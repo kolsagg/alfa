@@ -19,7 +19,7 @@ export function ErrorFallback({ onRetry }: ErrorFallbackProps) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-6 text-center">
+    <div className="flex h-full min-h-[50vh] w-full flex-col items-center justify-center gap-6 p-6 text-center">
       {/* Error Icon */}
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-urgent/10">
         <AlertTriangle className="h-8 w-8 text-urgent" aria-hidden="true" />
@@ -51,7 +51,6 @@ export function ErrorFallback({ onRetry }: ErrorFallbackProps) {
         <button
           onClick={handleReload}
           className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors min-h-[44px] flex items-center"
-          aria-label="Sayfayı Yenile"
         >
           Hâlâ sorun yaşıyorsanız sayfayı yenileyin
         </button>

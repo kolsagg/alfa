@@ -1,6 +1,6 @@
 # Story 1.6: Error Boundary and Fallback UI
 
-Status: Ready for Review
+Status: done
 
 ## Story
 
@@ -254,6 +254,8 @@ Claude (Antigravity) - Gemini Advanced Agentic Coding
 - ✅ AlertTriangle icon with OKLCH urgent color
 - ✅ main.tsx wraps App with ErrorBoundary, Toaster inside boundary
 - ✅ 7 comprehensive tests covering all AC scenarios
+- ✅ [AI-Review] Accessibility: Removed duplicate aria-label from secondary link
+- ✅ [AI-Review] Reusability: Changed from min-h-screen to flexible height constraint
 
 ### File List
 
@@ -266,3 +268,4 @@ Claude (Antigravity) - Gemini Advanced Agentic Coding
 
 - 2025-12-18: Story created - ready-for-dev
 - 2025-12-18: Implementation complete - all tasks done, 7/7 tests passing
+- 2025-12-18: Code review passed - fixed accessibility (aria-label) and reusability (height) issues
