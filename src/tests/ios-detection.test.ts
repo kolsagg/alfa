@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { useIOSPWADetection } from "../hooks/use-ios-pwa-detection";
 import { useSettingsStore } from "../stores/settings-store";
 
@@ -7,7 +7,9 @@ describe("useIOSPWADetection", () => {
   const originalUserAgent = navigator.userAgent;
 
   beforeEach(() => {
-    useSettingsStore.setState({ lastIOSPromptDismissed: undefined });
+    act(() => {
+      useSettingsStore.setState({ lastIOSPromptDismissed: undefined });
+    });
     vi.clearAllMocks();
     // Default to a non-iOS User Agent
     Object.defineProperty(navigator, "userAgent", {
@@ -80,8 +82,10 @@ describe("useIOSPWADetection", () => {
     // Dismissed 2 days ago
     const twoDaysAgo = new Date();
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-    useSettingsStore.setState({
-      lastIOSPromptDismissed: twoDaysAgo.toISOString(),
+    act(() => {
+      useSettingsStore.setState({
+        lastIOSPromptDismissed: twoDaysAgo.toISOString(),
+      });
     });
 
     const { result } = renderHook(() => useIOSPWADetection());
@@ -90,8 +94,10 @@ describe("useIOSPWADetection", () => {
     // Dismissed 8 days ago
     const eightDaysAgo = new Date();
     eightDaysAgo.setDate(eightDaysAgo.getDate() - 8);
-    useSettingsStore.setState({
-      lastIOSPromptDismissed: eightDaysAgo.toISOString(),
+    act(() => {
+      useSettingsStore.setState({
+        lastIOSPromptDismissed: eightDaysAgo.toISOString(),
+      });
     });
 
     const { result: result2 } = renderHook(() => useIOSPWADetection());

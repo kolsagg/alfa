@@ -39,25 +39,20 @@ export const useSettingsStore = createStore<SettingsState>(
     name: "SettingsStore",
     version: 2,
     migrate: (persistedState: unknown, version: number) => {
-      let state = persistedState as any;
+      const state = persistedState as Partial<SettingsState>;
 
       if (version === 0) {
         // Migration from v0 to v1: Add new fields with defaults
         console.log("[SettingsStore] Migrating from v0 to v1");
-        state = {
-          ...state,
-          notificationDaysBefore: state.notificationDaysBefore ?? 3,
-          onboardingCompleted: state.onboardingCompleted ?? false,
-        };
+        state.notificationDaysBefore = state.notificationDaysBefore ?? 3;
+        state.onboardingCompleted = state.onboardingCompleted ?? false;
       }
 
       if (version < 2) {
         // Migration to v2: Add lastIOSPromptDismissed
         console.log("[SettingsStore] Migrating to v2");
-        state = {
-          ...state,
-          lastIOSPromptDismissed: state.lastIOSPromptDismissed ?? undefined,
-        };
+        state.lastIOSPromptDismissed =
+          state.lastIOSPromptDismissed ?? undefined;
       }
 
       return state as SettingsState;

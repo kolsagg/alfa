@@ -51,8 +51,8 @@ development_status:
   1-1-zustand-store-infrastructure-setup: done
   1-2-pwa-manifest-and-service-worker-setup: done
   1-3-theme-system-implementation: done
-  1-4-ios-pwa-detection-and-guidance-component: review
-  1-5-dashboard-layout-skeleton: backlog
+  1-4-ios-pwa-detection-and-guidance-component: done
+  1-5-dashboard-layout-skeleton: done
   1-6-error-boundary-and-fallback-ui: backlog
   epic-1-retrospective: optional
 

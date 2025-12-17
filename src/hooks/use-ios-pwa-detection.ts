@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useSettingsStore } from "@/stores/settings-store";
 
+const INV_MS_PER_DAY = 1 / (1000 * 60 * 60 * 24);
+const PROMPT_RESIDENCY_DAYS = 7;
+
 export function useIOSPWADetection() {
   const [shouldShowPrompt, setShouldShowPrompt] = useState(false);
   const lastDismissed = useSettingsStore(
@@ -28,9 +31,9 @@ export function useIOSPWADetection() {
         const lastDate = new Date(lastDismissed);
         const now = new Date();
         const diffInDays =
-          (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
+          (now.getTime() - lastDate.getTime()) * INV_MS_PER_DAY;
 
-        if (diffInDays > 7) {
+        if (diffInDays > PROMPT_RESIDENCY_DAYS) {
           setShouldShowPrompt(true);
         }
       } else {

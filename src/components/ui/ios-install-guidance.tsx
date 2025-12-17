@@ -67,7 +67,7 @@ export function IOSInstallGuidance() {
 
         <div className="grid gap-3">
           <div className="flex items-start gap-4 p-3 rounded-xl bg-accent/50 border border-border/50">
-            <Share className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
+            <Share className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold">1. Paylaş Simgesi</p>
               <p className="text-xs text-muted-foreground">
@@ -76,7 +76,7 @@ export function IOSInstallGuidance() {
             </div>
           </div>
           <div className="flex items-start gap-4 p-3 rounded-xl bg-accent/50 border border-border/50">
-            <PlusSquare className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
+            <PlusSquare className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold">2. Ana Ekrana Ekle</p>
               <p className="text-xs text-muted-foreground">

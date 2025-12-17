@@ -30,3 +30,39 @@
 
   --color-success: oklch(0.65 0.15 165);
 }
+
+/* Font Family */
+:root {
+  --font-jakarta: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+/* Spacing Scale (4px base) */
+@theme {
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-7: 28px;
+  --spacing-8: 32px;
+  --spacing-9: 36px;
+  --spacing-10: 40px;
+  --spacing-11: 44px;
+  --spacing-12: 48px;
+}
+
+/* Utility Classes */
+.font-jakarta {
+  font-family: var(--font-jakarta);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Touch Target Minimum */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}

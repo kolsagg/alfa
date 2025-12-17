@@ -1,6 +1,6 @@
 # Story 1.4: iOS PWA Detection and Guidance Component
 
-Status: Ready for Review
+Status: done
 
 ## Story
 
@@ -10,22 +10,22 @@ So that **I can enable full PWA features including notifications**.
 
 ## Acceptance Criteria
 
-1. **Given** a user visits from iOS Safari (not standalone PWA)
-   **When** they interact with the app
-   **Then** a guidance modal appears explaining "Add to Home Screen"
-   **And** the modal includes step-by-step screenshot instructions (Share -> Add to Home Screen)
+1.  **Given** a user visits from iOS Safari (not standalone PWA)
+    **When** they interact with the app
+    **Then** a guidance modal appears explaining "Add to Home Screen"
+    **And** the modal includes step-by-step screenshot instructions (Share -> Add to Home Screen)
 
-2. **Given** the user dismisses the modal
-   **When** they visit again within 7 days
-   **Then** the modal is NOT shown (unless they clear storage)
+2.  **Given** the user dismisses the modal
+    **When** they visit again within 7 days
+    **Then** the modal is NOT shown (unless they clear storage)
 
-3. **Given** 7 days have passed since dismissal
-   **When** the user visits again (and still not installed)
-   **Then** the modal reappears
+3.  **Given** 7 days have passed since dismissal
+    **When** the user visits again (and still not installed)
+    **Then** the modal reappears
 
-4. **Given** the user is already in standalone PWA mode
-   **When** they open the app
-   **Then** no guidance modal is shown
+4.  **Given** the user is already in standalone PWA mode
+    **When** they open the app
+    **Then** no guidance modal is shown
 
 ## Tasks / Subtasks
 
@@ -67,7 +67,9 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const isStandalone =
   window.navigator.standalone ||
   window.matchMedia("(display-mode: standalone)").matches;
-const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(
+  navigator.userAgent
+);
 ```
 
 ### UX Requirements
@@ -83,8 +85,31 @@ const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 - `src/stores/settings-store.ts`
 - `src/App.tsx`
 - `src/tests/ios-detection.test.ts` (New)
+- `public/assets/ios-guidance.png`
+
+## Dev Agent Record
+
+### Summary of Changes
+
+Implemented an iOS PWA installation guidance system that detects iOS Safari users not running in standalone mode. Added a beautiful modal with step-by-step instructions and a 7-day frequency control using Zustand persistence.
+
+### Technical Decisions
+
+- **UA Detection:** Used a robust regex to target native iOS Safari while excluding Chrome (CriOS) and Firefox (FxiOS) wrappers.
+- **Persistence:** Incremented SettingsStore version to v2 and added a migration for `lastIOSPromptDismissed`.
+- **UI:** Used shadcn/ui Dialog with glassmorphism and custom AI-generated illustration optimized to 43KB.
+- **Code Quality:** Centralized magic numbers and ensured type-safe migrations in the store.
+
+### Validation Results
+
+- [x] Unit tests for `useIOSPWADetection` (4 tests) PASS.
+- [x] `SettingsStore` migration tests PASS.
+- [x] Image optimization (536KB -> 43KB) verified.
+- [x] ESLint/TypeScript errors in `App.tsx` resolved.
+- [x] `act()` warnings in tests resolved.
 
 ## Change Log
 
-- **Status Update:** backlog -> in-progress
-- **Feature:** iOS PWA Installation Guidance
+- **Status Update:** in-progress -> review
+- **Review Fixes:** Updated magic numbers, refactored migration for type safety, standardized icons, and optimized asset size.
+- **Status Update:** review -> done
