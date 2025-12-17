@@ -62,8 +62,8 @@ development_status:
   # FRs: FR01, FR02, FR03, FR04, FR05, FR21, FR23, FR25
   # Estimated: 25-30 hours
   # ===========================================
-  epic-2: backlog
-  2-1-subscription-zustand-slice: backlog
+  epic-2: in-progress
+  2-1-subscription-zustand-slice: review
   2-2-category-system: backlog
   2-3-subscription-form-add-flow: backlog
   2-4-subscription-form-edit-delete-flow: backlog
