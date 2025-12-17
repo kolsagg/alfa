@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { useSettingsStore } from "./settings-store";
+import { useSettingsStore, type SettingsState } from "./settings-store";
 
 describe("useSettingsStore", () => {
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe("useSettingsStore", () => {
       notificationDaysBefore: 3,
       notificationTime: "09:00",
       onboardingCompleted: false,
-    });
+    } as Partial<SettingsState>);
     localStorage.clear();
   });
 

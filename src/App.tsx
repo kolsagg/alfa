@@ -1,10 +1,25 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect } from "react";
+import { useSettingsStore } from "./stores/settings-store";
+import { useUIStore } from "./stores/ui-store";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Test Zustand stores
+  const theme = useSettingsStore((state) => state.theme);
+  const setTheme = useSettingsStore((state) => state.setTheme);
+  const notificationTime = useSettingsStore((state) => state.notificationTime);
+
+  const isLoading = useUIStore((state) => state.isLoading);
+  const setLoading = useUIStore((state) => state.setLoading);
+
+  useEffect(() => {
+    console.log("✅ Zustand stores initialized!");
+    console.log("📦 Settings Store - Theme:", theme);
+    console.log("📦 UI Store - Loading:", isLoading);
+    console.log('🔍 Check localStorage for "subtracker-settings-dev"');
+  }, [theme, isLoading]);
 
   return (
     <>
@@ -16,20 +31,40 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>Vite + React + Zustand</h1>
+
+      {/* Zustand Store Test UI */}
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+        <h2>🧪 Store Test</h2>
         <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+          <strong>Theme:</strong> {theme}
+        </p>
+        <p>
+          <strong>Notification Time:</strong> {notificationTime}
+        </p>
+        <p>
+          <strong>Loading:</strong> {isLoading ? "Yes" : "No"}
+        </p>
+
+        <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+          <button onClick={() => setTheme("light")}>☀️ Light</button>
+          <button onClick={() => setTheme("dark")}>🌙 Dark</button>
+          <button onClick={() => setTheme("system")}>💻 System</button>
+        </div>
+
+        <div style={{ marginTop: "10px" }}>
+          <button onClick={() => setLoading(!isLoading)}>
+            {isLoading ? "⏸️ Stop Loading" : "▶️ Start Loading"}
+          </button>
+        </div>
+
+        <p style={{ fontSize: "12px", marginTop: "20px", opacity: 0.7 }}>
+          💡 Open DevTools → Application → Local Storage to see
+          "subtracker-settings-dev"
         </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

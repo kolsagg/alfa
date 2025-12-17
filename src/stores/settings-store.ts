@@ -1,7 +1,8 @@
 import { createStore } from "./create-store";
-import { Settings, SettingsSchema, Theme } from "@/types/settings";
+import { SettingsSchema } from "@/types/settings";
+import type { Settings, Theme } from "@/types/settings";
 
-interface SettingsState extends Settings {
+export interface SettingsState extends Settings {
   setTheme: (theme: Theme) => void;
   setNotificationPermission: (
     permission: "default" | "granted" | "denied"

@@ -1,5 +1,5 @@
-import { create, StateCreator } from "zustand";
-import { persist, devtools, PersistOptions } from "zustand/middleware";
+import { create } from "zustand";
+import { persist, devtools } from "zustand/middleware";
 
 export const getStorageName = (domain: string): string =>
   import.meta.env.PROD ? `subtracker-${domain}` : `subtracker-${domain}-dev`;
@@ -32,7 +32,11 @@ export type StoreFactoryOptions<T> = {
  * ```
  */
 export const createStore = <T>(
-  storeInitializer: StateCreator<T>,
+  storeInitializer: (
+    set: (partial: T | Partial<T> | ((state: T) => T | Partial<T>)) => void,
+    get: () => T,
+    api: unknown
+  ) => T,
   options: StoreFactoryOptions<T>
 ) => {
   if (options.skipPersist) {
@@ -62,7 +66,7 @@ export const createStore = <T>(
             if (typeof validateData === "function") validateData(state, error);
           }
         },
-      } as PersistOptions<T>),
+      }),
       { name: options.name, enabled: !import.meta.env.PROD }
     )
   );
