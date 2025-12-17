@@ -1,10 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>alfa</title>
+    <meta name="theme-color" content="#fcfcfc" />
+    <script>
+      (function () {
+        try {
+          // Check for dev or prod key
+          const devKey = "subtracker-settings-dev";
+          const prodKey = "subtracker-settings";
+          const store =
+            localStorage.getItem(devKey) || localStorage.getItem(prodKey);
+
+          const state = store ? JSON.parse(store).state : null;
+          const theme = state?.theme || "system";
+
+          const systemDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const isDark = theme === "dark" || (theme === "system" && systemDark);
+
+          if (isDark) {
+            document.documentElement.classList.add("dark");
+            document
+              .querySelector('meta[name="theme-color"]')
+              ?.setAttribute("content", "#0F172A");
+          } else {
+            document.documentElement.classList.remove("dark");
+            document
+              .querySelector('meta[name="theme-color"]')
+              ?.setAttribute("content", "#fcfcfc");
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
