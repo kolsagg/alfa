@@ -13,6 +13,7 @@ export type StoreFactoryOptions<T> = {
   ) => ((state?: T, error?: Error) => void) | void;
   skipPersist?: boolean;
   partialize?: (state: T) => Partial<T>;
+  merge?: (persistedState: unknown, currentState: T) => T;
 };
 
 /**
@@ -55,6 +56,7 @@ export const createStore = <T>(
         version: options.version || 1,
         migrate: options.migrate,
         ...(options.partialize && { partialize: options.partialize }),
+        ...(options.merge && { merge: options.merge }),
         onRehydrateStorage: () => (state, error) => {
           if (error) {
             console.error(`[${options.name}] Rehydration error:`, error);

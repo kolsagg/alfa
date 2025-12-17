@@ -280,7 +280,7 @@ describe("useSubscriptionStore", () => {
       // Wait for persist middleware
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const devKey = "subtracker-subscription-dev";
+      const devKey = "subtracker-subscriptions-dev";
       const stored = localStorage.getItem(devKey);
 
       expect(stored).toBeTruthy();
@@ -296,7 +296,7 @@ describe("useSubscriptionStore", () => {
       const now = new Date().toISOString();
 
       localStorage.setItem(
-        "subtracker-subscription-dev",
+        "subtracker-subscriptions-dev",
         JSON.stringify({
           state: {
             subscriptions: [
@@ -326,7 +326,7 @@ describe("useSubscriptionStore", () => {
 
     it("should handle migration from v0 to v1", async () => {
       localStorage.setItem(
-        "subtracker-subscription-dev",
+        "subtracker-subscriptions-dev",
         JSON.stringify({
           state: {
             subscriptions: [],
@@ -352,7 +352,7 @@ describe("useSubscriptionStore", () => {
 
       // One valid, one invalid subscription
       localStorage.setItem(
-        "subtracker-subscription-dev",
+        "subtracker-subscriptions-dev",
         JSON.stringify({
           state: {
             subscriptions: [
@@ -386,15 +386,14 @@ describe("useSubscriptionStore", () => {
 
       await useSubscriptionStore.persist.rehydrate();
 
-      // Check that the warning was logged for invalid subscription
+      // Check that the warning was logged
       expect(consoleSpy).toHaveBeenCalled();
-      const calls = consoleSpy.mock.calls;
-      const invalidSubCall = calls.find(
-        (call) =>
-          typeof call[0] === "string" &&
-          call[0].includes("[SubscriptionStore] Invalid subscription")
-      );
-      expect(invalidSubCall).toBeDefined();
+
+      // CRITICAL CHECK: Verify that the invalid subscription was REMOVED from the store
+      const subscriptions = useSubscriptionStore.getState().getSubscriptions();
+      expect(subscriptions).toHaveLength(1);
+      expect(subscriptions[0].name).toBe("Valid");
+      expect(subscriptions[0].id).not.toBe("not-a-uuid");
 
       consoleSpy.mockRestore();
     });

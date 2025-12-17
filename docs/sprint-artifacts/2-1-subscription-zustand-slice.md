@@ -1,6 +1,6 @@
 # Story 2.1: Subscription Zustand Slice
 
-Status: Ready for Review
+Status: Done
 
 ## Story
 
@@ -10,21 +10,21 @@ Status: Ready for Review
 
 ## Acceptance Criteria
 
-1. **Given** the subscription slice is initialized
-   **When** I access the store
-   **Then** I have typed actions: `addSubscription`, `updateSubscription`, `deleteSubscription`, `getSubscriptions`
+3. 1. **Given** the subscription slice is initialized
+      **When** I access the store
+      **Then** I have typed actions: `addSubscription`, `updateSubscription`, `deleteSubscription`, `getSubscriptions`
 
-2. **And** subscription schema includes: `id`, `name`, `categoryId`, `price`, `currency`, `period`, `nextPaymentDate`, `color`, `icon`, `cardId` (optional)
+4. **And** subscription schema includes: `id`, `name`, `categoryId`, `amount`, `currency`, `billingCycle`, `nextPaymentDate`, `color`, `icon`, `cardId` (optional)
 
-3. **And** slice is persisted to localStorage
+5. **And** slice is persisted to localStorage
 
    - Namespace must be environment-aware: `subtracker-subscriptions-dev` vs `subtracker-subscriptions`
 
-4. **And** schema versioning starts at `version: 1`
+6. **And** schema versioning starts at `version: 1`
 
    - Migration function template must be present
 
-5. **And** unit tests cover all CRUD actions
+7. **And** unit tests cover all CRUD actions
    - Add works correctly
    - Update modifies existing record
    - Delete removes record
@@ -109,7 +109,7 @@ Antigravity (Google DeepMind)
 ### Completion Notes List
 
 - [x] Confirmed Zod schema matches FRs (inc. color, icon, cardId)
-- [x] Confirmed environment-aware storage key (`subtracker-subscription-dev` / `subtracker-subscription`)
+- [x] Confirmed environment-aware storage key (`subtracker-subscriptions-dev` / `subtracker-subscriptions`)
 - [x] Confirmed migration function signature with v0→v1 migration template
 - [x] All 19 unit tests pass covering CRUD + persistence + validation
 
@@ -143,6 +143,8 @@ Antigravity (Google DeepMind)
 
 - `src/stores/subscription-store.ts`
 - `src/stores/subscription-store.test.ts`
+- `src/types/subscription.ts`
+- `src/types/common.ts`
 
 ### Modified Files
 

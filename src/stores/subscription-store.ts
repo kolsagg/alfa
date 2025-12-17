@@ -130,7 +130,7 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
     },
   }),
   {
-    name: "SubscriptionStore",
+    name: "SubscriptionsStore",
     version: 1,
     migrate: (persistedState: unknown, version: number) => {
       const state = persistedState as Partial<SubscriptionState>;
@@ -143,17 +143,21 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
 
       return state as SubscriptionState;
     },
-    partialize: (state) => ({
-      subscriptions: state.subscriptions,
-    }),
-    onRehydrateStorage: (state) => {
-      // Validate each subscription on rehydration
-      if (state?.subscriptions) {
-        const validSubscriptions = state.subscriptions.filter((sub) => {
+    merge: (persistedState: unknown, currentState: SubscriptionState) => {
+      console.log("[SubscriptionStore] merge called", persistedState);
+      // Standard shallow merge
+      const merged = {
+        ...currentState,
+        ...(persistedState as Partial<SubscriptionState>),
+      };
+
+      // Always validate subscriptions during rehydration
+      if (merged.subscriptions) {
+        const validSubscriptions = merged.subscriptions.filter((sub) => {
           const result = SubscriptionSchema.safeParse(sub);
           if (!result.success) {
             console.warn(
-              "[SubscriptionStore] Invalid subscription during rehydration:",
+              "[SubscriptionStore] Invalid subscription removed during rehydration:",
               sub.id,
               result.error.issues
             );
@@ -162,16 +166,20 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
           return true;
         });
 
-        // If any invalid subscriptions were found, we need to clean up
-        if (validSubscriptions.length !== state.subscriptions.length) {
+        if (validSubscriptions.length !== merged.subscriptions.length) {
           console.warn(
-            `[SubscriptionStore] Removed ${
-              state.subscriptions.length - validSubscriptions.length
+            `[SubscriptionStore] Cleaned up ${
+              merged.subscriptions.length - validSubscriptions.length
             } invalid subscriptions`
           );
-          // Note: We can't directly set state here, but the validation protects on read
+          merged.subscriptions = validSubscriptions;
         }
       }
+
+      return merged;
     },
+    partialize: (state) => ({
+      subscriptions: state.subscriptions,
+    }),
   }
 );
