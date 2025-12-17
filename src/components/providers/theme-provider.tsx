@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 import { useSettingsStore } from "@/stores/settings-store";
 
+const THEME_COLORS = {
+  light: "#fcfcfc",
+  dark: "#0F172A",
+} as const;
+
 export function ThemeProvider({ children }: { children?: React.ReactNode }) {
   const theme = useSettingsStore((state) => state.theme);
 
@@ -27,7 +32,10 @@ export function ThemeProvider({ children }: { children?: React.ReactNode }) {
       // Update PWA Meta
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) {
-        meta.setAttribute("content", isDark ? "#0F172A" : "#fcfcfc");
+        meta.setAttribute(
+          "content",
+          isDark ? THEME_COLORS.dark : THEME_COLORS.light
+        );
       }
     };
 

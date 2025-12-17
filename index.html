@@ -9,7 +9,10 @@
     <script>
       (function () {
         try {
-          // Check for dev or prod key
+          /**
+           * CRITICAL: FOUC Prevention
+           * These keys must match getStorageName() in src/stores/create-store.ts
+           */
           const devKey = "subtracker-settings-dev";
           const prodKey = "subtracker-settings";
           const store =
@@ -23,16 +26,18 @@
           ).matches;
           const isDark = theme === "dark" || (theme === "system" && systemDark);
 
+          const COLORS = { light: "#fcfcfc", dark: "#0F172A" };
+
           if (isDark) {
             document.documentElement.classList.add("dark");
             document
               .querySelector('meta[name="theme-color"]')
-              ?.setAttribute("content", "#0F172A");
+              ?.setAttribute("content", COLORS.dark);
           } else {
             document.documentElement.classList.remove("dark");
             document
               .querySelector('meta[name="theme-color"]')
-              ?.setAttribute("content", "#fcfcfc");
+              ?.setAttribute("content", COLORS.light);
           }
         } catch (e) {}
       })();

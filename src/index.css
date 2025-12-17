@@ -16,30 +16,7 @@
   --color-success: oklch(0.7 0.15 165); /* Mint */
 }
 
-/* Dark Mode Overrides */
-/* Applied when system is dark */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: oklch(0.7 0.12 180);
-    --color-secondary: oklch(0.7 0.15 260);
-    --color-background: oklch(0.15 0.02 250); /* Deep Navy Background */
-    --color-foreground: oklch(0.98 0.01 80); /* Off-white Text */
-
-    --color-subtle: oklch(0.25 0.05 220);
-    --color-attention: oklch(0.7 0.15 85);
-    --color-urgent: oklch(0.6 0.2 25);
-    --color-critical: oklch(0.5 0.25 25);
-
-    --color-success: oklch(0.65 0.15 165);
-  }
-}
-
-/* 
-  Class-based dark mode override.
-  Uses :root.dark to ensure it overrides the @theme defaults if necessary,
-  and also overrides the media query if we want to force dark in light mode (though media usually wins if strict, but order generally matters).
-  Actually, .dark class should override @theme defaults.
-*/
+/* Dark Mode Overrides - Managed by ThemeProvider class injection */
 :root.dark {
   --color-primary: oklch(0.7 0.12 180);
   --color-secondary: oklch(0.7 0.15 260);

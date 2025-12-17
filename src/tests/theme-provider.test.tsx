@@ -81,4 +81,36 @@ describe("ThemeProvider", () => {
     const meta = document.querySelector('meta[name="theme-color"]');
     expect(meta?.getAttribute("content")).toBe("#fcfcfc");
   });
+
+  it("updates theme dynamically when system preference changes", () => {
+    useSettingsStore.setState({ theme: "system" });
+
+    // Start with light
+    let systemIsDark = false;
+    const listeners: Array<() => void> = [];
+
+    window.matchMedia = vi.fn().mockImplementation((query) => ({
+      get matches() {
+        return systemIsDark;
+      },
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn((event, callback) => {
+        if (event === "change") listeners.push(callback);
+      }),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    render(<ThemeProvider />);
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+
+    // Switch system to dark
+    systemIsDark = true;
+    listeners.forEach((l) => l());
+
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    expect(meta?.getAttribute("content")).toBe("#0F172A");
+  });
 });

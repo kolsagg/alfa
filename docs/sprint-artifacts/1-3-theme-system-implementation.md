@@ -1,6 +1,6 @@
 # Story 1.3: Theme System Implementation
 
-Status: Ready for Review
+Status: done
 
 ## Story
 
@@ -157,7 +157,7 @@ So that **the app matches my preference**.
 ## File List
 
 - `src/index.css`
-- `src/index.html`
+- `index.html`
 - `src/App.tsx`
 - `src/tests/setup.ts`
 - `src/components/providers/theme-provider.tsx` (New)

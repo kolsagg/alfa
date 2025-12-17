@@ -11,6 +11,7 @@ export interface SettingsState extends Settings {
   setNotificationDaysBefore: (days: number) => void;
   setLastBackupDate: (date: string) => void;
   completeOnboarding: () => void;
+  dismissIOSPrompt: () => void;
 }
 
 export const useSettingsStore = createStore<SettingsState>(
@@ -21,6 +22,7 @@ export const useSettingsStore = createStore<SettingsState>(
     notificationDaysBefore: 3,
     notificationTime: "09:00",
     onboardingCompleted: false,
+    lastIOSPromptDismissed: undefined,
 
     // Actions
     setTheme: (theme) => set({ theme }),
@@ -30,24 +32,35 @@ export const useSettingsStore = createStore<SettingsState>(
     setNotificationDaysBefore: (days) => set({ notificationDaysBefore: days }),
     setLastBackupDate: (date) => set({ lastBackupDate: date }),
     completeOnboarding: () => set({ onboardingCompleted: true }),
+    dismissIOSPrompt: () =>
+      set({ lastIOSPromptDismissed: new Date().toISOString() }),
   }),
   {
     name: "SettingsStore",
-    version: 1,
+    version: 2,
     migrate: (persistedState: unknown, version: number) => {
+      let state = persistedState as any;
+
       if (version === 0) {
         // Migration from v0 to v1: Add new fields with defaults
         console.log("[SettingsStore] Migrating from v0 to v1");
-        const oldState = persistedState as Record<string, unknown>;
-        return {
-          ...oldState,
-          notificationDaysBefore:
-            (oldState.notificationDaysBefore as number) ?? 3,
-          onboardingCompleted:
-            (oldState.onboardingCompleted as boolean) ?? false,
-        } as SettingsState;
+        state = {
+          ...state,
+          notificationDaysBefore: state.notificationDaysBefore ?? 3,
+          onboardingCompleted: state.onboardingCompleted ?? false,
+        };
       }
-      return persistedState as SettingsState;
+
+      if (version < 2) {
+        // Migration to v2: Add lastIOSPromptDismissed
+        console.log("[SettingsStore] Migrating to v2");
+        state = {
+          ...state,
+          lastIOSPromptDismissed: state.lastIOSPromptDismissed ?? undefined,
+        };
+      }
+
+      return state as SettingsState;
     },
     onRehydrateStorage: (state) => {
       // Validate data on rehydration
@@ -64,6 +77,7 @@ export const useSettingsStore = createStore<SettingsState>(
           notificationDaysBefore: 3,
           notificationTime: "09:00",
           onboardingCompleted: false,
+          lastIOSPromptDismissed: undefined,
         } as SettingsState;
       }
     },
