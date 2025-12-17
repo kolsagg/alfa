@@ -64,7 +64,7 @@ development_status:
   # ===========================================
   epic-2: in-progress
   2-1-subscription-zustand-slice: done
-  2-2-category-system: ready-for-dev
+  2-2-category-system: review
   2-3-subscription-form-add-flow: backlog
   2-4-subscription-form-edit-delete-flow: backlog
   2-5-period-selection-and-next-payment-calculation: backlog
