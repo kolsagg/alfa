@@ -17,6 +17,7 @@ function App() {
             <h2 className="text-lg font-semibold text-foreground font-jakarta">
               Aboneliklerim
             </h2>
+
             <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border/50 bg-muted/30 p-8 text-center">
               <p className="text-sm text-muted-foreground">
                 Henüz abonelik eklenmedi
