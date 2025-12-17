@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { useSettingsStore, type SettingsState } from "./settings-store";
 
 describe("useSettingsStore", () => {
@@ -71,8 +71,7 @@ describe("useSettingsStore", () => {
 
     // Trigger rehydration
     // Note: persist.rehydrate() is available when using persist middleware
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (useSettingsStore as any).persist.rehydrate();
+    await useSettingsStore.persist.rehydrate();
 
     expect(useSettingsStore.getState().theme).toBe("light");
   });
@@ -87,8 +86,7 @@ describe("useSettingsStore", () => {
       })
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (useSettingsStore as any).persist.rehydrate();
+    await useSettingsStore.persist.rehydrate();
 
     // Check if state is preserved/migrated correctly
     expect(useSettingsStore.getState().theme).toBe("dark");
@@ -108,8 +106,7 @@ describe("useSettingsStore", () => {
       })
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (useSettingsStore as any).persist.rehydrate();
+    await useSettingsStore.persist.rehydrate();
 
     // Expect validation warning
     expect(consoleSpy).toHaveBeenCalledWith(
