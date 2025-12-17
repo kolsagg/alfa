@@ -47,14 +47,14 @@ development_status:
   # FRs: FR17, FR20 | NFRs: NFR05, NFR08
   # Estimated: 18-23 hours
   # ===========================================
-  epic-1: in-progress
+  epic-1: done
   1-1-zustand-store-infrastructure-setup: done
   1-2-pwa-manifest-and-service-worker-setup: done
   1-3-theme-system-implementation: done
   1-4-ios-pwa-detection-and-guidance-component: done
   1-5-dashboard-layout-skeleton: done
   1-6-error-boundary-and-fallback-ui: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: completed
 
   # ===========================================
   # EPIC 2: Subscription Management + Onboarding
