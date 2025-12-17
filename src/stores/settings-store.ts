@@ -57,7 +57,11 @@ export const useSettingsStore = createStore<SettingsState>(
 
       return state as SettingsState;
     },
-    onRehydrateStorage: (state) => {
+    onRehydrateStorage: () => (state, error) => {
+      if (error) {
+        console.error("[SettingsStore] Rehydration error:", error);
+        return;
+      }
       // Validate data on rehydration
       const result = SettingsSchema.safeParse(state);
       if (!result.success) {
@@ -65,15 +69,7 @@ export const useSettingsStore = createStore<SettingsState>(
           "[SettingsStore] Invalid data during rehydration:",
           result.error
         );
-        // Reset to defaults if validation fails
-        return {
-          theme: "system",
-          notificationPermission: "default",
-          notificationDaysBefore: 3,
-          notificationTime: "09:00",
-          onboardingCompleted: false,
-          lastIOSPromptDismissed: undefined,
-        } as SettingsState;
+        // Note: Cannot reset state from here, validation is informational only
       }
     },
   }

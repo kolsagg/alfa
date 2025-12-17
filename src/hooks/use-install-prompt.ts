@@ -1,16 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+// Check standalone mode once - client-side only
+function getIsStandalone(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(display-mode: standalone)").matches;
+}
+
 export function useInstallPrompt() {
+  const isStandalone = useMemo(() => getIsStandalone(), []);
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
+  // Initialize with opposite of standalone - if standalone, not installable
+  const [isInstallable, setIsInstallable] = useState(() => !getIsStandalone());
 
   useEffect(() => {
+    // Don't listen for install prompt if already standalone
+    if (isStandalone) return;
+
     const handler = (e: Event) => {
       // Prevent default mini-infobar on mobile
       e.preventDefault();
@@ -19,14 +30,8 @@ export function useInstallPrompt() {
     };
 
     window.addEventListener("beforeinstallprompt", handler);
-
-    // Check if already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setIsInstallable(false);
-    }
-
     return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+  }, [isStandalone]);
 
   const showInstallPrompt = async () => {
     if (!installPrompt) return false;
@@ -43,8 +48,8 @@ export function useInstallPrompt() {
   };
 
   return {
-    isInstallable,
+    isInstallable: isInstallable && !isStandalone,
     showInstallPrompt,
-    isStandalone: window.matchMedia("(display-mode: standalone)").matches,
+    isStandalone,
   };
 }

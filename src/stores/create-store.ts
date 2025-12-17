@@ -1,5 +1,7 @@
 import { create } from "zustand";
+import type { StateCreator, StoreApi, UseBoundStore } from "zustand";
 import { persist, devtools } from "zustand/middleware";
+import type { PersistOptions } from "zustand/middleware";
 
 export const getStorageName = (domain: string): string =>
   import.meta.env.PROD ? `subtracker-${domain}` : `subtracker-${domain}-dev`;
@@ -9,11 +11,27 @@ export type StoreFactoryOptions<T> = {
   version?: number;
   migrate?: (persistedState: unknown, version: number) => T | Promise<T>;
   onRehydrateStorage?: (
-    state: T
+    state: T | undefined
   ) => ((state?: T, error?: Error) => void) | void;
   skipPersist?: boolean;
   partialize?: (state: T) => Partial<T>;
   merge?: (persistedState: unknown, currentState: T) => T;
+};
+
+// Persist API interface
+interface PersistApi<T> {
+  rehydrate: () => Promise<void>;
+  hasHydrated: () => boolean;
+  onHydrate: (fn: (state: T) => void) => () => void;
+  onFinishHydration: (fn: (state: T) => void) => () => void;
+  getOptions: () => Partial<PersistOptions<T, Partial<T>>>;
+  setOptions: (options: Partial<PersistOptions<T, Partial<T>>>) => void;
+  clearStorage: () => void;
+}
+
+// Type for store with persist API exposed - extends UseBoundStore with persist
+export type StoreWithPersist<T> = UseBoundStore<StoreApi<T>> & {
+  persist: PersistApi<T>;
 };
 
 /**
@@ -32,24 +50,32 @@ export type StoreFactoryOptions<T> = {
  * );
  * ```
  */
-export const createStore = <T>(
-  storeInitializer: (
-    set: (partial: T | Partial<T> | ((state: T) => T | Partial<T>)) => void,
-    get: () => T,
-    api: unknown
-  ) => T,
+export function createStore<T>(
+  storeInitializer: StateCreator<T, [], []>,
   options: StoreFactoryOptions<T>
-) => {
+): StoreWithPersist<T> {
   if (options.skipPersist) {
-    return create<T>()(
+    const store = create<T>()(
       devtools(storeInitializer, {
         name: options.name,
         enabled: !import.meta.env.PROD,
       })
     );
+    // For non-persist stores, add a no-op persist API
+    return Object.assign(store, {
+      persist: {
+        rehydrate: async () => {},
+        hasHydrated: () => true,
+        onHydrate: () => () => {},
+        onFinishHydration: () => () => {},
+        getOptions: () => ({}),
+        setOptions: () => {},
+        clearStorage: () => {},
+      },
+    }) as StoreWithPersist<T>;
   }
 
-  return create<T>()(
+  const store = create<T>()(
     devtools(
       persist(storeInitializer, {
         name: getStorageName(options.name.toLowerCase().replace("store", "")),
@@ -62,14 +88,17 @@ export const createStore = <T>(
             console.error(`[${options.name}] Rehydration error:`, error);
           }
           if (options.onRehydrateStorage && state) {
-            // We need to cast here because of how zustand types work internally with middleware
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const validateData = options.onRehydrateStorage(state) as any;
-            if (typeof validateData === "function") validateData(state, error);
+            const validateData = options.onRehydrateStorage(state);
+            if (typeof validateData === "function")
+              validateData(state, error as Error | undefined);
           }
         },
       }),
       { name: options.name, enabled: !import.meta.env.PROD }
     )
   );
-};
+
+  // The persist middleware attaches the persist API to the store
+  // We need to cast to access it since TypeScript doesn't know about it
+  return store as unknown as StoreWithPersist<T>;
+}
