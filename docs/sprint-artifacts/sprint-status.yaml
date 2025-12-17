@@ -1,0 +1,146 @@
+# generated: 2025-12-17
+# project: SubTracker
+# project_key: alfa
+# tracking_system: file-system
+# story_location: docs/sprint-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically drafts next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2025-12-17
+project: SubTracker
+project_key: alfa
+tracking_system: file-system
+story_location: docs/sprint-artifacts
+
+development_status:
+  # ===========================================
+  # EPIC 1: Project Foundation & Core Infrastructure
+  # Goal: Uygulama çalışır durumda, PWA olarak yüklenebilir, theme seçilebilir, store infrastructure hazır.
+  # FRs: FR17, FR20 | NFRs: NFR05, NFR08
+  # Estimated: 18-23 hours
+  # ===========================================
+  epic-1: in-progress
+  1-1-zustand-store-infrastructure-setup: review
+  1-2-pwa-manifest-and-service-worker-setup: backlog
+  1-3-theme-system-implementation: backlog
+  1-4-ios-pwa-detection-and-guidance-component: backlog
+  1-5-dashboard-layout-skeleton: backlog
+  1-6-error-boundary-and-fallback-ui: backlog
+  epic-1-retrospective: optional
+
+  # ===========================================
+  # EPIC 2: Subscription Management + Onboarding
+  # Goal: Kullanıcı abonelik ekleyebilir, düzenleyebilir, silebilir. İlk açılışta minimal onboarding ile yönlendirilir.
+  # FRs: FR01, FR02, FR03, FR04, FR05, FR21, FR23, FR25
+  # Estimated: 25-30 hours
+  # ===========================================
+  epic-2: backlog
+  2-1-subscription-zustand-slice: backlog
+  2-2-category-system: backlog
+  2-3-subscription-form-add-flow: backlog
+  2-4-subscription-form-edit-delete-flow: backlog
+  2-5-period-selection-and-next-payment-calculation: backlog
+  2-6-quick-add-grid: backlog
+  2-7-color-icon-picker: backlog
+  2-8-empty-state-and-minimal-onboarding: backlog
+  2-9-notification-permission-stub: backlog
+  epic-2-retrospective: optional
+
+  # ===========================================
+  # EPIC 3: Dashboard & Analytics
+  # Goal: Kullanıcı harcamalarını görüntüleyebilir, yaklaşan ödemeleri kronolojik sırayla takip edebilir.
+  # FRs: FR12, FR13, FR14
+  # Estimated: 19 hours
+  # ===========================================
+  epic-3: backlog
+  3-1-monthly-yearly-spending-summary-cards: backlog
+  3-2-timeline-view-upcoming-payments: backlog
+  3-3-countdown-hero-widget: backlog
+  3-4-subscription-list-view: backlog
+  3-5-category-breakdown-visualization: backlog
+  epic-3-retrospective: optional
+
+  # ===========================================
+  # EPIC 4: Notification System (Awareness Engine)
+  # Goal: Kullanıcı yaklaşan ödemeler için tarayıcı bildirimi alır, bildirim tercihlerini yapılandırabilir.
+  # FRs: FR09, FR10, FR11, FR19, FR24 | NFRs: NFR10, NFR16
+  # Estimated: 28 hours
+  # ===========================================
+  epic-4: backlog
+  4-1-notification-settings-slice: backlog
+  4-2-browser-notification-permission-flow: backlog
+  4-3-notification-scheduling-logic: backlog
+  4-4-notification-display-and-handling: backlog
+  4-5-grouped-notifications-same-day: backlog
+  4-6-ios-pwa-install-prompt: backlog
+  4-7-graceful-degradation-for-denied-unavailable: backlog
+  4-8-missed-notifications-recovery: backlog
+  epic-4-retrospective: optional
+
+  # ===========================================
+  # EPIC 5: Data Export/Import & Backup
+  # Goal: Kullanıcı verilerini JSON olarak yedekleyebilir ve geri yükleyebilir.
+  # FRs: FR15, FR16, FR18 | NFRs: NFR09, NFR14, NFR15, NFR17
+  # Estimated: 15-18 hours
+  # ===========================================
+  epic-5: backlog
+  5-1-json-export-functionality: backlog
+  5-2-json-import-functionality: backlog
+  5-3-schema-validation-with-zod: backlog
+  5-4-weekly-backup-reminder: backlog
+  5-5-storage-limit-warnings: backlog
+  epic-5-retrospective: optional
+
+  # ===========================================
+  # EPIC 6: Wallet & Cards
+  # Goal: Kullanıcı kredi/banka kartlarını tanımlayabilir ve aboneliklere bağlayabilir.
+  # FRs: FR06, FR07, FR08 | NFRs: NFR06
+  # Estimated: 15-18 hours
+  # ===========================================
+  epic-6: backlog
+  6-1-cards-zustand-slice: backlog
+  6-2-card-management-ui-add-edit-delete: backlog
+  6-3-card-assignment-to-subscriptions: backlog
+  6-4-per-card-monthly-spending-view: backlog
+  6-5-card-cut-off-date-awareness: backlog
+  epic-6-retrospective: optional
+
+  # ===========================================
+  # EPIC 7: System Analytics & Events
+  # Goal: Sistem anonim event'leri loglar, privacy-first yaklaşımı korunur.
+  # FRs: FR22, FR26 | NFRs: NFR07
+  # Estimated: 8-10 hours
+  # ===========================================
+  epic-7: backlog
+  7-1-anonymous-event-logging-system: backlog
+  7-2-privacy-first-data-handling: backlog
+  7-3-debug-log-export-developer-mode: backlog
+  epic-7-retrospective: optional

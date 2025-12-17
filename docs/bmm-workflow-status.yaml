@@ -1,0 +1,71 @@
+# BMM Workflow Status - alfa
+# Generated: 2025-12-16
+# Track: BMad Method (Greenfield)
+
+generated: "2025-12-16T01:37:19+03:00"
+project: "alfa"
+project_type: "Harcama Takip Dashboard"
+selected_track: "bmad-method"
+field_type: "greenfield"
+workflow_path: "method-greenfield.yaml"
+
+workflow_status:
+  # Phase 0: Discovery (Optional)
+  phase_0_discovery:
+    brainstorm:
+      status: "required" # User selected
+      agent: "analyst"
+      command: "/bmad-cis-brainstorm-project"
+
+    research:
+      status: "required" # User selected
+      agent: "analyst"
+      command: "/bmad-bmm-workflows-research"
+
+    product-brief:
+      status: "completed"
+      completed_at: "2025-12-16T22:04:00+03:00"
+      output: "docs/analysis/product-brief-SubTracker-2025-12-16.md"
+      agent: "analyst"
+      command: "/bmad-bmm-workflows-create-product-brief"
+
+  # Phase 1: Planning
+  phase_1_planning:
+    prd:
+      status: "required"
+      agent: "pm"
+      command: "/bmad-bmm-workflows-create-prd"
+
+    ux-design:
+      status: "conditional" # if_has_ui - determined after PRD
+      agent: "ux-designer"
+      command: "/bmad-bmm-workflows-create-ux-design"
+
+  # Phase 2: Solutioning
+  phase_2_solutioning:
+    architecture:
+      status: "required"
+      agent: "architect"
+      command: "/bmad-bmm-workflows-create-architecture"
+
+    epics-stories:
+      status: "required"
+      agent: "pm"
+      command: "/bmad-bmm-workflows-create-epics-stories"
+
+    test-design:
+      status: "recommended"
+      agent: "tea"
+      command: "/bmad-bmm-workflows-testarch-test-design"
+
+    implementation-readiness:
+      status: "required"
+      agent: "architect"
+      command: "/bmad-bmm-workflows-check-implementation-readiness"
+
+  # Phase 3: Implementation
+  phase_3_implementation:
+    sprint-planning:
+      status: "required"
+      agent: "sm"
+      command: "/bmad-bmm-workflows-sprint-planning"
