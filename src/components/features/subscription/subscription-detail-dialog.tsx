@@ -76,7 +76,10 @@ export function SubscriptionDetailDialog({
     monthly: "Aylık",
     yearly: "Yıllık",
     weekly: "Haftalık",
-    custom: "Özel",
+    custom:
+      subscription.billingCycle === "custom" && subscription.customDays
+        ? `${subscription.customDays} günde bir`
+        : "Özel",
   }[subscription.billingCycle];
 
   return (

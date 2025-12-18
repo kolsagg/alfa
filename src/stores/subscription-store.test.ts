@@ -397,5 +397,50 @@ describe("useSubscriptionStore", () => {
 
       consoleSpy.mockRestore();
     });
+    it("should handle migration from v1 to v2", async () => {
+      const now = new Date().toISOString();
+      const testId = crypto.randomUUID();
+
+      localStorage.setItem(
+        "subtracker-subscriptions-dev",
+        JSON.stringify({
+          state: {
+            subscriptions: [
+              {
+                id: testId,
+                name: "Legacy Sub",
+                amount: 100,
+                currency: "TRY",
+                billingCycle: "monthly",
+                nextPaymentDate: now,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+                // customDays is missing in v1
+              },
+            ],
+          },
+          version: 1, // Simulating stored v1 data
+        })
+      );
+
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      await useSubscriptionStore.persist.rehydrate();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("[SubscriptionStore] Migrating from v1 to v2")
+      );
+
+      const subscriptions = useSubscriptionStore.getState().getSubscriptions();
+      expect(subscriptions).toHaveLength(1);
+      expect(subscriptions[0].name).toBe("Legacy Sub");
+      // Check that customDays is undefined or handled
+      expect(
+        (subscriptions[0] as Record<string, unknown>).customDays
+      ).toBeUndefined();
+
+      consoleSpy.mockRestore();
+    });
   });
 });

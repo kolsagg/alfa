@@ -1,4 +1,5 @@
 import { useState, useEffect, type FormEvent, type KeyboardEvent } from "react";
+import { z } from "zod";
 import { toast } from "sonner";
 import { useSubscriptionStore } from "@/stores/subscription-store";
 import type { SubscriptionInput } from "@/stores/subscription-store";
@@ -92,6 +93,9 @@ export function SubscriptionForm({
   const [color, setColor] = useState(initialValues?.color || "");
   const [icon, setIcon] = useState(initialValues?.icon || "");
   const [cardId, setCardId] = useState(initialValues?.cardId || "");
+  const [customDays, setCustomDays] = useState(
+    initialValues?.customDays?.toString() || "30"
+  );
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -146,6 +150,8 @@ export function SubscriptionForm({
     setCardId("");
     setManuallySetColor(false);
     setManuallySetIcon(false);
+    setManuallySetIcon(false);
+    setCustomDays("30");
     setErrors({});
   };
 
@@ -175,6 +181,13 @@ export function SubscriptionForm({
         validationErrors.firstPaymentDate = "İlk ödeme tarihi gereklidir";
       }
 
+      if (billingCycle === "custom") {
+        const days = parseInt(customDays);
+        if (isNaN(days) || days < 1 || days > 365) {
+          validationErrors.customDays = "1-365 arası bir değer giriniz";
+        }
+      }
+
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
 
@@ -188,13 +201,15 @@ export function SubscriptionForm({
         }
 
         setIsSubmitting(false);
+        onSubmittingChange?.(false);
         return;
       }
 
       // Calculate nextPaymentDate before validation
       const nextPaymentDate = calculateNextPaymentDate(
         firstPaymentDate || new Date(),
-        billingCycle
+        billingCycle,
+        parseInt(customDays) || 30
       );
 
       // In edit mode, we might want to preserve the existing nextPaymentDate
@@ -244,6 +259,9 @@ export function SubscriptionForm({
         color: finalColor,
         icon: finalIcon,
         cardId: cardId || undefined,
+        ...(billingCycle === "custom" && {
+          customDays: parseInt(customDays) || 30,
+        }),
       };
 
       // Custom validation schema with Turkish error messages
@@ -258,6 +276,10 @@ export function SubscriptionForm({
         amount: SubscriptionSchema.shape.amount.positive(
           "Tutar pozitif olmalıdır"
         ),
+        customDays:
+          billingCycle === "custom"
+            ? z.number().int().min(1).max(365, "1-365 arası bir değer giriniz")
+            : z.number().optional(),
       });
 
       const result = inputSchema.safeParse(formData);
@@ -284,16 +306,19 @@ export function SubscriptionForm({
 
       // EDIT MODE
       if (mode === "edit" && subscriptionId) {
-        if (success) {
-          toast.success(`${name} güncellendi`, {
-            description: `${formatCurrency(
-              formData.amount,
-              formData.currency
-            )}/ay`,
-          });
-          onSuccess?.();
-        } else {
-          toast.error("Güncelleme başarısız");
+        if (updateSubscription) {
+          const success = updateSubscription(subscriptionId, formData);
+          if (success) {
+            toast.success(`${name} güncellendi`, {
+              description: `${formatCurrency(
+                formData.amount,
+                formData.currency
+              )}/ay`,
+            });
+            onSuccess?.();
+          } else {
+            toast.error("Güncelleme başarısız");
+          }
         }
       } else {
         // ADD MODE
@@ -412,22 +437,58 @@ export function SubscriptionForm({
       </div>
 
       {/* Billing Cycle */}
-      <div>
-        <Label htmlFor="billingCycle">Periyot</Label>
-        <Select
-          value={billingCycle}
-          onValueChange={(v) => setBillingCycle(v as BillingCycle)}
-          disabled={isSubmitting}
-        >
-          <SelectTrigger id="billingCycle" className="h-11 min-h-[44px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="monthly">Aylık</SelectItem>
-            <SelectItem value="yearly">Yıllık</SelectItem>
-            <SelectItem value="weekly">Haftalık</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="billingCycle">Periyot</Label>
+          <Select
+            value={billingCycle}
+            onValueChange={(v) => setBillingCycle(v as BillingCycle)}
+            disabled={isSubmitting}
+          >
+            <SelectTrigger id="billingCycle" className="h-11 min-h-[44px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="monthly">Aylık</SelectItem>
+              <SelectItem value="yearly">Yıllık</SelectItem>
+              <SelectItem value="weekly">Haftalık</SelectItem>
+              <SelectItem value="custom">Özel (Gün)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {billingCycle === "custom" && (
+          <div>
+            <Label htmlFor="customDays">
+              Gün Sayısı <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="customDays"
+              name="customDays"
+              type="number"
+              min="1"
+              max="365"
+              value={customDays}
+              onChange={(e) => setCustomDays(e.target.value)}
+              placeholder="30"
+              disabled={isSubmitting}
+              aria-required="true"
+              aria-invalid={!!errors.customDays}
+              aria-describedby={
+                errors.customDays ? "customDays-error" : undefined
+              }
+              className="h-11 min-h-[44px]"
+            />
+            {errors.customDays && (
+              <p
+                id="customDays-error"
+                className="mt-1 text-sm text-destructive"
+              >
+                {errors.customDays}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* First Payment Date */}
@@ -467,7 +528,11 @@ export function SubscriptionForm({
           <p className="mt-1 text-sm text-muted-foreground">
             Bir sonraki ödeme:{" "}
             {format(
-              calculateNextPaymentDate(firstPaymentDate, billingCycle),
+              calculateNextPaymentDate(
+                firstPaymentDate,
+                billingCycle,
+                parseInt(customDays) || 30
+              ),
               "PPP",
               { locale: tr }
             )}

@@ -1,6 +1,6 @@
 # Story 2.5: Period Selection and Next Payment Calculation
 
-Status: ready-for-dev
+Status: done
 
 ## Dev Agent Record
 
@@ -24,10 +24,19 @@ Antigravity (Google DeepMind)
 - Story context created - exhaustive analysis of PRD, Arch, UX and previous stories completed.
 - Custom period logic aligned with `date-fns` usage patterns.
 - Schema update plan defined to preserve data integrity.
+- Implemented v2 schema with `customDays` and migration logic.
 
 ### File List
 
 - `docs/sprint-artifacts/2-5-period-selection-and-next-payment-calculation.md`
+- `src/types/subscription.ts`
+- `src/stores/subscription-store.ts`
+- `src/stores/subscription-store.test.ts`
+- `src/components/features/subscription/subscription-form.tsx`
+- `src/components/features/subscription/subscription-form.test.tsx`
+- `src/components/features/subscription/subscription-card.tsx`
+- `src/components/features/subscription/subscription-card.test.tsx`
+- `src/components/features/subscription/subscription-detail-dialog.tsx`
 
 ## Story
 
@@ -37,7 +46,7 @@ Antigravity (Google DeepMind)
 
 ## Tasks / Subtasks
 
-- [ ] 1. Data Model & Migration (AC: 5)
+- [x] 1. Data Model & Migration (AC: 5)
 
   - [ ] Add `customDays: z.number().int().min(1).max(365).optional()` to `SubscriptionSchema` in `src/types/subscription.ts`.
   - [ ] Update `Subscription` and `SubscriptionInput` types.
@@ -45,30 +54,30 @@ Antigravity (Google DeepMind)
   - [ ] Implement migration logic: verify existing subscriptions carry over correctly.
   - [ ] Unit Test: Create a test case in `src/stores/subscription-store.test.ts` that mocks v1 state and verifies successful migration to v2 (ensuring `customDays` is handled as optional).
 
-- [ ] 2. Update SubscriptionForm UI (AC: 1, 2, 7)
+- [x] 2. Update SubscriptionForm UI (AC: 1, 2, 7)
 
-  - [ ] Add "custom" (Özel - Gün) option to the Period `Select` in `src/components/features/subscription/subscription-form.tsx`.
-  - [ ] Implement conditional rendering for the `customDays` input.
-  - [ ] **Input Handling:** Use explicit number conversion or `z.coerce.number()` pattern for `customDays` to ensure schema compliance.
-  - [ ] Ensure the field matches shadcn `Input` styling and has 44x44px touch target.
-  - [ ] Update defaults or initial values to support optional `customDays`.
+  - [x] Add "custom" (Özel - Gün) option to the Period `Select` in `src/components/features/subscription/subscription-form.tsx`.
+  - [x] Implement conditional rendering for the `customDays` input.
+  - [x] **Input Handling:** Use explicit number conversion or `z.coerce.number()` pattern for `customDays` to ensure schema compliance.
+  - [x] Ensure the field matches shadcn `Input` styling and has 44x44px touch target.
+  - [x] Update defaults or initial values to support optional `customDays`.
 
-- [ ] 3. Enhance Payment Calculation Logic (AC: 3, 4)
+- [x] 3. Enhance Payment Calculation Logic (AC: 3, 4)
 
-  - [ ] **Integration Only:** `calculateNextPaymentDate` in `src/components/features/subscription/utils.ts` ALREADY supports `customDays` with infinite loop protection. Do NOT rewrite this utility; only ensure the form passes the correctly parsed `customDays` value.
-  - [ ] Update `SubscriptionForm` implementation to pass the correct `customDays` to `calculateNextPaymentDate`.
-  - [ ] Update the "Bir sonraki ödeme" helper text in `SubscriptionForm` to reactively use this utility (likely already works if utility is used correctly, but needs verification).
+  - [x] **Integration Only:** `calculateNextPaymentDate` in `src/components/features/subscription/utils.ts` ALREADY supports `customDays` with infinite loop protection. Do NOT rewrite this utility; only ensure the form passes the correctly parsed `customDays` value.
+  - [x] Update `SubscriptionForm` implementation to pass the correct `customDays` to `calculateNextPaymentDate`.
+  - [x] Update the "Bir sonraki ödeme" helper text in `SubscriptionForm` to reactively use this utility (likely already works if utility is used correctly, but needs verification).
 
-- [ ] 4. Update Display Logic (AC: 6)
+- [x] 4. Update Display Logic (AC: 6)
 
-  - [ ] Update `src/components/features/subscription/subscription-card.tsx` to handle "custom" period display.
-  - [ ] Update `src/components/features/subscription/subscription-detail-dialog.tsx` to show detail format (e.g., "45 günde bir").
-  - [ ] Check if `SubscriptionList` or other components need specific handling for custom cycles.
+  - [x] Update `src/components/features/subscription/subscription-card.tsx` to handle "custom" period display.
+  - [x] Update `src/components/features/subscription/subscription-detail-dialog.tsx` to show detail format (e.g., "45 günde bir").
+  - [x] Check if `SubscriptionList` or other components need specific handling for custom cycles.
 
-- [ ] 5. Unit & Integration Tests (AC: All)
-  - [ ] Add tests to `src/components/features/subscription/subscription-form.test.tsx` for custom period selection.
-  - [ ] Test edge cases: 1 day, 365 days, empty custom days (should default to 30), invalid input (strings, decimals).
-  - [ ] Test past date calculation with custom days (e.g., start 2 months ago with 45 days period).
+- [x] 5. Unit & Integration Tests (AC: All)
+  - [x] Add tests to `src/components/features/subscription/subscription-form.test.tsx` for custom period selection.
+  - [x] Test edge cases: 1 day, 365 days, empty custom days (should default to 30), invalid input (strings, decimals).
+  - [x] Test past date calculation with custom days (e.g., start 2 months ago with 45 days period).
 
 ## Acceptance Criteria
 

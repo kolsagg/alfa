@@ -81,7 +81,9 @@ export function SubscriptionCard({
           {subscription.billingCycle === "monthly" && "Aylık"}
           {subscription.billingCycle === "yearly" && "Yıllık"}
           {subscription.billingCycle === "weekly" && "Haftalık"}
-          {subscription.billingCycle === "custom" && "Özel"}
+          {subscription.billingCycle === "custom" &&
+            subscription.customDays &&
+            `${subscription.customDays} günde bir`}
         </span>
       </div>
     </div>

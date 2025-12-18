@@ -67,7 +67,7 @@ development_status:
   2-2-category-system: review
   2-3-subscription-form-add-flow: done
   2-4-subscription-form-edit-delete-flow: done
-  2-5-period-selection-and-next-payment-calculation: ready-for-dev
+  2-5-period-selection-and-next-payment-calculation: done
   2-6-quick-add-grid: backlog
   2-7-color-icon-picker: backlog
   2-8-empty-state-and-minimal-onboarding: backlog

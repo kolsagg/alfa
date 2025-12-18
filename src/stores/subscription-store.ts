@@ -131,7 +131,7 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
   }),
   {
     name: "SubscriptionsStore",
-    version: 1,
+    version: 2,
     migrate: (persistedState: unknown, version: number) => {
       const state = persistedState as Partial<SubscriptionState>;
 
@@ -139,6 +139,11 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
         // Migration from v0 to v1: Ensure subscriptions array exists
         console.log("[SubscriptionStore] Migrating from v0 to v1");
         state.subscriptions = state.subscriptions ?? [];
+      }
+
+      if (version < 2) {
+        console.log("[SubscriptionStore] Migrating from v1 to v2");
+        // v2 adds customDays as optional, so existing records are valid
       }
 
       return state as SubscriptionState;

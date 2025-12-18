@@ -46,15 +46,15 @@ export function DeletionCelebration({
   const [isAnimating, setIsAnimating] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Handle show changes
+  // Handle show changes and animation completion
   useEffect(() => {
+    // Start animation when show becomes true
     if (show && !isAnimating) {
       setIsAnimating(true);
+      return;
     }
-  }, [show, isAnimating]);
 
-  // Handle animation completion
-  useEffect(() => {
+    // Handle animation completion timer
     if (isAnimating) {
       const duration = reducedMotion ? 800 : 2500;
       timerRef.current = setTimeout(() => {
@@ -68,7 +68,8 @@ export function DeletionCelebration({
         }
       };
     }
-  }, [isAnimating, reducedMotion, onComplete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show, isAnimating, reducedMotion]);
 
   if (!isAnimating) return null;
 

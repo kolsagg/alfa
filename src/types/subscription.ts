@@ -11,6 +11,7 @@ export const SubscriptionSchema = z.object({
   isActive: z.boolean().default(true),
   categoryId: CategorySchema.optional(),
   cardId: z.string().uuid().optional(),
+  customDays: z.number().int().min(1).max(365).optional(),
   color: z.string().optional(),
   icon: z.string().optional(),
   createdAt: z.string().datetime(),
