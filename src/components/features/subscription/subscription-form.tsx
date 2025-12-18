@@ -31,8 +31,11 @@ import * as Icons from "lucide-react";
 
 export interface SubscriptionFormProps {
   initialValues?: Partial<SubscriptionInput>;
+  mode?: "add" | "edit";
+  subscriptionId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
+  onSubmittingChange?: (isSubmitting: boolean) => void;
 }
 
 const PRESET_COLORS = [
@@ -63,8 +66,11 @@ const POPULAR_ICONS = [
 
 export function SubscriptionForm({
   initialValues,
+  mode = "add",
+  subscriptionId,
   onSuccess,
   onCancel,
+  onSubmittingChange,
 }: SubscriptionFormProps) {
   // Form state
   const [name, setName] = useState(initialValues?.name || "");
@@ -98,6 +104,9 @@ export function SubscriptionForm({
   // Store
   const addSubscription = useSubscriptionStore(
     (state) => state.addSubscription
+  );
+  const updateSubscription = useSubscriptionStore(
+    (state) => state.updateSubscription
   );
 
   // Auto-populate color/icon when category changes
@@ -188,6 +197,31 @@ export function SubscriptionForm({
         billingCycle
       );
 
+      // In edit mode, we might want to preserve the existing nextPaymentDate
+      // unless the user intended to reset the cycle by changing the first payment date
+      let finalNextPaymentDate = nextPaymentDate;
+      if (mode === "edit" && initialValues?.nextPaymentDate) {
+        const existingNextDate = new Date(initialValues.nextPaymentDate);
+        // We compare with the initial form date to see if user changed it
+        const initialFormDate = initialValues.nextPaymentDate
+          ? new Date(initialValues.nextPaymentDate).toISOString().split("T")[0]
+          : null;
+        const currentFormDate = firstPaymentDate
+          ? firstPaymentDate.toISOString().split("T")[0]
+          : null;
+
+        const firstPaymentChanged = initialFormDate !== currentFormDate;
+
+        // If nothing critical changed, keep the existing next payment date
+        // to avoid "jumping" dates when editing on the payment day
+        if (
+          !firstPaymentChanged &&
+          billingCycle === initialValues.billingCycle
+        ) {
+          finalNextPaymentDate = existingNextDate;
+        }
+      }
+
       // Get category defaults if not set
       const finalCategory = category || "other";
       const categoryData = categories.get(finalCategory);
@@ -204,7 +238,7 @@ export function SubscriptionForm({
         amount: parseFloat(amount),
         currency,
         billingCycle,
-        nextPaymentDate: nextPaymentDate.toISOString(),
+        nextPaymentDate: finalNextPaymentDate.toISOString(),
         isActive: true,
         categoryId: finalCategory,
         color: finalColor,
@@ -244,25 +278,43 @@ export function SubscriptionForm({
         }
 
         setIsSubmitting(false);
+        onSubmittingChange?.(false);
         return;
       }
 
-      const created = addSubscription(formData);
+      // EDIT MODE
+      if (mode === "edit" && subscriptionId) {
+        if (success) {
+          toast.success(`${name} güncellendi`, {
+            description: `${formatCurrency(
+              formData.amount,
+              formData.currency
+            )}/ay`,
+          });
+          onSuccess?.();
+        } else {
+          toast.error("Güncelleme başarısız");
+        }
+      } else {
+        // ADD MODE
+        const created = addSubscription(formData);
 
-      if (!created) {
-        toast.error("Abonelik eklenemedi", {
-          description: "Veri doğrulama hatası",
+        if (!created) {
+          toast.error("Abonelik eklenemedi", {
+            description: "Veri doğrulama hatası",
+          });
+          setIsSubmitting(false);
+          onSubmittingChange?.(false);
+          return;
+        }
+
+        toast.success(`${created.name} eklendi`, {
+          description: `${formatCurrency(created.amount, created.currency)}/ay`,
         });
-        setIsSubmitting(false);
-        return;
+
+        resetForm();
+        onSuccess?.();
       }
-
-      toast.success(`${created.name} eklendi`, {
-        description: `${formatCurrency(created.amount, created.currency)}/ay`,
-      });
-
-      resetForm();
-      onSuccess?.();
     } catch (error) {
       if (
         error instanceof Error &&
@@ -278,6 +330,7 @@ export function SubscriptionForm({
       }
     } finally {
       setIsSubmitting(false);
+      onSubmittingChange?.(false);
     }
   };
 
@@ -526,8 +579,10 @@ export function SubscriptionForm({
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Kaydediliyor...
+              {mode === "edit" ? "Güncelleniyor..." : "Kaydediliyor..."}
             </>
+          ) : mode === "edit" ? (
+            "Güncelle"
           ) : (
             "Kaydet"
           )}
