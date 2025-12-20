@@ -63,6 +63,7 @@ const POPULAR_ICONS = [
   "Coffee",
   "Gamepad2",
   "Dumbbell",
+  "Sparkles",
 ];
 
 export function SubscriptionForm({

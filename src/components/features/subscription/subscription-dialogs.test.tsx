@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SubscriptionCard } from "./subscription-card";
 import { SubscriptionDetailDialog } from "./subscription-detail-dialog";
@@ -329,8 +335,10 @@ describe("DeletionCelebration", () => {
     const handleComplete = vi.fn();
     render(<DeletionCelebration show={true} onComplete={handleComplete} />);
 
-    // Fast-forward to end of animation
-    vi.advanceTimersByTime(800);
+    // Fast-forward to end of animation - wrap in act() for React state updates
+    await act(async () => {
+      vi.advanceTimersByTime(800);
+    });
 
     expect(handleComplete).toHaveBeenCalled();
   });
@@ -362,5 +370,53 @@ describe("SubscriptionList Integration", () => {
     render(<SubscriptionList />);
 
     expect(screen.getByText("Netflix")).toBeInTheDocument();
+  });
+});
+describe("AddSubscriptionDialog Integration", () => {
+  it("should show QuickAddGrid by default", async () => {
+    // Need a component that triggers the dialog
+    const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
+    render(<AddSubscriptionDialog />);
+
+    // Click the FAB to open dialog
+    await userEvent.click(screen.getByLabelText("Abonelik ekle"));
+
+    expect(screen.getByText("Hızlı Abonelik Ekle")).toBeInTheDocument();
+    expect(screen.getByText("Netflix")).toBeInTheDocument();
+  });
+
+  it("should transition to form when a service is selected", async () => {
+    const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
+    render(<AddSubscriptionDialog />);
+
+    await userEvent.click(screen.getByLabelText("Abonelik ekle"));
+    await userEvent.click(screen.getByText("Netflix"));
+
+    // Now should show form with Netflix pre-filled
+    expect(screen.getByDisplayValue("Netflix")).toBeInTheDocument();
+    expect(screen.getByText("Geri")).toBeInTheDocument();
+  });
+
+  it("should go back to grid when Geri is clicked", async () => {
+    const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
+    render(<AddSubscriptionDialog />);
+
+    await userEvent.click(screen.getByLabelText("Abonelik ekle"));
+    await userEvent.click(screen.getByText("Netflix"));
+    await userEvent.click(screen.getByText("Geri"));
+
+    expect(screen.getByText("Hızlı Abonelik Ekle")).toBeInTheDocument();
+  });
+
+  it("should pre-populate category and icon from selected service", async () => {
+    const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
+    render(<AddSubscriptionDialog />);
+
+    await userEvent.click(screen.getByLabelText("Abonelik ekle"));
+    await userEvent.click(screen.getByText("Spotify"));
+
+    // Check if category is selected (Music/Entertainment)
+    // The CategorySelect shows the label
+    expect(screen.getByText("Eğlence")).toBeInTheDocument();
   });
 });

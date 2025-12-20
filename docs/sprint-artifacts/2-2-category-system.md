@@ -1,6 +1,6 @@
 # Story 2.2: Category System
 
-Status: review
+Status: done
 
 ## Story
 
@@ -376,7 +376,7 @@ Antigravity (Google DeepMind) + Quality Competition Review
 ```
 ✅ npm run lint: 0 errors
 ✅ npm run build: SUCCESS
-✅ npm run test: 92 passed | 2 skipped (94 total)
+✅ npm run test: 148 passed | 5 skipped (153 total)
 ```
 
 ### File List
@@ -388,15 +388,22 @@ Antigravity (Google DeepMind) + Quality Competition Review
 - `src/components/ui/category-badge.tsx` (Badge component)
 - `src/components/ui/category-badge.test.tsx` (9 tests)
 - `src/components/ui/category-icon.tsx` (Icon component)
-- `src/components/forms/category-select.tsx` (Select wrapper)
+- `src/components/ui/category-icon.test.tsx` (9 tests) - **Added in code review**
+- `src/components/forms/category-select.tsx` (Select wrapper + accessibility fix)
 - `src/components/forms/category-select.test.tsx` (9 tests, 2 skipped)
 
-**Modified Files:**
+**Modified Files (Code Review Fixes):**
 
-- None (this story adds new files only)
+- `src/components/forms/category-select.tsx` - aria-label eklendi (accessibility)
+- `src/components/features/subscription/subscription-dialogs.test.tsx` - act() warning fix
 
 ## Change Log
 
 - 2025-12-18: Story created - ready-for-dev
 - 2025-12-18: Implementation complete - all tasks done, 34 new tests
 - 2025-12-18: Status → review (awaiting code review)
+- 2025-12-20: Code Review completed - fixed 4 issues:
+  - H1: Added missing CategoryIcon unit tests (9 tests)
+  - M1: Fixed React act() warning in DeletionCelebration test
+  - L2: Added aria-label to CategorySelect for accessibility
+  - Status → done

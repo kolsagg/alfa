@@ -41,7 +41,10 @@ export function CategorySelect({
         </label>
       )}
       <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-        <SelectTrigger className="w-full">
+        <SelectTrigger
+          className="w-full"
+          aria-label={label || "Kategori seçimi"}
+        >
           <SelectValue placeholder={placeholder}>
             {value && (
               <span className="flex items-center gap-2">
