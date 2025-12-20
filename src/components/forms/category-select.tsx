@@ -42,7 +42,7 @@ export function CategorySelect({
       )}
       <Select value={value} onValueChange={onValueChange} disabled={disabled}>
         <SelectTrigger
-          className="w-full"
+          className="w-full h-11 min-h-[44px]"
           aria-label={label || "Kategori seçimi"}
         >
           <SelectValue placeholder={placeholder}>
@@ -66,7 +66,11 @@ export function CategorySelect({
           {options.map((option) => {
             const Icon = option.icon;
             return (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                className="min-h-[44px]"
+              >
                 <span className="flex items-center gap-2">
                   <Icon size={16} className="shrink-0" />
                   <span>{option.label}</span>

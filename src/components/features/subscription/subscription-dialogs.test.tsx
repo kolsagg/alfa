@@ -37,6 +37,59 @@ vi.mock("@/stores/subscription-store", () => ({
   },
 }));
 
+vi.mock("@/components/forms/category-select", () => ({
+  CategorySelect: ({ value }: { value?: string }) => (
+    <div data-testid="mock-category-select">
+      {value === "entertainment" && "Eğlence"}
+      {value === "productivity" && "İş"}
+      {value === "tools" && "Araçlar"}
+      {value === "education" && "Eğitim"}
+      {value === "health" && "Sağlık"}
+      {value === "other" && "Diğer"}
+      {!value && "Kategori seç..."}
+    </div>
+  ),
+}));
+
+vi.mock("./color-picker", () => ({
+  ColorPicker: ({
+    value,
+    onChange,
+  }: {
+    value: string;
+    onChange: (v: string) => void;
+  }) => (
+    <div data-testid="mock-color-picker">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label="Renk"
+      />
+    </div>
+  ),
+  PRESET_COLORS: [],
+}));
+
+vi.mock("./icon-picker", () => ({
+  IconPicker: ({
+    value,
+    onChange,
+  }: {
+    value: string;
+    onChange: (v: string) => void;
+  }) => (
+    <div data-testid="mock-icon-picker">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label="İkon"
+      />
+    </div>
+  ),
+}));
+
 // Mock matchMedia for useReducedMotion
 const mockMatchMedia = (matches: boolean) => {
   Object.defineProperty(window, "matchMedia", {

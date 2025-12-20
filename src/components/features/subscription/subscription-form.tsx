@@ -29,6 +29,8 @@ import { tr } from "date-fns/locale";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import * as Icons from "lucide-react";
+import { ColorPicker } from "./color-picker";
+import { IconPicker } from "./icon-picker";
 
 export interface SubscriptionFormProps {
   initialValues?: Partial<SubscriptionInput>;
@@ -38,33 +40,6 @@ export interface SubscriptionFormProps {
   onCancel?: () => void;
   onSubmittingChange?: (isSubmitting: boolean) => void;
 }
-
-const PRESET_COLORS = [
-  { name: "Primary", value: "oklch(0.75 0.12 180)" },
-  { name: "Secondary", value: "oklch(0.65 0.15 260)" },
-  { name: "Attention", value: "oklch(0.8 0.15 85)" },
-  { name: "Urgent", value: "oklch(0.65 0.2 25)" },
-  { name: "Critical", value: "oklch(0.55 0.25 25)" },
-  { name: "Success", value: "oklch(0.7 0.15 165)" },
-  { name: "Subtle", value: "oklch(0.85 0.05 220)" },
-  { name: "Muted", value: "oklch(0.6 0.05 250)" },
-];
-
-const POPULAR_ICONS = [
-  "Tv",
-  "Music",
-  "Briefcase",
-  "GraduationCap",
-  "HeartPulse",
-  "Archive",
-  "Smartphone",
-  "Cloud",
-  "Book",
-  "Coffee",
-  "Gamepad2",
-  "Dumbbell",
-  "Sparkles",
-];
 
 export function SubscriptionForm({
   initialValues,
@@ -123,10 +98,16 @@ export function SubscriptionForm({
     if (category && !manuallySetIcon) {
       const categoryData = categories.get(category);
       const IconComponent = categoryData.icon;
-      // Get icon name from the component
-      const iconName = Object.keys(Icons).find(
-        (key) => Icons[key as keyof typeof Icons] === IconComponent
-      );
+      // Get icon name from the component, preferring non-prefixed names
+      const iconName =
+        Object.keys(Icons).find(
+          (key) =>
+            !key.startsWith("Lucide") &&
+            Icons[key as keyof typeof Icons] === IconComponent
+        ) ||
+        Object.keys(Icons).find(
+          (key) => Icons[key as keyof typeof Icons] === IconComponent
+        );
       setIcon(iconName || "");
     }
   }, [category, manuallySetColor, manuallySetIcon]);
@@ -150,7 +131,6 @@ export function SubscriptionForm({
     setIcon("");
     setCardId("");
     setManuallySetColor(false);
-    setManuallySetIcon(false);
     setManuallySetIcon(false);
     setCustomDays("30");
     setErrors({});
@@ -552,77 +532,24 @@ export function SubscriptionForm({
       </div>
 
       {/* Color Picker */}
-      <div>
-        <Label>Renk</Label>
-        <div className="grid grid-cols-4 gap-2 mt-2">
-          {PRESET_COLORS.map((preset) => (
-            <button
-              key={preset.value}
-              type="button"
-              onClick={() => {
-                setColor(preset.value);
-                setManuallySetColor(true);
-              }}
-              className={cn(
-                "w-full h-11 min-h-[44px] rounded-md border-2 transition-all",
-                color === preset.value
-                  ? "border-primary ring-2 ring-primary ring-offset-2"
-                  : "border-border hover:border-primary/50"
-              )}
-              style={{ backgroundColor: preset.value }}
-              aria-label={preset.name}
-              disabled={isSubmitting}
-            />
-          ))}
-        </div>
-      </div>
+      <ColorPicker
+        value={color}
+        onChange={(v) => {
+          setColor(v);
+          setManuallySetColor(true);
+        }}
+        disabled={isSubmitting}
+      />
 
       {/* Icon Picker */}
-      <div>
-        <Label htmlFor="icon">İkon</Label>
-        <Select
-          value={icon}
-          onValueChange={(v) => {
-            setIcon(v);
-            setManuallySetIcon(true);
-          }}
-          disabled={isSubmitting}
-        >
-          <SelectTrigger id="icon" className="h-11 min-h-[44px]">
-            <SelectValue placeholder="İkon seç">
-              {icon &&
-                (() => {
-                  const IconComponent = Icons[
-                    icon as keyof typeof Icons
-                  ] as React.ComponentType<{ size?: number }>;
-                  return IconComponent ? (
-                    <span className="flex items-center gap-2">
-                      <IconComponent size={16} />
-                      {icon}
-                    </span>
-                  ) : (
-                    icon
-                  );
-                })()}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {POPULAR_ICONS.map((iconName) => {
-              const IconComponent = Icons[
-                iconName as keyof typeof Icons
-              ] as React.ComponentType<{ size?: number }>;
-              return (
-                <SelectItem key={iconName} value={iconName}>
-                  <span className="flex items-center gap-2">
-                    {IconComponent && <IconComponent size={16} />}
-                    {iconName}
-                  </span>
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-      </div>
+      <IconPicker
+        value={icon}
+        onChange={(v) => {
+          setIcon(v);
+          setManuallySetIcon(true);
+        }}
+        disabled={isSubmitting}
+      />
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4">

@@ -1,0 +1,15 @@
+export const POPULAR_ICONS = [
+  "Tv",
+  "Music",
+  "Briefcase",
+  "GraduationCap",
+  "HeartPulse",
+  "Archive",
+  "Smartphone",
+  "Cloud",
+  "Book",
+  "Coffee",
+  "Gamepad2",
+  "Dumbbell",
+  "Sparkles",
+];

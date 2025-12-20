@@ -7,6 +7,28 @@ import { toast } from "sonner";
 
 vi.mock("@/stores/subscription-store");
 vi.mock("sonner");
+vi.mock("@/components/forms/category-select", () => ({
+  CategorySelect: ({
+    value,
+    onValueChange,
+    disabled,
+  }: {
+    value?: string;
+    onValueChange: (v: string) => void;
+    disabled?: boolean;
+  }) => (
+    <select
+      aria-label="Kategori"
+      value={value || ""}
+      onChange={(e) => onValueChange(e.target.value)}
+      disabled={disabled}
+    >
+      <option value="">Kategori seç...</option>
+      <option value="entertainment">Eğlence</option>
+      <option value="productivity">İş</option>
+    </select>
+  ),
+}));
 
 // Mock pointer capture for Radix UI
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
@@ -143,8 +165,7 @@ describe("SubscriptionForm", () => {
   });
 
   describe("Auto-assignment from category", () => {
-    // Skip: Radix UI Select doesn't work properly in jsdom
-    it.skip("should auto-populate color and icon when category is selected", async () => {
+    it("should auto-populate color and icon when category is selected", async () => {
       const user = userEvent.setup();
       mockAddSubscription.mockReturnValue({
         id: "test-id",
@@ -160,23 +181,14 @@ describe("SubscriptionForm", () => {
       render(<SubscriptionForm onSuccess={mockOnSuccess} />);
 
       // Select entertainment category
-      const comboboxes = screen.getAllByRole("combobox");
-      const categorySelect = comboboxes.find((cb) =>
-        cb.textContent?.includes("Kategori")
-      );
-      await user.click(categorySelect!);
-
-      const entertainmentOption = await screen.findByText(
-        /eğlence|entertainment/i
-      );
-      await user.click(entertainmentOption);
+      const categorySelect = screen.getByLabelText(/Kategori/i);
+      await user.selectOptions(categorySelect, "entertainment");
 
       // Fill required fields
       const nameInput = screen.getByLabelText(/Abonelik İsmi/i);
       await user.type(nameInput, "Netflix");
 
       const amountInput = screen.getByLabelText(/Tutar/i);
-
       await user.type(amountInput, "100");
 
       const submitButton = screen.getByRole("button", { name: /kaydet/i });
@@ -186,14 +198,15 @@ describe("SubscriptionForm", () => {
         const calls = mockAddSubscription.mock.calls;
         if (calls.length > 0) {
           const addedSubscription = calls[0][0];
-          expect(addedSubscription.color).toBeDefined();
-          expect(addedSubscription.icon).toBeDefined();
+          expect(addedSubscription.categoryId).toBe("entertainment");
+          // Metadata for entertainment has specific color/icon
+          expect(addedSubscription.color).toBe("var(--color-primary)");
+          expect(addedSubscription.icon).toBe("Tv");
         }
       });
     });
 
-    // Skip: Radix UI Select doesn't work properly in jsdom
-    it.skip("should allow manual override of auto-assigned color and icon", async () => {
+    it("should allow manual override of auto-assigned color and icon", async () => {
       const user = userEvent.setup();
       mockAddSubscription.mockReturnValue({
         id: "test-id",
@@ -203,39 +216,35 @@ describe("SubscriptionForm", () => {
         billingCycle: "monthly",
         nextPaymentDate: new Date().toISOString(),
         isActive: true,
-        categoryId: "entertainment",
       });
 
       render(<SubscriptionForm onSuccess={mockOnSuccess} />);
 
-      // Select entertainment category
-      const comboboxes = screen.getAllByRole("combobox");
-      const categorySelect = comboboxes.find((cb) =>
-        cb.textContent?.includes("Kategori")
-      );
-      await user.click(categorySelect!);
+      // 1. Manually set a color FIRST
+      const manualColor = screen.getByLabelText(/^Mercan$/i);
+      await user.click(manualColor);
 
-      const entertainmentOption = await screen.findByText(
-        /eğlence|entertainment/i
-      );
-      await user.click(entertainmentOption);
+      // 2. Select category
+      const categorySelect = screen.getByLabelText(/Kategori/i);
+      await user.selectOptions(categorySelect, "entertainment");
 
-      // Manually change color (this will be implemented)
-      // For now, we test that manual changes are preserved
-
+      // 3. Verify manual color IS NOT overwritten
       // Fill required fields
       const nameInput = screen.getByLabelText(/Abonelik İsmi/i);
       await user.type(nameInput, "Netflix");
-
       const amountInput = screen.getByLabelText(/Tutar/i);
-
       await user.type(amountInput, "100");
 
       const submitButton = screen.getByRole("button", { name: /kaydet/i });
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(mockAddSubscription).toHaveBeenCalled();
+        const calls = mockAddSubscription.mock.calls;
+        if (calls.length > 0) {
+          const addedSubscription = calls[0][0];
+          // Should stay 'Mercan' (var(--color-urgent)) instead of auto-assigned 'Turkuaz' (var(--color-primary))
+          expect(addedSubscription.color).toBe("var(--color-urgent)");
+        }
       });
     });
   });

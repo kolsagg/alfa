@@ -8,7 +8,7 @@ describe("categories", () => {
       expect(result.label).toBe("Eğlence");
       expect(result.id).toBe("entertainment");
       expect(result.icon).toBeDefined();
-      expect(result.color).toContain("oklch");
+      expect(result.color).toContain("var(--color-");
       expect(result.colorClass).toBeDefined();
     });
 
