@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "@/components/ui/category-badge";
-import { formatCurrency } from "./utils";
+import { formatCurrency } from "@/lib/formatters";
 import { Edit2, Trash2 } from "lucide-react";
 
 interface SubscriptionDetailDialogProps {
@@ -84,39 +84,41 @@ export function SubscriptionDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl">{subscription.name}</DialogTitle>
-          <DialogDescription asChild>
-            <div className="flex flex-col gap-3 pt-2">
-              {/* Category Badge */}
-              <div className="flex items-center gap-2">
-                <CategoryBadge
-                  categoryId={subscription.categoryId}
-                  size="default"
-                />
-              </div>
+      <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+        <div className="flex-1 overflow-y-auto p-6">
+          <DialogHeader>
+            <DialogTitle className="text-xl">{subscription.name}</DialogTitle>
+            <DialogDescription asChild>
+              <div className="flex flex-col gap-3 pt-2">
+                {/* Category Badge */}
+                <div className="flex items-center gap-2">
+                  <CategoryBadge
+                    categoryId={subscription.categoryId}
+                    size="default"
+                  />
+                </div>
 
-              {/* Amount */}
-              <div className="text-3xl font-bold text-foreground">
-                {formattedAmount}
-                <span className="text-sm font-normal text-muted-foreground ml-1">
-                  / {billingCycleLabel?.toLowerCase()}
-                </span>
-              </div>
+                {/* Amount */}
+                <div className="text-3xl font-bold text-foreground">
+                  {formattedAmount}
+                  <span className="text-sm font-normal text-muted-foreground ml-1">
+                    / {billingCycleLabel?.toLowerCase()}
+                  </span>
+                </div>
 
-              {/* Next Payment */}
-              <div className="text-sm text-muted-foreground">
-                Sonraki ödeme:{" "}
-                <span className="font-medium text-foreground">
-                  {formattedDate}
-                </span>
+                {/* Next Payment */}
+                <div className="text-sm text-muted-foreground">
+                  Sonraki ödeme:{" "}
+                  <span className="font-medium text-foreground">
+                    {formattedDate}
+                  </span>
+                </div>
               </div>
-            </div>
-          </DialogDescription>
-        </DialogHeader>
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <DialogFooter className="flex-row gap-2 sm:gap-2">
+        <DialogFooter className="flex-row gap-2 sm:gap-2 p-6 pt-0">
           <Button
             variant="outline"
             onClick={onEdit}

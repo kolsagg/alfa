@@ -414,7 +414,8 @@ describe("SubscriptionList Integration", () => {
   it("should show empty state when no subscriptions", () => {
     render(<SubscriptionList />);
 
-    expect(screen.getByText(/henüz abonelik eklenmedi/i)).toBeInTheDocument();
+    // New EmptyState shows welcome message instead of old placeholder
+    expect(screen.getByText("Merhaba! 👋")).toBeInTheDocument();
   });
 
   it("should render subscription cards when subscriptions exist", () => {
@@ -424,17 +425,84 @@ describe("SubscriptionList Integration", () => {
 
     expect(screen.getByText("Netflix")).toBeInTheDocument();
   });
+
+  describe("EmptyState Flow", () => {
+    it("should open AddSubscriptionDialog in form view when a service is selected from EmptyState", async () => {
+      const { AddSubscriptionDialog } = await import(
+        "./add-subscription-dialog"
+      );
+      render(
+        <>
+          <SubscriptionList />
+          <AddSubscriptionDialog />
+        </>
+      );
+
+      // Verify EmptyState is visible (because no subscriptions)
+      expect(screen.getByText(/Merhaba!/i)).toBeInTheDocument();
+
+      // Click on a service tile (e.g., Netflix)
+      const netflixTile = screen.getByRole("button", { name: /Netflix/i });
+      fireEvent.click(netflixTile);
+
+      // Verify Dialog is open and shows the form (not the grid)
+      await waitFor(() => {
+        expect(
+          screen.getByRole("heading", { name: "Netflix" })
+        ).toBeInTheDocument();
+      });
+      expect(
+        await screen.findByPlaceholderText(/Netflix, Spotify/i)
+      ).toBeInTheDocument();
+    });
+
+    it("should open AddSubscriptionDialog in quick-add grid when clicking custom add in EmptyState", async () => {
+      const { AddSubscriptionDialog } = await import(
+        "./add-subscription-dialog"
+      );
+      render(
+        <>
+          <SubscriptionList />
+          <AddSubscriptionDialog />
+        </>
+      );
+
+      const customAddBtn = screen.getByRole("button", {
+        name: /Özel Abonelik Ekle/i,
+      });
+      fireEvent.click(customAddBtn);
+
+      // Should open directly in form view (skipToForm is passed from EmptyState)
+      await waitFor(() => {
+        expect(
+          screen.getByRole("heading", { name: /Yeni Abonelik Ekle/i })
+        ).toBeInTheDocument();
+      });
+    });
+  });
 });
 describe("AddSubscriptionDialog Integration", () => {
+  beforeEach(async () => {
+    // Reset UIStore before each test
+    const { useUIStore } = await import("@/stores/ui-store");
+    useUIStore.setState({
+      activeModal: null,
+      editingSubscriptionId: null,
+      prefillData: null,
+      isLoading: false,
+    });
+  });
+
   it("should show QuickAddGrid by default", async () => {
-    // Need a component that triggers the dialog
     const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
     render(<AddSubscriptionDialog />);
 
-    // Click the FAB to open dialog
-    await userEvent.click(screen.getByLabelText("Abonelik ekle"));
+    // Click the FAB to open dialog - use fireEvent to avoid pointer-events issue in JSDOM
+    fireEvent.click(screen.getByLabelText("Abonelik ekle"));
 
-    expect(screen.getByText("Hızlı Abonelik Ekle")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Hızlı Abonelik Ekle")).toBeInTheDocument();
+    });
     expect(screen.getByText("Netflix")).toBeInTheDocument();
   });
 
@@ -442,11 +510,18 @@ describe("AddSubscriptionDialog Integration", () => {
     const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
     render(<AddSubscriptionDialog />);
 
-    await userEvent.click(screen.getByLabelText("Abonelik ekle"));
-    await userEvent.click(screen.getByText("Netflix"));
+    fireEvent.click(screen.getByLabelText("Abonelik ekle"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Netflix")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("Netflix"));
 
     // Now should show form with Netflix pre-filled
-    expect(screen.getByDisplayValue("Netflix")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("Netflix")).toBeInTheDocument();
+    });
     expect(screen.getByText("Geri")).toBeInTheDocument();
   });
 
@@ -454,22 +529,40 @@ describe("AddSubscriptionDialog Integration", () => {
     const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
     render(<AddSubscriptionDialog />);
 
-    await userEvent.click(screen.getByLabelText("Abonelik ekle"));
-    await userEvent.click(screen.getByText("Netflix"));
-    await userEvent.click(screen.getByText("Geri"));
+    fireEvent.click(screen.getByLabelText("Abonelik ekle"));
 
-    expect(screen.getByText("Hızlı Abonelik Ekle")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Netflix")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("Netflix"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Geri")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("Geri"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Hızlı Abonelik Ekle")).toBeInTheDocument();
+    });
   });
 
   it("should pre-populate category and icon from selected service", async () => {
     const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
     render(<AddSubscriptionDialog />);
 
-    await userEvent.click(screen.getByLabelText("Abonelik ekle"));
-    await userEvent.click(screen.getByText("Spotify"));
+    fireEvent.click(screen.getByLabelText("Abonelik ekle"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Spotify")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("Spotify"));
 
     // Check if category is selected (Music/Entertainment)
-    // The CategorySelect shows the label
-    expect(screen.getByText("Eğlence")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Eğlence")).toBeInTheDocument();
+    });
   });
 });

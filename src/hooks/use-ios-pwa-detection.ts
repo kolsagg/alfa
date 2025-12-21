@@ -13,7 +13,7 @@ interface IOSWindow extends Window {
   MSStream?: unknown;
 }
 
-function detectIOSSafariNonStandalone(): boolean {
+export function detectIOSSafariNonStandalone(): boolean {
   if (typeof window === "undefined") return false;
 
   const iosWindow = window as IOSWindow;

@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import type { Subscription } from "@/types/subscription";
 import { CategoryBadge } from "@/components/ui/category-badge";
-import { formatCurrency } from "./utils";
+import { formatCurrency } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 
 interface SubscriptionCardProps {

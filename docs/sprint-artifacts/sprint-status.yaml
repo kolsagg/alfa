@@ -62,17 +62,17 @@ development_status:
   # FRs: FR01, FR02, FR03, FR04, FR05, FR21, FR23, FR25
   # Estimated: 25-30 hours
   # ===========================================
-  epic-2: in-progress
+  epic-2: done
   2-1-subscription-zustand-slice: done
   2-2-category-system: done
   2-3-subscription-form-add-flow: done
   2-4-subscription-form-edit-delete-flow: done
   2-5-period-selection-and-next-payment-calculation: done
-  2-6-quick-add-grid: review
+  2-6-quick-add-grid: done
   2-7-color-icon-picker: done
-  2-8-empty-state-and-minimal-onboarding: backlog
-  2-9-notification-permission-stub: backlog
-  epic-2-retrospective: optional
+  2-8-empty-state-and-minimal-onboarding: done
+  2-9-notification-permission-stub: done
+  epic-2-retrospective: completed
 
   # ===========================================
   # EPIC 3: Dashboard & Analytics
@@ -80,9 +80,9 @@ development_status:
   # FRs: FR12, FR13, FR14
   # Estimated: 19 hours
   # ===========================================
-  epic-3: backlog
-  3-1-monthly-yearly-spending-summary-cards: backlog
-  3-2-timeline-view-upcoming-payments: backlog
+  epic-3: in-progress
+  3-1-monthly-yearly-spending-summary-cards: done
+  3-2-timeline-view-upcoming-payments: done
   3-3-countdown-hero-widget: backlog
   3-4-subscription-list-view: backlog
   3-5-category-breakdown-visualization: backlog

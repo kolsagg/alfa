@@ -7,10 +7,11 @@ import { SubscriptionDetailDialog } from "./subscription-detail-dialog";
 import { EditSubscriptionDialog } from "./edit-subscription-dialog";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 import { DeletionCelebration } from "./deletion-celebration";
+import { EmptyState } from "@/components/layout/empty-state";
 
 /**
  * SubscriptionList manages the subscription list view with dialog orchestration
- * - Displays subscription cards
+ * - Displays subscription cards OR EmptyState for first-time users
  * - Handles detail → edit/delete flow
  * - Shows deletion celebration
  */
@@ -74,23 +75,9 @@ export function SubscriptionList() {
     setShowCelebration(false);
   }, []);
 
-  // Empty state
+  // Empty state - use new EmptyState component
   if (subscriptions.length === 0) {
-    return (
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground font-jakarta">
-          Aboneliklerim
-        </h2>
-        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border/50 bg-muted/30 p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            Henüz abonelik eklenmedi
-          </p>
-          <p className="text-xs text-muted-foreground/70">
-            Alt menüden &quot;Ekle&quot; butonuna dokunarak başlayın
-          </p>
-        </div>
-      </section>
-    );
+    return <EmptyState />;
   }
 
   return (

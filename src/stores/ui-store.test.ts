@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import type { Category } from "@/types/common";
 import { useUIStore } from "./ui-store";
 
 describe("useUIStore", () => {
@@ -7,6 +8,7 @@ describe("useUIStore", () => {
     useUIStore.setState({
       activeModal: null,
       editingSubscriptionId: null,
+      prefillData: null,
       isLoading: false,
     });
   });
@@ -63,5 +65,51 @@ describe("useUIStore", () => {
     const uiStoreKeys = keys.filter((key) => key.includes("ui"));
 
     expect(uiStoreKeys.length).toBe(0);
+  });
+
+  // ======== NEW: prefillData tests for Task 1 ========
+
+  it("should open addSubscription modal with prefillData", () => {
+    const prefill = {
+      name: "Netflix",
+      categoryId: "entertainment" as Category,
+    };
+    useUIStore.getState().openModal("addSubscription", undefined, prefill);
+
+    const state = useUIStore.getState();
+    expect(state.activeModal).toBe("addSubscription");
+    expect(state.prefillData).toEqual(prefill);
+    expect(state.editingSubscriptionId).toBeNull();
+  });
+
+  it("should clear prefillData when modal is closed", () => {
+    const prefill = {
+      name: "Spotify",
+      categoryId: "entertainment" as Category,
+    };
+    useUIStore.getState().openModal("addSubscription", undefined, prefill);
+
+    // Close modal
+    useUIStore.getState().closeModal();
+
+    const state = useUIStore.getState();
+    expect(state.activeModal).toBeNull();
+    expect(state.prefillData).toBeNull();
+  });
+
+  it("should support prefillData with all optional fields", () => {
+    const fullPrefill = {
+      name: "ChatGPT Plus",
+      categoryId: "productivity" as Category,
+      icon: "brain",
+      color: "oklch(0.65 0.2 290)", // Purple
+    };
+    useUIStore.getState().openModal("addSubscription", undefined, fullPrefill);
+
+    expect(useUIStore.getState().prefillData).toEqual(fullPrefill);
+  });
+
+  it("should initialize with null prefillData", () => {
+    expect(useUIStore.getState().prefillData).toBeNull();
   });
 });

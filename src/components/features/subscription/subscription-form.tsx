@@ -23,7 +23,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { categories } from "@/config/categories";
-import { calculateNextPaymentDate, formatCurrency } from "./utils";
+import { calculateNextPaymentDate } from "./utils";
+import { formatCurrency } from "@/lib/formatters";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { CalendarIcon, Loader2 } from "lucide-react";

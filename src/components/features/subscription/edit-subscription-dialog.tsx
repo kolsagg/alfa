@@ -86,21 +86,23 @@ export function EditSubscriptionDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+        <DialogHeader className="p-6 pb-2">
           <DialogTitle>Aboneliği Düzenle</DialogTitle>
           <DialogDescription>
             {subscription.name} aboneliğini düzenleyin.
           </DialogDescription>
         </DialogHeader>
-        <SubscriptionForm
-          mode="edit"
-          subscriptionId={subscription.id}
-          initialValues={mapToFormValues(subscription)}
-          onSuccess={handleSuccess}
-          onCancel={() => onOpenChange(false)}
-          onSubmittingChange={setIsSubmitting}
-        />
+        <div className="flex-1 overflow-y-auto p-6 pt-2">
+          <SubscriptionForm
+            mode="edit"
+            subscriptionId={subscription.id}
+            initialValues={mapToFormValues(subscription)}
+            onSuccess={handleSuccess}
+            onCancel={() => onOpenChange(false)}
+            onSubmittingChange={setIsSubmitting}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

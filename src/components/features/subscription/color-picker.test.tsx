@@ -24,10 +24,10 @@ describe("ColorPicker", () => {
   });
 
   it("highlights the selected color", () => {
-    const selectedValue = "var(--color-primary)";
+    const selectedValue = "oklch(0.65 0.2 25)"; // Coral/Mercan
     render(<ColorPicker value={selectedValue} onChange={mockOnChange} />);
 
-    const selectedButton = screen.getByLabelText(/Turkuaz/i);
+    const selectedButton = screen.getByLabelText(/Mercan/i);
     expect(selectedButton).toHaveClass("ring-2");
   });
 

@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { formatCurrency } from "./utils";
+import { formatCurrency } from "@/lib/formatters";
 import { Loader2 } from "lucide-react";
 
 interface DeleteConfirmationDialogProps {

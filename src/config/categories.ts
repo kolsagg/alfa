@@ -23,48 +23,49 @@ export interface CategoryMetadata {
 /**
  * Complete category metadata for all subscription categories
  * Labels are in Turkish as per UX requirements
+ * Using fixed OKLCH colors for consistent display across themes
  */
 export const CATEGORY_METADATA: Record<Category, CategoryMetadata> = {
   entertainment: {
     id: "entertainment",
     label: "Eğlence",
     icon: Tv,
-    color: "var(--color-primary)",
+    color: "oklch(0.65 0.2 25)", // Coral/Red - Netflix, etc.
     colorClass: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
   },
   productivity: {
     id: "productivity",
     label: "İş",
     icon: Briefcase,
-    color: "var(--color-secondary)",
+    color: "oklch(0.6 0.2 250)", // Blue - Work apps
     colorClass: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
   },
   tools: {
     id: "tools",
     label: "Araçlar",
     icon: Wrench,
-    color: "var(--color-success)",
+    color: "oklch(0.7 0.15 180)", // Teal - Tools
     colorClass: "bg-teal-500/10 text-teal-600 dark:text-teal-400",
   },
   education: {
     id: "education",
     label: "Eğitim",
     icon: GraduationCap,
-    color: "var(--color-attention)",
+    color: "oklch(0.85 0.18 90)", // Yellow - Education
     colorClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   },
   health: {
     id: "health",
     label: "Sağlık",
     icon: HeartPulse,
-    color: "var(--color-urgent)",
+    color: "oklch(0.7 0.18 145)", // Green - Health
     colorClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   },
   other: {
     id: "other",
     label: "Diğer",
     icon: Archive,
-    color: "var(--color-muted)",
+    color: "oklch(0.6 0.05 250)", // Muted gray
     colorClass: "bg-slate-500/10 text-slate-600 dark:text-slate-400",
   },
 } satisfies Record<Category, CategoryMetadata>;

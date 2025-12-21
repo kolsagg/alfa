@@ -40,7 +40,7 @@ export function QuickAddGrid({
           variant="ghost"
           onClick={onCustomClick}
           disabled={disabled}
-          className="w-full min-h-[44px] text-muted-foreground hover:text-foreground"
+          className="w-full min-h-[44px] min-w-[44px] text-muted-foreground hover:text-foreground"
         >
           <Plus className="mr-2 h-4 w-4" />
           Özel Abonelik Ekle

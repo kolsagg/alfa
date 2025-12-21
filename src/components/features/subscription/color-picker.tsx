@@ -12,6 +12,9 @@ export function ColorPicker({ value, onChange, disabled }: ColorPickerProps) {
   return (
     <div className="space-y-2">
       <Label>Renk</Label>
+      <p className="text-xs text-muted-foreground -mt-1">
+        Abonelik kartının vurgu rengi
+      </p>
       <div className="grid grid-cols-4 gap-2">
         {PRESET_COLORS.map((preset) => (
           <button

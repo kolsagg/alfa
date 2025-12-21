@@ -1,6 +1,6 @@
 # Story 2.6: Quick-Add Grid
 
-Status: Ready for Review
+Status: Done
 
 ## Story
 
@@ -282,21 +282,28 @@ Gemini (Antigravity)
 - ✅ QuickAddGrid uses responsive grid (2/3/4 columns)
 - ✅ AddSubscriptionDialog now shows Quick-Add Grid first, then transitions to form with pre-filled values
 - ✅ All 16 new tests pass (7 for QuickAddTile, 9 for QuickAddGrid)
-- ✅ Total 159 tests passing, lint clean, build successful
+- ✅ Total 175 tests passing, lint clean, build successful
+
+### Code Review Fixes (2025-12-20)
+
+- [H1] Custom Button touch target: Added `min-w-[44px]` for WCAG compliance
+- [H2] Back Button touch target: Added `min-h-[44px] min-w-[44px]`
+- [M1] FAB semantic HTML: Changed from raw `<button>` to shadcn `<Button>`
 
 ### Change Log
 
 - 2025-12-20: Story implementation completed - Quick-Add Grid feature fully functional
+- 2025-12-20: Code review fixes applied - touch targets and semantic HTML
 
 ### File List
 
 - `docs/sprint-artifacts/2-6-quick-add-grid.md` (this file - updated)
 - `src/config/quick-add-services.ts` (created)
-- `src/components/features/quick-add/quick-add-grid.tsx` (created)
+- `src/components/features/quick-add/quick-add-grid.tsx` (created, modified for touch target fix)
 - `src/components/features/quick-add/quick-add-grid.test.tsx` (created)
 - `src/components/features/quick-add/quick-add-tile.tsx` (created)
 - `src/components/features/quick-add/quick-add-tile.test.tsx` (created)
 - `src/components/features/quick-add/index.ts` (created)
-- `src/components/features/subscription/add-subscription-dialog.tsx` (modified)
-- `src/components/forms/category-select.tsx` (modified)
+- `src/components/features/subscription/add-subscription-dialog.tsx` (modified: Quick-Add integration, FAB→Button, Back touch target)
+- `src/components/forms/category-select.tsx` (modified: accessibility label added in Epic 2.2)
 - `src/components/features/subscription/subscription-dialogs.test.tsx` (modified)

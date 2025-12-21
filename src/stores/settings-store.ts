@@ -12,6 +12,7 @@ export interface SettingsState extends Settings {
   setLastBackupDate: (date: string) => void;
   completeOnboarding: () => void;
   dismissIOSPrompt: () => void;
+  setHasSeenNotificationPrompt: (seen: boolean) => void;
 }
 
 export const useSettingsStore = createStore<SettingsState>(
@@ -23,6 +24,7 @@ export const useSettingsStore = createStore<SettingsState>(
     notificationTime: "09:00",
     onboardingCompleted: false,
     lastIOSPromptDismissed: undefined,
+    hasSeenNotificationPrompt: false,
 
     // Actions
     setTheme: (theme) => set({ theme }),
@@ -34,6 +36,8 @@ export const useSettingsStore = createStore<SettingsState>(
     completeOnboarding: () => set({ onboardingCompleted: true }),
     dismissIOSPrompt: () =>
       set({ lastIOSPromptDismissed: new Date().toISOString() }),
+    setHasSeenNotificationPrompt: (seen) =>
+      set({ hasSeenNotificationPrompt: seen }),
   }),
   {
     name: "SettingsStore",

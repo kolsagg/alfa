@@ -16,6 +16,7 @@ export const SettingsSchema = z.object({
   lastBackupDate: z.string().datetime().optional(),
   onboardingCompleted: z.boolean().default(false),
   lastIOSPromptDismissed: z.string().datetime().optional(),
+  hasSeenNotificationPrompt: z.boolean().default(false),
 });
 
 export type Settings = z.infer<typeof SettingsSchema>;

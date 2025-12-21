@@ -200,7 +200,7 @@ describe("SubscriptionForm", () => {
           const addedSubscription = calls[0][0];
           expect(addedSubscription.categoryId).toBe("entertainment");
           // Metadata for entertainment has specific color/icon
-          expect(addedSubscription.color).toBe("var(--color-primary)");
+          expect(addedSubscription.color).toBe("oklch(0.65 0.2 25)");
           expect(addedSubscription.icon).toBe("Tv");
         }
       });
@@ -242,8 +242,8 @@ describe("SubscriptionForm", () => {
         const calls = mockAddSubscription.mock.calls;
         if (calls.length > 0) {
           const addedSubscription = calls[0][0];
-          // Should stay 'Mercan' (var(--color-urgent)) instead of auto-assigned 'Turkuaz' (var(--color-primary))
-          expect(addedSubscription.color).toBe("var(--color-urgent)");
+          // Should stay 'Mercan' (oklch Coral) instead of auto-assigned entertainment color
+          expect(addedSubscription.color).toBe("oklch(0.65 0.2 25)");
         }
       });
     });

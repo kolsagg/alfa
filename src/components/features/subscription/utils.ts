@@ -54,20 +54,3 @@ export function calculateNextPaymentDate(
 
   return nextDate;
 }
-
-/**
- * Format currency value with symbol
- * @param amount - The amount to format
- * @param currency - The currency code (TRY, USD, EUR)
- * @returns Formatted currency string
- */
-export function formatCurrency(amount: number, currency: string): string {
-  const symbols: Record<string, string> = {
-    TRY: "₺",
-    USD: "$",
-    EUR: "€",
-  };
-
-  const symbol = symbols[currency] || currency;
-  return `${amount.toFixed(2)} ${symbol}`;
-}
