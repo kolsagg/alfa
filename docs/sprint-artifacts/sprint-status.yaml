@@ -94,9 +94,9 @@ development_status:
   # FRs: FR09, FR10, FR11, FR19, FR24 | NFRs: NFR10, NFR16
   # Estimated: 28 hours
   # ===========================================
-  epic-4: backlog
-  4-1-notification-settings-slice: backlog
-  4-2-browser-notification-permission-flow: backlog
+  epic-4: in-progress
+  4-1-notification-settings-slice: done
+  4-2-browser-notification-permission-flow: done
   4-3-notification-scheduling-logic: backlog
   4-4-notification-display-and-handling: backlog
   4-5-grouped-notifications-same-day: backlog

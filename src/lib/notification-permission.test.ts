@@ -3,8 +3,12 @@ import { toast } from "sonner";
 import {
   requestNotificationPermission,
   showNotificationPermissionPrompt,
+  requestAndUpdatePermission,
+  isNotificationSupported,
+  getBrowserNotificationPermission,
 } from "./notification-permission";
 import { useSettingsStore } from "@/stores/settings-store";
+import type { SettingsState } from "@/stores/settings-store";
 import * as iosDetection from "@/hooks/use-ios-pwa-detection";
 
 // Mock sonner toast
@@ -25,10 +29,12 @@ describe("notification-permission", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Reset settings store
+    // Reset settings store with v4 fields
     useSettingsStore.setState({
       notificationPermission: "default",
-    });
+      notificationPermissionDeniedAt: undefined,
+      notificationBannerDismissedAt: undefined,
+    } as Partial<SettingsState>);
 
     // Default: not iOS Safari
     vi.mocked(iosDetection.detectIOSSafariNonStandalone).mockReturnValue(false);
@@ -175,6 +181,195 @@ describe("notification-permission", () => {
 
       store.setNotificationPermission("denied");
       expect(useSettingsStore.getState().notificationPermission).toBe("denied");
+    });
+  });
+
+  // ============ STORY 4.2 TESTS ============
+
+  describe("requestAndUpdatePermission (Story 4.2)", () => {
+    it("should return false and show error when Notification API unavailable", async () => {
+      const originalNotification = globalThis.Notification;
+      // @ts-expect-error - intentionally making Notification undefined
+      globalThis.Notification = undefined;
+
+      const result = await requestAndUpdatePermission();
+
+      expect(result).toBe(false);
+      expect(toast.error).toHaveBeenCalledWith(
+        "Bu tarayıcı bildirimleri desteklemiyor.",
+        expect.objectContaining({ duration: 4000 })
+      );
+
+      globalThis.Notification = originalNotification;
+    });
+
+    it("should sync store and return true when already granted", async () => {
+      const mockNotification = {
+        permission: "granted" as NotificationPermission,
+        requestPermission: vi.fn(),
+      };
+      // @ts-expect-error - partial mock
+      globalThis.Notification = mockNotification;
+
+      const result = await requestAndUpdatePermission();
+
+      expect(result).toBe(true);
+      expect(useSettingsStore.getState().notificationPermission).toBe(
+        "granted"
+      );
+      expect(toast.success).toHaveBeenCalledWith(
+        "Bildirimler aktif!",
+        expect.objectContaining({
+          description: "Ödeme hatırlatıcıları artık size gönderilecek.",
+        })
+      );
+    });
+
+    it("should set denied with timestamp when browser already denied", async () => {
+      const mockNotification = {
+        permission: "denied" as NotificationPermission,
+        requestPermission: vi.fn(),
+      };
+      // @ts-expect-error - partial mock
+      globalThis.Notification = mockNotification;
+
+      const result = await requestAndUpdatePermission();
+
+      expect(result).toBe(false);
+      expect(useSettingsStore.getState().notificationPermission).toBe("denied");
+      expect(
+        useSettingsStore.getState().notificationPermissionDeniedAt
+      ).toBeDefined();
+      expect(toast.info).toHaveBeenCalledWith(
+        "Bildirimleri daha sonra tarayıcı ayarlarından açabilirsiniz.",
+        expect.objectContaining({ duration: 5000 })
+      );
+    });
+
+    it("should request permission and update store on grant", async () => {
+      const mockRequestPermission = vi.fn().mockResolvedValue("granted");
+      const mockNotification = {
+        permission: "default" as NotificationPermission,
+        requestPermission: mockRequestPermission,
+      };
+      // @ts-expect-error - partial mock
+      globalThis.Notification = mockNotification;
+
+      const result = await requestAndUpdatePermission();
+
+      expect(result).toBe(true);
+      expect(mockRequestPermission).toHaveBeenCalled();
+      expect(useSettingsStore.getState().notificationPermission).toBe(
+        "granted"
+      );
+      expect(toast.success).toHaveBeenCalled();
+    });
+
+    it("should request permission and set denied with timestamp on deny", async () => {
+      const mockRequestPermission = vi.fn().mockResolvedValue("denied");
+      const mockNotification = {
+        permission: "default" as NotificationPermission,
+        requestPermission: mockRequestPermission,
+      };
+      // @ts-expect-error - partial mock
+      globalThis.Notification = mockNotification;
+
+      const result = await requestAndUpdatePermission();
+
+      expect(result).toBe(false);
+      expect(useSettingsStore.getState().notificationPermission).toBe("denied");
+      expect(
+        useSettingsStore.getState().notificationPermissionDeniedAt
+      ).toBeDefined();
+      expect(toast.info).toHaveBeenCalled();
+    });
+
+    it("should return false when user dismisses prompt without choosing", async () => {
+      const mockRequestPermission = vi.fn().mockResolvedValue("default");
+      const mockNotification = {
+        permission: "default" as NotificationPermission,
+        requestPermission: mockRequestPermission,
+      };
+      // @ts-expect-error - partial mock
+      globalThis.Notification = mockNotification;
+
+      const result = await requestAndUpdatePermission();
+
+      expect(result).toBe(false);
+      // Permission should remain default
+      expect(useSettingsStore.getState().notificationPermission).toBe(
+        "default"
+      );
+    });
+
+    it("should handle permission request errors gracefully", async () => {
+      const mockRequestPermission = vi
+        .fn()
+        .mockRejectedValue(new Error("Test error"));
+      const mockNotification = {
+        permission: "default" as NotificationPermission,
+        requestPermission: mockRequestPermission,
+      };
+      // @ts-expect-error - partial mock
+      globalThis.Notification = mockNotification;
+
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const result = await requestAndUpdatePermission();
+
+      expect(result).toBe(false);
+      expect(toast.error).toHaveBeenCalledWith(
+        "Bildirim izni istenemedi. Lütfen tekrar deneyin.",
+        expect.objectContaining({ duration: 4000 })
+      );
+      expect(consoleSpy).toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe("isNotificationSupported", () => {
+    it("should return true when Notification API available", () => {
+      const mockNotification = {
+        permission: "default" as NotificationPermission,
+      };
+      // @ts-expect-error - partial mock
+      globalThis.Notification = mockNotification;
+
+      expect(isNotificationSupported()).toBe(true);
+    });
+
+    it("should return false when Notification API unavailable", () => {
+      const originalNotification = globalThis.Notification;
+      // @ts-expect-error - intentionally making Notification undefined
+      globalThis.Notification = undefined;
+
+      expect(isNotificationSupported()).toBe(false);
+
+      globalThis.Notification = originalNotification;
+    });
+  });
+
+  describe("getBrowserNotificationPermission", () => {
+    it("should return current browser permission", () => {
+      const mockNotification = {
+        permission: "granted" as NotificationPermission,
+      };
+      // @ts-expect-error - partial mock
+      globalThis.Notification = mockNotification;
+
+      expect(getBrowserNotificationPermission()).toBe("granted");
+    });
+
+    it("should return 'unsupported' when Notification API unavailable", () => {
+      const originalNotification = globalThis.Notification;
+      // @ts-expect-error - intentionally making Notification undefined
+      globalThis.Notification = undefined;
+
+      expect(getBrowserNotificationPermission()).toBe("unsupported");
+
+      globalThis.Notification = originalNotification;
     });
   });
 });

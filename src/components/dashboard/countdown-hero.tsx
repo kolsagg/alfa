@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSubscriptionStore } from "@/stores/subscription-store";
+import { useSettingsStore } from "@/stores/settings-store";
+import { isNotificationSupported } from "@/lib/notification-permission";
 import { formatCurrency } from "@/lib/formatters";
 import {
   getTimeRemaining,
@@ -11,7 +13,8 @@ import {
   type TimeRemaining,
 } from "@/lib/countdown-utils";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Clock } from "lucide-react";
+import { AlertTriangle, Clock, BellOff } from "lucide-react";
+import { NOTIFICATION_CONFIG } from "@/config/notifications";
 
 const urgencyStyles: Record<CountdownUrgency, string> = {
   subtle: "from-muted/10 via-background to-background",
@@ -29,6 +32,12 @@ const urgencyTextStyles: Record<CountdownUrgency, string> = {
 
 export function CountdownHero() {
   const subscriptions = useSubscriptionStore((state) => state.subscriptions);
+  const { notificationsEnabled, notificationPermission } = useSettingsStore();
+
+  const isPushActive =
+    notificationsEnabled &&
+    notificationPermission === "granted" &&
+    isNotificationSupported();
 
   // 1. Optimize nextPayment calculation
   const nextPayment = useMemo(
@@ -154,16 +163,35 @@ export function CountdownHero() {
       : `${timeRemaining.days} gün ${timeRemaining.hours} saat sonra`
   }`;
 
+  // AC7: Payment is imminent if it's within the configured threshold
+  const isImminent =
+    timeRemaining.totalMs <
+    NOTIFICATION_CONFIG.IMMINENT_PAYMENT_DAYS * 24 * 60 * 60 * 1000;
+
   return (
     <section
       className={cn(
         "relative overflow-hidden rounded-2xl bg-gradient-to-br p-6 border border-border/50",
         urgencyStyles[urgency],
-        urgency === "urgent" && "animate-countdown-pulse",
-        urgency === "critical" && "animate-countdown-pulse"
+        (urgency === "urgent" || urgency === "critical") &&
+          "animate-countdown-pulse",
+        // AC7: Emphasize pulse if notifications are not helping
+        !isPushActive && isImminent && "ring-2 ring-primary/20 ring-offset-2"
       )}
       aria-label={ariaLabel}
     >
+      {/* AC7: Persistent Alert Badge for high urgency without push notifications */}
+      {!isPushActive && isImminent && (
+        <div
+          className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 text-primary animate-in fade-in zoom-in duration-300"
+          title="Bildirimler kapalı - Buradan takip edin"
+        >
+          <BellOff className="size-3" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">
+            Alert
+          </span>
+        </div>
+      )}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {announcementText}
       </div>

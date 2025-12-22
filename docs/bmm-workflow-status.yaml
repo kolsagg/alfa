@@ -1,5 +1,6 @@
 # BMM Workflow Status - alfa
 # Generated: 2025-12-16
+# Updated: 2025-12-22
 # Track: BMad Method (Greenfield)
 
 generated: "2025-12-16T01:37:19+03:00"
@@ -13,12 +14,15 @@ workflow_status:
   # Phase 0: Discovery (Optional)
   phase_0_discovery:
     brainstorm:
-      status: "required" # User selected
+      status: "skipped"
+      note: "Direct product-brief yazıldı"
       agent: "analyst"
       command: "/bmad-cis-brainstorm-project"
 
     research:
-      status: "required" # User selected
+      status: "completed"
+      completed_at: "2025-12-16"
+      output: "docs/analysis/research/technical-subtracker-stack-research-2025-12-16.md"
       agent: "analyst"
       command: "/bmad-bmm-workflows-research"
 
@@ -32,40 +36,52 @@ workflow_status:
   # Phase 1: Planning
   phase_1_planning:
     prd:
-      status: "required"
+      status: "completed"
+      completed_at: "2025-12-16"
+      output: "docs/prd.md"
       agent: "pm"
       command: "/bmad-bmm-workflows-create-prd"
 
     ux-design:
-      status: "conditional" # if_has_ui - determined after PRD
+      status: "completed"
+      completed_at: "2025-12-16"
+      output: "docs/ux-design-specification.md"
       agent: "ux-designer"
       command: "/bmad-bmm-workflows-create-ux-design"
 
   # Phase 2: Solutioning
   phase_2_solutioning:
     architecture:
-      status: "required"
+      status: "completed"
+      completed_at: "2025-12-16"
+      output: "docs/architecture.md"
       agent: "architect"
       command: "/bmad-bmm-workflows-create-architecture"
 
     epics-stories:
-      status: "required"
+      status: "completed"
+      completed_at: "2025-12-17"
+      output: "docs/epics.md"
       agent: "pm"
       command: "/bmad-bmm-workflows-create-epics-stories"
 
     test-design:
-      status: "recommended"
+      status: "skipped"
+      note: "TEA workflow kullanılmadı, testler story bazlı yazıldı"
       agent: "tea"
       command: "/bmad-bmm-workflows-testarch-test-design"
 
     implementation-readiness:
-      status: "required"
+      status: "skipped"
+      note: "Gate check yapılmadı, direkt implementation'a geçildi"
       agent: "architect"
       command: "/bmad-bmm-workflows-check-implementation-readiness"
 
   # Phase 3: Implementation
   phase_3_implementation:
     sprint-planning:
-      status: "required"
+      status: "completed"
+      completed_at: "2025-12-17"
+      output: "docs/sprint-artifacts/sprint-status.yaml"
       agent: "sm"
       command: "/bmad-bmm-workflows-sprint-planning"

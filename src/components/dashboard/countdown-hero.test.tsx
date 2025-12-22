@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { CountdownHero } from "./countdown-hero";
 import type { Subscription } from "@/types/subscription";
+import { isNotificationSupported } from "@/lib/notification-permission";
 
 // Mock subscription store
 const mockSubscriptions = vi.fn(() => [] as Subscription[]);
@@ -10,6 +11,21 @@ vi.mock("@/stores/subscription-store", () => ({
   useSubscriptionStore: (
     selector: (state: { subscriptions: Subscription[] }) => Subscription[]
   ) => selector({ subscriptions: mockSubscriptions() }),
+}));
+
+// Mock settings store
+const mockSettings = vi.fn(() => ({
+  notificationsEnabled: true,
+  notificationPermission: "granted" as const,
+}));
+
+vi.mock("@/stores/settings-store", () => ({
+  useSettingsStore: () => mockSettings(),
+}));
+
+// Mock notification support
+vi.mock("@/lib/notification-permission", () => ({
+  isNotificationSupported: vi.fn(() => true),
 }));
 
 // Mock formatCurrency
@@ -225,6 +241,66 @@ describe("CountdownHero", () => {
       render(<CountdownHero />);
 
       expect(screen.getByText("--:--:--")).toBeInTheDocument();
+    });
+  });
+
+  describe("Notification Awareness (AC7)", () => {
+    it("should show alert badge when notifications are denied and payment is imminent", () => {
+      mockSubscriptions.mockReturnValue([
+        createSubscription("1", "2025-01-17T12:00:00.000Z"), // 2 days away (< 3)
+      ]);
+      mockSettings.mockReturnValue({
+        notificationsEnabled: true,
+        notificationPermission: "denied",
+      });
+
+      render(<CountdownHero />);
+
+      expect(screen.getByText("Alert")).toBeInTheDocument();
+      expect(screen.getByTitle(/Bildirimler kapalı/)).toBeInTheDocument();
+    });
+
+    it("should show alert badge when notifications are unsupported and payment is imminent", () => {
+      mockSubscriptions.mockReturnValue([
+        createSubscription("1", "2025-01-17T12:00:00.000Z"), // 2 days
+      ]);
+
+      vi.mocked(isNotificationSupported).mockReturnValue(false);
+
+      render(<CountdownHero />);
+
+      expect(screen.getByText("Alert")).toBeInTheDocument();
+
+      // Reset for other tests
+      vi.mocked(isNotificationSupported).mockReturnValue(true);
+    });
+
+    it("should NOT show alert badge when notifications are active", () => {
+      mockSubscriptions.mockReturnValue([
+        createSubscription("1", "2025-01-17T12:00:00.000Z"),
+      ]);
+      mockSettings.mockReturnValue({
+        notificationsEnabled: true,
+        notificationPermission: "granted",
+      });
+
+      render(<CountdownHero />);
+
+      expect(screen.queryByText("Alert")).not.toBeInTheDocument();
+    });
+
+    it("should apply ring styling when and payment is imminent and notifications are off", () => {
+      mockSubscriptions.mockReturnValue([
+        createSubscription("1", "2025-01-17T12:00:00.000Z"),
+      ]);
+      mockSettings.mockReturnValue({
+        notificationsEnabled: false,
+        notificationPermission: "default",
+      });
+
+      const { container } = render(<CountdownHero />);
+      const section = container.querySelector("section");
+      expect(section?.className).toContain("ring-2");
     });
   });
 });

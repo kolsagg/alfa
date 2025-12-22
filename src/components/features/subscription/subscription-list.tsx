@@ -1,3 +1,5 @@
+"use no memo"; // TanStack Virtual's useVirtualizer API is incompatible with React Compiler
+
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { toast } from "sonner";
@@ -121,6 +123,7 @@ export function SubscriptionList({
   }, [processedSubscriptions.length, categoryFilter, subscriptions.length]);
 
   // Virtualizer for large lists
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Virtual opt-out via "use no memo" at file top
   const virtualizer = useVirtualizer({
     count: processedSubscriptions.length,
     getScrollElement: () => parentRef.current,

@@ -404,6 +404,38 @@ Bu doküman, SubTracker projesi için PRD, UX Design ve Architecture dokümanlar
 
 ---
 
+### Epic 8: Navigation & Settings Infrastructure (Party Mode Addition)
+
+**Goal:** Uygulama içi sayfa navigasyonu ve merkezi ayarlar sayfasını tam routing ile implemente et.
+
+**User Outcome:** Kullanıcı alt navbar ile sayfalar arası geçiş yapabilir, tüm uygulama ayarlarını organize bir Settings sayfasında yönetebilir.
+
+**Background:** Party Mode tartışmasında (2025-12-22) tespit edildi ki alt navbar sadece görsel olarak implement edilmiş, Settings sayfası yok. Şu an SettingsSheet (modal pattern) ile geçici çözüm uygulandı. Bu epic full routing ekler.
+
+**Implementation Notes:**
+
+- React Router v7 (hash-based for PWA compatibility)
+- Route structure: `/#/dashboard`, `/#/settings`, `/#/wallet`
+- Settings page with organized sections
+- Bottom nav state management
+- Lazy loading for route components
+- Migration from SettingsSheet to Settings page
+
+**Stories:**
+
+- 8.1: React Router Setup (hash mode, PWA-ready)
+- 8.2: Settings Page Layout & Route
+- 8.3: Bottom Nav Route Integration
+- 8.4: Settings - Theme Section
+- 8.5: Settings - Notification Section
+- 8.6: Settings - Data Section (Epic 5 integration point)
+- 8.7: Settings - About Section
+- 8.8: Wallet Route (Epic 6 integration point)
+
+**Estimated Effort:** 8-12 hours (1-2 dev-days)
+
+---
+
 ## Dependency Graph
 
 ```
@@ -416,6 +448,8 @@ Epic 6 (Cards) ←────────────────────�
 Epic 5 (Export/Import) ← can be developed in parallel after Epic 2
     ↓
 Epic 7 (Analytics) ← cross-cutting, can be developed alongside any epic
+    ↓
+Epic 8 (Navigation & Settings) ← unblocks full Epic 5/6 integration
 ```
 
 ## Party Mode Consensus Notes
@@ -425,6 +459,7 @@ Epic 7 (Analytics) ← cross-cutting, can be developed alongside any epic
 - **Notification stub Epic 2'de** (Murat requirement)
 - **Dashboard skeleton Epic 1'de kurulacak** (Winston suggestion)
 - **Slice-based store extension** paterni kullanılacak (Amelia)
+- **SettingsSheet şimdi, full routing Epic 8'de** (2025-12-22 party mode consensus: Winston, Sally, John, Amelia, Murat, Bob)
 
 ---
 

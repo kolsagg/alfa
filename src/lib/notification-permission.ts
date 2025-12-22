@@ -97,3 +97,96 @@ export function showNotificationPermissionPrompt(
     },
   });
 }
+
+/**
+ * Request notification permission and update SettingsStore.
+ * Shows appropriate toast based on result.
+ *
+ * Story 4.2: This is the primary function for settings toggle integration.
+ *
+ * @returns boolean - true if permission granted, false otherwise
+ */
+export async function requestAndUpdatePermission(): Promise<boolean> {
+  const { setNotificationPermission, setNotificationPermissionDenied } =
+    useSettingsStore.getState();
+
+  // Check if Notification API is available
+  if (typeof Notification === "undefined") {
+    toast.error("Bu tarayıcı bildirimleri desteklemiyor.", {
+      duration: 4000,
+    });
+    return false;
+  }
+
+  // Check current browser permission state
+  const currentPermission = Notification.permission;
+
+  // Already granted - sync store and return success
+  if (currentPermission === "granted") {
+    setNotificationPermission("granted");
+    toast.success("Bildirimler aktif!", {
+      description: "Ödeme hatırlatıcıları artık size gönderilecek.",
+    });
+    return true;
+  }
+
+  // Already denied - can't request again, show guidance
+  if (currentPermission === "denied") {
+    setNotificationPermissionDenied();
+    toast.info("Bildirimleri daha sonra tarayıcı ayarlarından açabilirsiniz.", {
+      duration: 5000,
+    });
+    return false;
+  }
+
+  // Permission is "default" - request it
+  try {
+    const result = await Notification.requestPermission();
+
+    if (result === "granted") {
+      setNotificationPermission("granted");
+      toast.success("Bildirimler aktif!", {
+        description: "Ödeme hatırlatıcıları artık size gönderilecek.",
+      });
+      return true;
+    } else if (result === "denied") {
+      setNotificationPermissionDenied();
+      toast.info(
+        "Bildirimleri daha sonra tarayıcı ayarlarından açabilirsiniz.",
+        {
+          duration: 5000,
+        }
+      );
+      return false;
+    }
+
+    // "default" returned (user dismissed without choosing)
+    return false;
+  } catch (error) {
+    console.error("[NotificationPermission] Permission request failed:", error);
+    toast.error("Bildirim izni istenemedi. Lütfen tekrar deneyin.", {
+      duration: 4000,
+    });
+    return false;
+  }
+}
+
+/**
+ * Check if notifications are supported in the current browser.
+ */
+export function isNotificationSupported(): boolean {
+  return typeof Notification !== "undefined";
+}
+
+/**
+ * Get the current browser notification permission state.
+ * Returns "unsupported" if Notification API is not available.
+ */
+export function getBrowserNotificationPermission():
+  | NotificationPermission
+  | "unsupported" {
+  if (typeof Notification === "undefined") {
+    return "unsupported";
+  }
+  return Notification.permission;
+}

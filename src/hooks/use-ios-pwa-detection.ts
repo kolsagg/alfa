@@ -1,7 +1,9 @@
 import { useMemo } from "react";
 import { useSettingsStore } from "@/stores/settings-store";
 
-const PROMPT_RESIDENCY_DAYS = 7;
+import { NOTIFICATION_CONFIG } from "@/config/notifications";
+
+const { IOS_PROMPT_RESIDENCY_DAYS } = NOTIFICATION_CONFIG;
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 // Type augmentation for iOS-specific window properties
@@ -50,7 +52,7 @@ export function useIOSPWADetection() {
       const lastDate = new Date(lastDismissed);
       const now = new Date();
       const diffInDays = (now.getTime() - lastDate.getTime()) / MS_PER_DAY;
-      return diffInDays > PROMPT_RESIDENCY_DAYS;
+      return diffInDays > IOS_PROMPT_RESIDENCY_DAYS;
     }
 
     // Never dismissed before
