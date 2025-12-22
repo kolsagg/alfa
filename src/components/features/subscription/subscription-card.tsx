@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import * as Icons from "lucide-react";
 import type { Subscription } from "@/types/subscription";
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { formatCurrency } from "@/lib/formatters";
@@ -13,7 +14,7 @@ interface SubscriptionCardProps {
 
 /**
  * SubscriptionCard displays a subscription with its details
- * - Shows name, amount, currency, next payment date, category
+ * - Shows icon, name, amount, currency, next payment date, category
  * - Keyboard accessible with Enter/Space triggering click
  * - Hover effect for visual feedback
  */
@@ -44,6 +45,17 @@ export function SubscriptionCard({
     { locale: tr }
   );
 
+  // Dynamic icon rendering with fallback
+  const IconComponent =
+    subscription.icon &&
+    Icons[subscription.icon as keyof typeof Icons] &&
+    typeof Icons[subscription.icon as keyof typeof Icons] === "function"
+      ? (Icons[subscription.icon as keyof typeof Icons] as React.ComponentType<{
+          size?: number;
+          className?: string;
+        }>)
+      : Icons.CreditCard;
+
   return (
     <div
       role="button"
@@ -51,7 +63,7 @@ export function SubscriptionCard({
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       className={cn(
-        "group relative flex items-center justify-between gap-4 rounded-lg border bg-card p-4 transition-all",
+        "group relative flex items-center gap-4 rounded-lg border bg-card p-4 transition-all",
         "cursor-pointer hover:shadow-md hover:scale-[1.01]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         "min-h-[80px]",
@@ -59,7 +71,17 @@ export function SubscriptionCard({
       )}
       aria-label={`${subscription.name}, ${formattedAmount}, sonraki ödeme ${formattedDate}`}
     >
-      {/* Left: Name and Category */}
+      {/* Left: Icon */}
+      <div
+        className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-lg"
+        style={{
+          backgroundColor: subscription.color || "var(--color-primary)",
+        }}
+      >
+        <IconComponent size={20} className="text-white" />
+      </div>
+
+      {/* Middle: Name and Category */}
       <div className="flex flex-col gap-1 min-w-0 flex-1">
         <span className="font-medium text-foreground truncate">
           {subscription.name}

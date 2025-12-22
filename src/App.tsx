@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ThemeProvider } from "./components/providers/theme-provider";
 import { IOSInstallGuidance } from "./components/ui/ios-install-guidance";
 import { DashboardLayout } from "./components/layout/dashboard-layout";
@@ -6,11 +7,15 @@ import { SubscriptionList } from "./components/features/subscription/subscriptio
 import { useSubscriptionStore } from "./stores/subscription-store";
 import { SpendingSummary } from "./components/features/spending";
 import { TimelineView } from "./components/features/timeline";
+import { CategoryBreakdown } from "./components/features/analytics/category-breakdown";
 import "./App.css";
 
 function App() {
-  const subscriptionCount = useSubscriptionStore((s) => s.subscriptions.length);
-  const hasSubscriptions = subscriptionCount > 0;
+  const subscriptions = useSubscriptionStore((s) => s.subscriptions);
+  const hasSubscriptions = subscriptions.length > 0;
+
+  // Shared category filter state for sync between Breakdown and List
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   return (
     <ThemeProvider>
@@ -20,7 +25,17 @@ function App() {
           <SpendingSummary />
           <CountdownHero />
           {hasSubscriptions && <TimelineView />}
-          <SubscriptionList />
+          {hasSubscriptions && (
+            <CategoryBreakdown
+              subscriptions={subscriptions}
+              selectedCategory={selectedCategory}
+              onCategorySelect={setSelectedCategory}
+            />
+          )}
+          <SubscriptionList
+            externalCategoryFilter={selectedCategory}
+            onExternalCategoryChange={setSelectedCategory}
+          />
         </div>
       </DashboardLayout>
     </ThemeProvider>

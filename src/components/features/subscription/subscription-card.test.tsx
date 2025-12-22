@@ -69,4 +69,25 @@ describe("SubscriptionCard", () => {
 
     expect(onClick).toHaveBeenCalledWith(mockSubscription);
   });
+
+  it("should render correct icon and background color", () => {
+    const iconSub: Subscription = {
+      ...mockSubscription,
+      icon: "Tv",
+      color: "oklch(0.65 0.2 25)",
+    };
+
+    const { container } = render(<SubscriptionCard subscription={iconSub} />);
+
+    // Check if the icon container has the correct background color
+    const iconContainer = container.querySelector(
+      'div[style*="background-color: oklch(0.65 0.2 25)"]'
+    );
+    expect(iconContainer).toBeInTheDocument();
+
+    // Check if the Tv icon (part of lucide-react) is rendered
+    // Lucide icons usually have a data-lucide attribute or specific classes
+    const svg = iconContainer?.querySelector("svg");
+    expect(svg).toBeInTheDocument();
+  });
 });

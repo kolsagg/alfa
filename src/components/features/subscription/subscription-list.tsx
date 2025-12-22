@@ -1,5 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { toast } from "sonner";
+import { ArrowUpDown, Filter } from "lucide-react";
 import { useSubscriptionStore } from "@/stores/subscription-store";
 import type { Subscription } from "@/types/subscription";
 import { SubscriptionCard } from "./subscription-card";
@@ -8,16 +10,77 @@ import { EditSubscriptionDialog } from "./edit-subscription-dialog";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 import { DeletionCelebration } from "./deletion-celebration";
 import { EmptyState } from "@/components/layout/empty-state";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  processSubscriptions,
+  getUniqueCategoryIds,
+  VIRTUALIZATION_THRESHOLD,
+  SortOptionSchema,
+  type SortOption,
+  DEFAULT_SORT_OPTION,
+} from "@/lib/subscription-list-utils";
+import { categories } from "@/config/categories";
+
+// Sort option labels (Turkish)
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "date", label: "Tarihe göre" },
+  { value: "price", label: "Fiyata göre" },
+  { value: "name", label: "İsme göre" },
+];
+
+interface SubscriptionListProps {
+  /** External category filter (controlled by parent) */
+  externalCategoryFilter?: string | null;
+  /** Callback when internal filter changes (for sync with parent) */
+  onExternalCategoryChange?: (categoryId: string | null) => void;
+}
 
 /**
  * SubscriptionList manages the subscription list view with dialog orchestration
- * - Displays subscription cards OR EmptyState for first-time users
+ * - Displays subscription cards with virtualization for large lists (20+ items)
+ * - Supports sorting by date, price, or name
+ * - Supports filtering by category
+ * - ARIA live announcements for filter changes
  * - Handles detail → edit/delete flow
  * - Shows deletion celebration
  */
-export function SubscriptionList() {
+export function SubscriptionList({
+  externalCategoryFilter,
+  onExternalCategoryChange,
+}: SubscriptionListProps = {}) {
   const subscriptions = useSubscriptionStore((s) => s.subscriptions);
   const deleteSubscription = useSubscriptionStore((s) => s.deleteSubscription);
+
+  // Filter and sort state
+  const [sortOption, setSortOption] = useState<SortOption>(DEFAULT_SORT_OPTION);
+  // Use external filter if provided as a prop, otherwise use internal state
+  const [internalCategoryFilter, setInternalCategoryFilter] = useState<
+    string | null
+  >(null);
+
+  // CRITICAL FIX: null is a valid 'All' filter.
+  // We only fall back to internal state if the external prop is strictly undefined.
+  const isControlled = externalCategoryFilter !== undefined;
+  const categoryFilter = isControlled
+    ? externalCategoryFilter
+    : internalCategoryFilter;
+
+  const handleCategoryChange = (value: string | null) => {
+    if (!isControlled) {
+      setInternalCategoryFilter(value);
+    }
+    // Always notify parent to keep sync
+    onExternalCategoryChange?.(value);
+  };
+
+  // ARIA live announcement
+  const [announcement, setAnnouncement] = useState("");
 
   // Selected subscription for dialogs
   const [selectedSubscription, setSelectedSubscription] =
@@ -30,6 +93,40 @@ export function SubscriptionList() {
 
   // Celebration state
   const [showCelebration, setShowCelebration] = useState(false);
+
+  // Virtualization ref
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // Process subscriptions with filter and sort
+  const processedSubscriptions = useMemo(
+    () => processSubscriptions(subscriptions, categoryFilter, sortOption),
+    [subscriptions, categoryFilter, sortOption]
+  );
+
+  // Get unique categories for filter dropdown
+  const availableCategories = useMemo(
+    () => getUniqueCategoryIds(subscriptions),
+    [subscriptions]
+  );
+
+  // Announce filter changes for screen readers
+  useEffect(() => {
+    if (subscriptions.length > 0) {
+      const count = processedSubscriptions.length;
+      const categoryLabel = categoryFilter
+        ? categories.get(categoryFilter).label
+        : "Tümü";
+      setAnnouncement(`${count} adet ${categoryLabel} abonelik listelendi`);
+    }
+  }, [processedSubscriptions.length, categoryFilter, subscriptions.length]);
+
+  // Virtualizer for large lists
+  const virtualizer = useVirtualizer({
+    count: processedSubscriptions.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 92, // 80px card + 12px gap
+    overscan: 5,
+  });
 
   // Handle card click - open detail dialog
   const handleCardClick = useCallback((subscription: Subscription) => {
@@ -80,21 +177,153 @@ export function SubscriptionList() {
     return <EmptyState />;
   }
 
-  return (
-    <>
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground font-jakarta">
-          Aboneliklerim
-        </h2>
+  // Determine if we should use virtualization
+  const useVirtualization =
+    processedSubscriptions.length >= VIRTUALIZATION_THRESHOLD;
+
+  // Render list items
+  const renderListContent = () => {
+    // Empty filter result
+    if (processedSubscriptions.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <Filter className="w-12 h-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">
+            Bu kategoride abonelik bulunamadı
+          </p>
+        </div>
+      );
+    }
+
+    // Regular rendering for small lists
+    if (!useVirtualization) {
+      return (
         <div className="space-y-3">
-          {subscriptions.map((subscription) => (
+          {processedSubscriptions.map((subscription) => (
             <SubscriptionCard
               key={subscription.id}
               subscription={subscription}
               onClick={handleCardClick}
+              className="animate-in fade-in duration-200"
             />
           ))}
         </div>
+      );
+    }
+
+    // Virtualized rendering for large lists
+    return (
+      <div
+        ref={parentRef}
+        className="h-[500px] overflow-auto rounded-lg"
+        style={{ contain: "strict" }}
+      >
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualItem) => (
+            <div
+              key={virtualItem.key}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: `${virtualItem.size}px`,
+                transform: `translateY(${virtualItem.start}px)`,
+              }}
+            >
+              <SubscriptionCard
+                subscription={processedSubscriptions[virtualItem.index]}
+                onClick={handleCardClick}
+                className="mb-3"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {/* ARIA Live Region for screen readers */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        role="status"
+      >
+        {announcement}
+      </div>
+
+      <section className="space-y-4">
+        {/* Header with controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h2 className="text-lg font-semibold text-foreground font-jakarta">
+            Aboneliklerim ({processedSubscriptions.length})
+          </h2>
+
+          {/* Sort and Filter Controls */}
+          <div className="flex items-center gap-2">
+            {/* Category Filter */}
+            {availableCategories.length > 0 && (
+              <Select
+                value={categoryFilter || "all"}
+                onValueChange={(value) =>
+                  handleCategoryChange(value === "all" ? null : value)
+                }
+              >
+                <SelectTrigger
+                  className="w-[130px] h-9 min-h-[44px]"
+                  aria-label="Kategori filtresi"
+                >
+                  <Filter className="w-4 h-4 mr-1" />
+                  <SelectValue placeholder="Filtre" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tümü</SelectItem>
+                  {availableCategories.map((catId) => (
+                    <SelectItem key={catId} value={catId}>
+                      {categories.get(catId).label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {/* Sort Dropdown */}
+            <Select
+              value={sortOption}
+              onValueChange={(value) => {
+                const validated = SortOptionSchema.parse(value);
+                setSortOption(validated);
+              }}
+            >
+              <SelectTrigger
+                className="w-[140px] h-9 min-h-[44px]"
+                aria-label="Sıralama seçeneği"
+              >
+                <ArrowUpDown className="w-4 h-4 mr-1" />
+                <SelectValue placeholder="Sırala" />
+              </SelectTrigger>
+              <SelectContent>
+                {SORT_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* List Content */}
+        {renderListContent()}
       </section>
 
       {/* Detail Dialog */}
