@@ -1,73 +1,166 @@
-# React + TypeScript + Vite
+<div align="center">
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# 💳 SubTracker
 
-Currently, two official plugins are available:
+**Aboneliklerinizi Akıllıca Takip Edin**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
 
-## React Compiler
+[Demo](#demo) • [Özellikler](#-özellikler) • [Kurulum](#-kurulum) • [Teknolojiler](#-teknolojiler)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+</div>
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📱 Demo
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+<div align="center">
+  <img src="docs/assets/screenshot.png" alt="SubTracker Screenshot" width="300" />
+</div>
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+> **Not:** Uygulama tamamen tarayıcı tabanlıdır ve verileriniz cihazınızda (localStorage) güvenle saklanır.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## ✨ Özellikler
+
+### 🎯 Temel Özellikler
+
+- **Abonelik Yönetimi** - Netflix, Spotify, YouTube ve daha fazlasını ekleyin
+- **Akıllı Geri Sayım** - Bir sonraki ödemeye kalan süreyi dramatik bir şekilde görün
+- **Kategori Sistemi** - Eğlence, Yazılım, Bulut ve daha fazlası
+- **Harcama Özeti** - Aylık ve yıllık harcamalarınızı görüntüleyin
+
+### 🚀 Gelişmiş Özellikler
+
+- **Crescendo Urgency System** - Ödeme yaklaştıkça renk ve animasyon değişir
+- **Timeline View** - Yaklaşan ödemelerinizi kronolojik sırada görün
+- **Quick-Add Grid** - Popüler servisleri tek tıkla ekleyin
+- **Özel Periyot** - Haftalık, aylık, yıllık veya özel döngüler
+
+### 📱 Mobil-First
+
+- **PWA Desteği** - Telefonunuza yükleyebilirsiniz
+- **Responsive Design** - Her ekran boyutunda mükemmel
+- **Dark/Light Mode** - Göz dostu temalar
+- **Türkçe Arayüz** - Tamamen Türkçe kullanıcı deneyimi
+
+---
+
+## 🛠 Kurulum
+
+### Gereksinimler
+
+- Node.js 18+
+- npm veya pnpm
+
+### Adımlar
+
+```bash
+# Repo'yu klonla
+git clone https://github.com/yourusername/subtracker.git
+cd subtracker
+
+# Bağımlılıkları yükle
+npm install
+
+# Geliştirme sunucusunu başlat
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Tarayıcıda açın: `http://localhost:5173`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Diğer Komutlar
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build      # Production build
+npm run preview    # Build'i önizle
+npm run lint       # Lint kontrolü
+npm run test       # Testleri çalıştır
+npm run test:ui    # Test UI'ını aç
 ```
+
+---
+
+## 🧪 Test Coverage
+
+| Kategori        | Testler         |
+| --------------- | --------------- |
+| Unit Tests      | 250+            |
+| Component Tests | 50+             |
+| Total           | **284 passing** |
+
+---
+
+## 🏗 Teknolojiler
+
+| Kategori          | Teknoloji                |
+| ----------------- | ------------------------ |
+| **Framework**     | React 19                 |
+| **Language**      | TypeScript 5.9           |
+| **Build Tool**    | Vite 7                   |
+| **Styling**       | TailwindCSS 4            |
+| **State**         | Zustand 5                |
+| **UI Components** | Radix UI                 |
+| **Icons**         | Lucide React             |
+| **Date Utils**    | date-fns                 |
+| **Validation**    | Zod 4                    |
+| **Testing**       | Vitest + Testing Library |
+| **PWA**           | vite-plugin-pwa          |
+
+---
+
+## 📁 Proje Yapısı
+
+```
+src/
+├── components/
+│   ├── dashboard/      # Countdown Hero, Spending Summary
+│   ├── features/       # Subscription, Timeline, Quick-Add
+│   ├── forms/          # Form components
+│   ├── layout/         # Header, BottomNav, Layout
+│   └── ui/             # Base UI components (Button, Dialog, etc.)
+├── lib/                # Utilities, formatters, utils
+├── stores/             # Zustand stores (subscription, settings)
+├── types/              # TypeScript types
+└── tests/              # Test files
+```
+
+---
+
+## 🎨 Tasarım Sistemi
+
+- **Renk Paleti:** OKLCH tabanlı modern renk sistemi
+- **Urgency Colors:** Subtle → Attention → Urgent → Critical
+- **Animasyonlar:** `prefers-reduced-motion` desteği
+- **Font:** Plus Jakarta Sans
+
+---
+
+## 🤝 Katkıda Bulunma
+
+1. Fork'layın
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Commit'leyin (`git commit -m 'feat: add amazing feature'`)
+4. Push'layın (`git push origin feature/amazing-feature`)
+5. Pull Request açın
+
+---
+
+## 📄 Lisans
+
+MIT License - Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+---
+
+<div align="center">
+
+**SubTracker ile aboneliklerinizi kontrol altına alın! 💪**
+
+Made with ❤️ by [Emre Kölunsağ](https://github.com/emrekolunsag)
+
+</div>
