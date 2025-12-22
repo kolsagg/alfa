@@ -1,11 +1,36 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { DashboardLayout } from "../components/layout/dashboard-layout";
 import { Header } from "../components/layout/header";
 import { BottomNav } from "../components/layout/bottom-nav";
-import { CountdownHeroPlaceholder } from "../components/dashboard/countdown-hero-placeholder";
+import { CountdownHero } from "../components/dashboard/countdown-hero";
+import type { Subscription } from "@/types/subscription";
+
+// Mock subscription store for CountdownHero
+const mockSubscriptions = vi.fn(() => [] as Subscription[]);
+
+vi.mock("@/stores/subscription-store", () => ({
+  useSubscriptionStore: (
+    selector: (state: { subscriptions: Subscription[] }) => Subscription[]
+  ) => selector({ subscriptions: mockSubscriptions() }),
+}));
+
+// Mock formatCurrency
+vi.mock("@/lib/formatters", () => ({
+  formatCurrency: (amount: number, currency: string) => `${amount} ${currency}`,
+}));
 
 describe("Dashboard Layout Components", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockSubscriptions.mockReturnValue([]);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.clearAllMocks();
+  });
+
   describe("Header", () => {
     it("renders app title", () => {
       render(<Header />);
@@ -41,15 +66,15 @@ describe("Dashboard Layout Components", () => {
     });
   });
 
-  describe("CountdownHeroPlaceholder", () => {
-    it("renders placeholder text", () => {
-      render(<CountdownHeroPlaceholder />);
+  describe("CountdownHero", () => {
+    it("renders placeholder text when empty", () => {
+      render(<CountdownHero />);
       expect(screen.getByText("Bir sonraki ödeme")).toBeInTheDocument();
       expect(screen.getByText("--:--:--")).toBeInTheDocument();
     });
 
     it("has tabular-nums for countdown display", () => {
-      render(<CountdownHeroPlaceholder />);
+      render(<CountdownHero />);
       const countdown = screen.getByText("--:--:--");
       expect(countdown).toHaveClass("tabular-nums");
     });

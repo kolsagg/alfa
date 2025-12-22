@@ -102,3 +102,48 @@
 .animate-success-pulse {
   animation: success-pulse 0.3s ease-out forwards;
 }
+
+/* Countdown Pulse Animation */
+@keyframes countdown-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+.animate-countdown-pulse {
+  animation: countdown-pulse 2s ease-in-out infinite;
+}
+
+/* Critical Attention Shake */
+@keyframes attention-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+.animate-attention-shake {
+  animation: attention-shake 0.5s ease-in-out infinite;
+}
+
+/* Reduced Motion Fallback */
+@media (prefers-reduced-motion: reduce) {
+  .animate-countdown-pulse,
+  .animate-attention-shake,
+  .animate-confetti-fall,
+  .animate-success-pulse {
+    animation: none;
+  }
+}
