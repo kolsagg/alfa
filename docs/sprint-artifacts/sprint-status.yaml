@@ -97,8 +97,8 @@ development_status:
   epic-4: in-progress
   4-1-notification-settings-slice: done
   4-2-browser-notification-permission-flow: done
-  4-3-notification-scheduling-logic: backlog
-  4-4-notification-display-and-handling: backlog
+  4-3-notification-scheduling-logic: done
+  4-4-notification-display-and-handling: done
   4-5-grouped-notifications-same-day: backlog
   4-6-ios-pwa-install-prompt: backlog
   4-7-graceful-degradation-for-denied-unavailable: backlog

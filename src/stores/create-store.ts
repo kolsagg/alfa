@@ -16,6 +16,11 @@ export type StoreFactoryOptions<T> = {
   skipPersist?: boolean;
   partialize?: (state: T) => Partial<T>;
   merge?: (persistedState: unknown, currentState: T) => T;
+  /**
+   * Optional override for the persistence key (excluding prefix).
+   * If not provided, defaults to name.toLowerCase().replace("store", "")
+   */
+  storageName?: string;
 };
 
 // Persist API interface
@@ -78,7 +83,9 @@ export function createStore<T>(
   const store = create<T>()(
     devtools(
       persist(storeInitializer, {
-        name: getStorageName(options.name.toLowerCase().replace("store", "")),
+        name: getStorageName(
+          options.storageName ?? options.name.toLowerCase().replace("store", "")
+        ),
         version: options.version || 1,
         migrate: options.migrate,
         ...(options.partialize && { partialize: options.partialize }),
