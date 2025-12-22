@@ -161,6 +161,6 @@ MIT License - Detaylar için [LICENSE](LICENSE) dosyasına bakın.
 
 **SubTracker ile aboneliklerinizi kontrol altına alın! 💪**
 
-Made with ❤️ by [Emre Kölunsağ](https://github.com/emrekolunsag)
+Made with ☕️ and 🤖 by [Emre Kolunsağ](https://github.com/kolsagg)
 
 </div>
