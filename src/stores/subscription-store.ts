@@ -4,6 +4,7 @@ import {
   SubscriptionUpdateSchema,
 } from "@/types/subscription";
 import type { Subscription, SubscriptionUpdate } from "@/types/subscription";
+import { generateUUID } from "@/lib/uuid";
 
 // Input type for adding subscriptions (without auto-generated fields)
 export type SubscriptionInput = Omit<
@@ -39,7 +40,7 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
       const now = new Date().toISOString();
       const newSubscription = {
         ...input,
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         createdAt: now,
         updatedAt: now,
       };

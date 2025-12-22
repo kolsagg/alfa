@@ -80,13 +80,13 @@ development_status:
   # FRs: FR12, FR13, FR14
   # Estimated: 19 hours
   # ===========================================
-  epic-3: in-progress
+  epic-3: done
   3-1-monthly-yearly-spending-summary-cards: done
   3-2-timeline-view-upcoming-payments: done
   3-3-countdown-hero-widget: done
   3-4-subscription-list-view: done
   3-5-category-breakdown-visualization: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: completed
 
   # ===========================================
   # EPIC 4: Notification System (Awareness Engine)
