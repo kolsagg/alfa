@@ -94,16 +94,16 @@ development_status:
   # FRs: FR09, FR10, FR11, FR19, FR24 | NFRs: NFR10, NFR16
   # Estimated: 28 hours
   # ===========================================
-  epic-4: in-progress
+  epic-4: done
   4-1-notification-settings-slice: done
   4-2-browser-notification-permission-flow: done
   4-3-notification-scheduling-logic: done
   4-4-notification-display-and-handling: done
-  4-5-grouped-notifications-same-day: backlog
-  4-6-ios-pwa-install-prompt: backlog
-  4-7-graceful-degradation-for-denied-unavailable: backlog
-  4-8-missed-notifications-recovery: backlog
-  epic-4-retrospective: optional
+  4-5-grouped-notifications-same-day: done
+  4-6-ios-pwa-install-prompt: done
+  4-7-graceful-degradation-for-denied-unavailable: done
+  4-8-missed-notifications-recovery: done
+  epic-4-retrospective: completed
 
   # ===========================================
   # EPIC 5: Data Export/Import & Backup
@@ -144,3 +144,20 @@ development_status:
   7-2-privacy-first-data-handling: backlog
   7-3-debug-log-export-developer-mode: backlog
   epic-7-retrospective: optional
+
+  # ===========================================
+  # EPIC 8: Navigation & Settings Infrastructure
+  # Goal: Uygulama içi sayfa navigasyonu ve merkezi ayarlar sayfasını tam routing ile implemente et.
+  # Party Mode Addition: 2025-12-22
+  # Estimated: 8-12 hours
+  # ===========================================
+  epic-8: in-progress
+  8-1-react-router-setup: done
+  8-2-settings-page-layout-and-route: done
+  8-3-bottom-nav-route-integration: backlog
+  8-4-settings-theme-section: backlog
+  8-5-settings-notification-section: backlog
+  8-6-settings-data-section: backlog
+  8-7-settings-about-section: backlog
+  8-8-wallet-route: backlog
+  epic-8-retrospective: optional

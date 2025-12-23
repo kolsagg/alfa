@@ -3,15 +3,22 @@ import {
   checkAndDispatchNotifications,
   syncNotificationPermissions,
 } from "@/services/notification-dispatcher";
+import { useMissedNotificationsRecovery } from "./use-missed-notifications-recovery";
 
 export function useNotificationLifecycle() {
+  const { runRecovery } = useMissedNotificationsRecovery();
+
   useEffect(() => {
-    // Initial check
+    // Initial recovery and check (Story 4.8)
+    runRecovery();
     checkAndDispatchNotifications();
     syncNotificationPermissions();
 
     // Interval (Every 60 seconds)
     const intervalId = setInterval(() => {
+      // Periodic check with recovery to handle device wake-up after long sleep
+      // where checkAndDispatchNotifications tolerance might be exceeded.
+      runRecovery();
       checkAndDispatchNotifications();
       syncNotificationPermissions();
     }, 60 * 1000);
@@ -19,6 +26,8 @@ export function useNotificationLifecycle() {
     // Visibility Listener
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
+        // Run recovery before dispatch on visibility change (AC1)
+        runRecovery();
         checkAndDispatchNotifications();
         syncNotificationPermissions();
       }
@@ -30,5 +39,5 @@ export function useNotificationLifecycle() {
       clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, [runRecovery]);
 }

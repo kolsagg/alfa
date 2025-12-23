@@ -7,15 +7,19 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+  },
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt", // iOS için daha stabil
       devOptions: {
-        enabled: false, // Disabled for better DX, enable manually for PWA testing
+        enabled: true,
+        type: "module",
       },
-      includeAssets: ["favicon.ico", "apple-touch-icon.png"],
+      includeAssets: ["favicon.ico", "apple-touch-icon.png", "icons/*.png"],
       manifest: {
         name: "SubTracker",
         short_name: "SubTracker",
@@ -23,6 +27,8 @@ export default defineConfig({
         theme_color: "#0f766e",
         background_color: "#0f172a",
         display: "standalone",
+        orientation: "portrait",
+        scope: "/",
         start_url: "/",
         icons: [
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -37,6 +43,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
       },
     }),
   ],
@@ -44,6 +53,9 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  server: {
+    allowedHosts: [".ngrok-free.dev", ".loca.lt"],
   },
   test: {
     globals: true,

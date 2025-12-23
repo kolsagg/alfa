@@ -149,7 +149,7 @@ describe("NotificationToggle", () => {
     const toggle = screen.getByRole("switch");
     expect(toggle).toBeDisabled();
     expect(
-      screen.getByText("Bu tarayıcı bildirimleri desteklemiyor")
+      screen.getByText(/Bu tarayıcı bildirimleri desteklemiyor/i)
     ).toBeInTheDocument();
   });
 
@@ -166,7 +166,7 @@ describe("NotificationToggle", () => {
     const toggle = screen.getByRole("switch");
     expect(toggle).toBeDisabled();
     expect(
-      screen.getByText("Tarayıcı ayarlarından izin verin")
+      screen.getByText(/Tarayıcı ayarlarından izin verin/i)
     ).toBeInTheDocument();
   });
 

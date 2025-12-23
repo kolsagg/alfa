@@ -1,25 +1,31 @@
 import { differenceInCalendarDays, startOfDay } from "date-fns";
 import { NOTIFICATION_CONFIG } from "@/config/notifications";
 import { useUIStore } from "@/stores/ui-store";
+import { formatCurrency } from "@/lib/formatters";
 
-export enum NotificationUrgency {
-  STANDARD = "standard",
-  IMMINENT = "imminent",
+export const NotificationUrgency = {
+  STANDARD: "standard",
+  IMMINENT: "imminent",
+} as const;
+
+export type NotificationUrgencyType =
+  (typeof NotificationUrgency)[keyof typeof NotificationUrgency];
+
+export interface DisplaySubscriptionData {
+  id: string;
+  name: string;
+  cost: number;
+  currency: string;
+  icon?: string;
+  color?: string;
 }
 
 export interface DisplayNotificationParams {
-  subscription: {
-    id: string;
-    name: string;
-    cost: number;
-    currency: string;
-    icon?: string;
-    color?: string;
-  };
+  subscription: DisplaySubscriptionData;
   paymentDueAt: string;
 }
 
-export function calculateUrgency(daysDiff: number): NotificationUrgency {
+export function calculateUrgency(daysDiff: number): NotificationUrgencyType {
   return daysDiff <= NOTIFICATION_CONFIG.IMMINENT_PAYMENT_DAYS
     ? NotificationUrgency.IMMINENT
     : NotificationUrgency.STANDARD;
@@ -58,11 +64,15 @@ export function displayNotification(
     daysText = `${daysDiff} gün içinde`;
   }
 
-  const body = `${subscription.cost} ${subscription.currency} ödemesi ${daysText}.`;
+  const formattedAmount = formatCurrency(
+    subscription.cost,
+    subscription.currency
+  );
+  const body = `${formattedAmount} ödemesi ${daysText}.`;
 
   const vibrate = isImminent ? [200, 100, 200] : [200];
 
-  const options: NotificationOptions = {
+  const options: NotificationOptions & { vibrate?: number[] } = {
     body,
     tag: subscription.id,
     icon: "/icons/android-chrome-192x192.png",
@@ -77,15 +87,11 @@ export function displayNotification(
   // Attempt SW notification for better persistence/background handling if supported (AC5)
   if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.ready.then((registration) => {
-      registration.showNotification(title, options);
+      registration.showNotification(title, options as NotificationOptions);
     });
-    // We still return a ghost notification or handles click manually if needed,
-    // but browser might show it twice if we don't return null here.
-    // However, AC2 requires focusing which is easier with new Notification() in foreground.
-    // Standard PWA practice: If foreground, use Notification constructor.
   }
 
-  const notification = new Notification(title, options);
+  const notification = new Notification(title, options as NotificationOptions);
 
   notification.onclick = (event) => {
     event.preventDefault();
@@ -93,6 +99,110 @@ export function displayNotification(
 
     // Open edit/detail modal
     useUIStore.getState().openModal("editSubscription", subscription.id);
+
+    notification.close();
+  };
+
+  return notification;
+}
+
+/**
+ * Parameters for grouped notification display
+ * Story 4.5 - Grouped Notifications
+ */
+export interface GroupedNotificationParams {
+  subscriptions: DisplaySubscriptionData[];
+  paymentDueAt: string;
+}
+
+/**
+ * Display a grouped notification for multiple payments on the same day
+ * Story 4.5 - AC2: Aggregated Notification Content
+ */
+export function displayGroupedNotification(
+  params: GroupedNotificationParams
+): Notification | null {
+  if (
+    typeof Notification === "undefined" ||
+    Notification.permission !== "granted"
+  ) {
+    console.warn("[DisplayService] Notification permission not granted");
+    return null;
+  }
+
+  const { subscriptions, paymentDueAt } = params;
+  const now = new Date();
+  const paymentDate = new Date(paymentDueAt);
+  const daysDiff = differenceInCalendarDays(
+    startOfDay(paymentDate),
+    startOfDay(now)
+  );
+
+  // AC5: Use imminent urgency if payment is urgent
+  const urgency = calculateUrgency(daysDiff);
+  const isImminent = urgency === NotificationUrgency.IMMINENT;
+
+  // Calculate total amount
+  const totalAmount = subscriptions.reduce((sum, sub) => sum + sub.cost, 0);
+  // Assume all subscriptions have the same currency (grouped by day)
+  const currency = subscriptions[0]?.currency || "TRY";
+
+  // AC2: Localized title
+  const title = "Birden Fazla Ödeme Yaklaşıyor";
+
+  // Generate days text
+  let daysText = "";
+  if (daysDiff === 0) {
+    daysText = "bugün";
+  } else if (daysDiff === 1) {
+    daysText = "yarın";
+  } else {
+    daysText = `${daysDiff} gün içinde`;
+  }
+
+  // AC2: Format body as "{{count}} adet ödeme {{daysText}} yapılacak - Toplam {{totalAmount}}"
+  const formattedTotal = formatCurrency(totalAmount, currency);
+  const body = `${subscriptions.length} adet ödeme ${daysText} yapılacak - Toplam ${formattedTotal}`;
+
+  const vibrate = isImminent ? [200, 100, 200] : [200];
+
+  // Create a unique tag for grouped notifications
+  const tag = `grouped-${paymentDate.toISOString().split("T")[0]}`;
+
+  const options: NotificationOptions & { vibrate?: number[] } = {
+    body,
+    tag,
+    icon: "/icons/android-chrome-192x192.png",
+    badge: "/icons/badge-72x72.png",
+    vibrate,
+    data: {
+      isGrouped: true,
+      subscriptionIds: subscriptions.map((s) => s.id),
+      dateFilter: paymentDate.toISOString().split("T")[0],
+      url: `/dashboard?dateFilter=${paymentDate.toISOString().split("T")[0]}`,
+    },
+  };
+
+  // Attempt SW notification for better persistence/background handling
+  if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.ready.then((registration) => {
+      registration.showNotification(title, options as NotificationOptions);
+    });
+  }
+
+  const notification = new Notification(title, options as NotificationOptions);
+
+  // AC4: Close any open modals and set dateFilter on click
+  const dateFilterValue = paymentDate.toISOString().split("T")[0];
+  notification.onclick = (event) => {
+    event.preventDefault();
+    window.focus();
+
+    // Close any open modals
+    useUIStore.getState().closeModal();
+
+    // AC4: Set dateFilter state to filter subscription list
+    useUIStore.getState().setDateFilter(dateFilterValue);
 
     notification.close();
   };

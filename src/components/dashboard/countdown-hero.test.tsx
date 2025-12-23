@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { CountdownHero } from "./countdown-hero";
 import type { Subscription } from "@/types/subscription";
-import { isNotificationSupported } from "@/lib/notification-permission";
+import { NOTIFICATION_STRINGS } from "@/lib/i18n/notifications";
 
 // Mock subscription store
 const mockSubscriptions = vi.fn(() => [] as Subscription[]);
@@ -16,16 +16,26 @@ vi.mock("@/stores/subscription-store", () => ({
 // Mock settings store
 const mockSettings = vi.fn(() => ({
   notificationsEnabled: true,
-  notificationPermission: "granted" as const,
+  notificationPermission: "granted" as NotificationPermission,
 }));
 
 vi.mock("@/stores/settings-store", () => ({
   useSettingsStore: () => mockSettings(),
 }));
 
-// Mock notification support
-vi.mock("@/lib/notification-permission", () => ({
-  isNotificationSupported: vi.fn(() => true),
+// Mock notification utils
+vi.mock("@/lib/notification/utils", () => ({
+  isPushNotificationActive: vi.fn(
+    (enabled, permission) => enabled && permission === "granted"
+  ),
+}));
+
+import { isPushNotificationActive } from "@/lib/notification/utils";
+
+// Mock reduced motion hook
+const mockReducedMotion = vi.fn(() => false);
+vi.mock("@/hooks/use-reduced-motion", () => ({
+  useReducedMotion: () => mockReducedMotion(),
 }));
 
 // Mock formatCurrency
@@ -59,6 +69,10 @@ describe("CountdownHero", () => {
     vi.useFakeTimers();
     vi.setSystemTime(MOCK_NOW);
     mockSubscriptions.mockReturnValue([]);
+    mockReducedMotion.mockReturnValue(false);
+    vi.mocked(isPushNotificationActive).mockImplementation(
+      (enabled, permission) => enabled && permission === "granted"
+    );
   });
 
   afterEach(() => {
@@ -256,23 +270,36 @@ describe("CountdownHero", () => {
 
       render(<CountdownHero />);
 
-      expect(screen.getByText("Alert")).toBeInTheDocument();
-      expect(screen.getByTitle(/Bildirimler kapalı/)).toBeInTheDocument();
+      expect(
+        screen.getByText(NOTIFICATION_STRINGS.HERO_NO_PUSH)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTitle(NOTIFICATION_STRINGS.HERO_ALERT_TITLE)
+      ).toBeInTheDocument();
     });
 
     it("should show alert badge when notifications are unsupported and payment is imminent", () => {
       mockSubscriptions.mockReturnValue([
         createSubscription("1", "2025-01-17T12:00:00.000Z"), // 2 days
       ]);
+      mockSettings.mockReturnValue({
+        notificationsEnabled: true,
+        notificationPermission: "granted",
+      });
 
-      vi.mocked(isNotificationSupported).mockReturnValue(false);
+      // Mock isPushNotificationActive to return false (simulating unsupported)
+      vi.mocked(isPushNotificationActive).mockReturnValue(false);
 
       render(<CountdownHero />);
 
-      expect(screen.getByText("Alert")).toBeInTheDocument();
+      expect(
+        screen.getByText(NOTIFICATION_STRINGS.HERO_NO_PUSH)
+      ).toBeInTheDocument();
 
       // Reset for other tests
-      vi.mocked(isNotificationSupported).mockReturnValue(true);
+      vi.mocked(isPushNotificationActive).mockImplementation(
+        (enabled, permission) => enabled && permission === "granted"
+      );
     });
 
     it("should NOT show alert badge when notifications are active", () => {
@@ -286,10 +313,12 @@ describe("CountdownHero", () => {
 
       render(<CountdownHero />);
 
-      expect(screen.queryByText("Alert")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(NOTIFICATION_STRINGS.HERO_NO_PUSH)
+      ).not.toBeInTheDocument();
     });
 
-    it("should apply ring styling when and payment is imminent and notifications are off", () => {
+    it("should apply ring styling when payment is imminent and notifications are off (no reduced motion)", () => {
       mockSubscriptions.mockReturnValue([
         createSubscription("1", "2025-01-17T12:00:00.000Z"),
       ]);
@@ -297,10 +326,59 @@ describe("CountdownHero", () => {
         notificationsEnabled: false,
         notificationPermission: "default",
       });
+      mockReducedMotion.mockReturnValue(false);
 
       const { container } = render(<CountdownHero />);
       const section = container.querySelector("section");
       expect(section?.className).toContain("ring-2");
+    });
+
+    it("should apply border styling instead of ring when reduced motion is preferred (AC4)", () => {
+      mockSubscriptions.mockReturnValue([
+        createSubscription("1", "2025-01-17T12:00:00.000Z"),
+      ]);
+      mockSettings.mockReturnValue({
+        notificationsEnabled: false,
+        notificationPermission: "default",
+      });
+      mockReducedMotion.mockReturnValue(true);
+
+      const { container } = render(<CountdownHero />);
+      const section = container.querySelector("section");
+      expect(section?.className).toContain("border-2");
+      expect(section?.className).not.toContain("ring-2");
+    });
+  });
+
+  describe("Reduced Motion (AC4)", () => {
+    it("should not apply pulse animation when reduced motion is preferred", () => {
+      mockSubscriptions.mockReturnValue([
+        createSubscription("1", "2025-01-16T12:00:00.000Z"), // 1 day away (urgent)
+      ]);
+      mockSettings.mockReturnValue({
+        notificationsEnabled: true,
+        notificationPermission: "granted",
+      });
+      mockReducedMotion.mockReturnValue(true);
+
+      const { container } = render(<CountdownHero />);
+      const section = container.querySelector("section");
+      expect(section?.className).not.toContain("animate-countdown-pulse");
+    });
+
+    it("should apply pulse animation when reduced motion is not preferred", () => {
+      mockSubscriptions.mockReturnValue([
+        createSubscription("1", "2025-01-15T23:00:00.000Z"), // same day (critical)
+      ]);
+      mockSettings.mockReturnValue({
+        notificationsEnabled: true,
+        notificationPermission: "granted",
+      });
+      mockReducedMotion.mockReturnValue(false);
+
+      const { container } = render(<CountdownHero />);
+      const section = container.querySelector("section");
+      expect(section?.className).toContain("animate-countdown-pulse");
     });
   });
 });

@@ -26,6 +26,8 @@ export interface NotificationScheduleStoreActions {
   updateSchedule: (entries: NotificationScheduleEntry[]) => void;
   /** Mark a specific entry as notified */
   markAsNotified: (subscriptionId: string) => void;
+  /** Mark multiple entries as notified in a single batch (Story 4.5) */
+  markBatchAsNotified: (subscriptionIds: string[]) => void;
   /** Clear all scheduled entries */
   clearSchedule: () => void;
   /** Get pending (not yet notified) entries */
@@ -69,6 +71,19 @@ export const useNotificationScheduleStore =
         set((state) => ({
           schedule: state.schedule.map((entry) =>
             entry.subscriptionId === subscriptionId
+              ? { ...entry, notifiedAt: now }
+              : entry
+          ),
+        }));
+      },
+
+      markBatchAsNotified: (subscriptionIds) => {
+        if (!subscriptionIds.length) return;
+        const now = new Date().toISOString();
+        const idsSet = new Set(subscriptionIds);
+        set((state) => ({
+          schedule: state.schedule.map((entry) =>
+            idsSet.has(entry.subscriptionId)
               ? { ...entry, notifiedAt: now }
               : entry
           ),

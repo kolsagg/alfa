@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   checkAndDispatchNotifications,
   syncNotificationPermissions,
@@ -33,13 +33,14 @@ describe("Notification Dispatcher", () => {
   const mockSubscription = {
     id: "sub-1",
     name: "Test Sub",
-    cost: 10,
-    currency: "USD",
+    amount: 10,
+    currency: "USD" as const,
     isActive: true,
-    renewalPeriod: "monthly",
-    startDate: "2024-01-01",
+    billingCycle: "monthly" as const,
     nextPaymentDate: "2024-02-01T00:00:00.000Z",
-    categoryId: "cat-1",
+    categoryId: "tools" as const,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   describe("checkAndDispatchNotifications", () => {
@@ -56,6 +57,7 @@ describe("Notification Dispatcher", () => {
         ],
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (displayNotification as any).mockReturnValue({}); // Mock success
 
       // When
@@ -133,6 +135,7 @@ describe("Notification Dispatcher", () => {
           },
         ],
       });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (displayNotification as any).mockReturnValue({});
 
       checkAndDispatchNotifications();
@@ -140,7 +143,8 @@ describe("Notification Dispatcher", () => {
       const logs = JSON.parse(localStorage.getItem("reliabilityLog") || "[]");
       expect(logs).toHaveLength(1);
       expect(logs[0]).toMatchObject({
-        subscriptionId: "sub-1",
+        subscriptionIds: ["sub-1"],
+        count: 1,
         status: "success",
       });
     });

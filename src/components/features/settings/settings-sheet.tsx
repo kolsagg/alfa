@@ -1,6 +1,11 @@
 /**
  * SettingsSheet Component
  *
+ * @deprecated This component is deprecated as of Story 8.2.
+ * Use the new SettingsPage (`src/pages/settings-page.tsx`) instead.
+ * Navigation should go to `/#/settings` route.
+ * This file is kept for reference but will be removed in a future cleanup.
+ *
  * Party Mode Consensus: Settings Sheet pattern for quick access to app settings.
  * Full routing will be implemented in Epic 8.
  *

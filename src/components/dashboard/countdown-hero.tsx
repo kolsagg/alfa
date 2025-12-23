@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSubscriptionStore } from "@/stores/subscription-store";
 import { useSettingsStore } from "@/stores/settings-store";
-import { isNotificationSupported } from "@/lib/notification-permission";
+import { isPushNotificationActive } from "@/lib/notification/utils";
 import { formatCurrency } from "@/lib/formatters";
 import {
   getTimeRemaining,
@@ -15,6 +15,8 @@ import {
 import { cn } from "@/lib/utils";
 import { AlertTriangle, Clock, BellOff } from "lucide-react";
 import { NOTIFICATION_CONFIG } from "@/config/notifications";
+import { NOTIFICATION_STRINGS } from "@/lib/i18n/notifications";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 const urgencyStyles: Record<CountdownUrgency, string> = {
   subtle: "from-muted/10 via-background to-background",
@@ -33,11 +35,14 @@ const urgencyTextStyles: Record<CountdownUrgency, string> = {
 export function CountdownHero() {
   const subscriptions = useSubscriptionStore((state) => state.subscriptions);
   const { notificationsEnabled, notificationPermission } = useSettingsStore();
+  const reducedMotion = useReducedMotion();
 
-  const isPushActive =
-    notificationsEnabled &&
-    notificationPermission === "granted" &&
-    isNotificationSupported();
+  // Story 4.7: Use shared utility for push notification state
+  const isPushActive = useMemo(
+    () =>
+      isPushNotificationActive(notificationsEnabled, notificationPermission),
+    [notificationsEnabled, notificationPermission]
+  );
 
   // 1. Optimize nextPayment calculation
   const nextPayment = useMemo(
@@ -174,21 +179,37 @@ export function CountdownHero() {
         "relative overflow-hidden rounded-2xl bg-gradient-to-br p-6 border border-border/50",
         urgencyStyles[urgency],
         (urgency === "urgent" || urgency === "critical") &&
+          !reducedMotion &&
           "animate-countdown-pulse",
-        // AC7: Emphasize pulse if notifications are not helping
-        !isPushActive && isImminent && "ring-2 ring-primary/20 ring-offset-2"
+        // AC4/AC7: Emphasize if notifications are not helping
+        !isPushActive &&
+          isImminent &&
+          !reducedMotion &&
+          "ring-2 ring-primary/20 ring-offset-2",
+        // AC4: respect prefers-reduced-motion - use bold border instead
+        !isPushActive &&
+          isImminent &&
+          reducedMotion &&
+          "border-2 border-[var(--color-urgent)]"
       )}
       aria-label={ariaLabel}
     >
       {/* AC7: Persistent Alert Badge for high urgency without push notifications */}
       {!isPushActive && isImminent && (
         <div
-          className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 text-primary animate-in fade-in zoom-in duration-300"
-          title="Bildirimler kapalı - Buradan takip edin"
+          className={cn(
+            "absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full",
+            "bg-[var(--color-urgent)]/10 text-[var(--color-urgent)]",
+            "animate-in fade-in zoom-in duration-300",
+            // AC4: respect prefers-reduced-motion
+            reducedMotion &&
+              "!animate-none border-2 border-[var(--color-urgent)]"
+          )}
+          title={NOTIFICATION_STRINGS.HERO_ALERT_TITLE}
         >
           <BellOff className="size-3" />
           <span className="text-[10px] font-bold uppercase tracking-wider">
-            Alert
+            {NOTIFICATION_STRINGS.HERO_NO_PUSH}
           </span>
         </div>
       )}

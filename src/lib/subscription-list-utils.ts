@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isSameDay, parseISO } from "date-fns";
 import type { Subscription } from "@/types/subscription";
 
 // Zod schema for sort options
@@ -81,14 +82,50 @@ export function getUniqueCategoryIds(subscriptions: Subscription[]): string[] {
 }
 
 /**
+ * Filter subscriptions by date (same day check)
+ * @param subscriptions - Array of subscriptions to filter
+ * @param dateFilter - ISO date string to filter by, null means "all" (no filter)
+ * Story 4.5 - Grouped Notifications
+ */
+export function filterByDate(
+  subscriptions: Subscription[],
+  dateFilter: string | null
+): Subscription[] {
+  if (!dateFilter) return subscriptions;
+
+  // Story 4.7: If dateFilter contains multiple dates (comma-separated), filter by any of them
+  const filterDates = dateFilter.split(",");
+
+  if (filterDates.length > 1) {
+    const targetDates = filterDates.map((d) => parseISO(d));
+    return subscriptions.filter((sub) => {
+      const subDate = parseISO(sub.nextPaymentDate);
+      return targetDates.some((target) => isSameDay(subDate, target));
+    });
+  }
+
+  const targetDate = parseISO(dateFilter);
+  return subscriptions.filter((sub) =>
+    isSameDay(parseISO(sub.nextPaymentDate), targetDate)
+  );
+}
+
+/**
  * Process subscriptions with both filtering and sorting
+ * @param subscriptions - Array of subscriptions to process
+ * @param categoryId - Category ID to filter by, null means "all" (no filter)
+ * @param sortBy - Sort option (date, price, name)
+ * @param dateFilter - ISO date string to filter by, null means "all" (no filter)
+ * Story 4.5 - Supports combined category + date filtering (AND logic)
  */
 export function processSubscriptions(
   subscriptions: Subscription[],
   categoryId: string | null,
-  sortBy: SortOption
+  sortBy: SortOption,
+  dateFilter: string | null = null
 ): Subscription[] {
-  const filtered = filterByCategory(subscriptions, categoryId);
+  let filtered = filterByCategory(subscriptions, categoryId);
+  filtered = filterByDate(filtered, dateFilter);
   return sortSubscriptions(filtered, sortBy);
 }
 

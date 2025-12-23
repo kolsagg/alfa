@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { DashboardLayout } from "./dashboard-layout";
 import { useSettingsStore } from "@/stores/settings-store";
@@ -18,14 +18,34 @@ vi.mock("./bottom-nav", () => ({
   BottomNav: () => <div data-testid="bottom-nav" />,
 }));
 
+// Mock notification-permission for isNotificationSupported
+vi.mock("@/lib/notification-permission", () => ({
+  isNotificationSupported: vi.fn(() => true),
+}));
+
+// Mock iOS detection
+vi.mock("@/hooks/use-ios-pwa-detection", () => ({
+  useIOSPWADetection: vi.fn(() => ({ shouldShowPrompt: false })),
+  detectIOSSafariNonStandalone: vi.fn(() => false),
+}));
+
+import { isNotificationSupported } from "@/lib/notification-permission";
+
+const mockedIsNotificationSupported = vi.mocked(isNotificationSupported);
+
 describe("DashboardLayout Integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedIsNotificationSupported.mockReturnValue(true);
     useSettingsStore.setState({
       notificationPermission: "default",
       notificationPermissionDeniedAt: undefined,
       notificationBannerDismissedAt: undefined,
     } as Partial<SettingsState>);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("should render the NotificationBanner when permission is denied", () => {
@@ -71,8 +91,8 @@ describe("DashboardLayout Integration", () => {
     );
 
     expect(screen.getByTestId("header")).toBeInTheDocument();
-    expect(screen.getByTestId("bottom-nav")).toBeInTheDocument();
-    expect(screen.getByTestId("add-dialog")).toBeInTheDocument();
     expect(screen.getByTestId("child-content")).toBeInTheDocument();
+    // Note: BottomNav and AddSubscriptionDialog are now in RootLayout (Story 8.1)
+    // This deprecated DashboardLayout only renders Header + content
   });
 });

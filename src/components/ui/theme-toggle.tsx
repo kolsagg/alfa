@@ -30,15 +30,15 @@ export function ThemeToggle() {
         >
           <DropdownMenuRadioItem value="light">
             <Sun className="mr-2 h-4 w-4" />
-            Light
+            Açık
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="dark">
             <Moon className="mr-2 h-4 w-4" />
-            Dark
+            Koyu
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="system">
             <Laptop className="mr-2 h-4 w-4" />
-            System
+            Sistem
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>

@@ -3,8 +3,11 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { toast } from "sonner";
-import { ArrowUpDown, Filter } from "lucide-react";
+import { ArrowUpDown, Filter, X, Calendar } from "lucide-react";
 import { useSubscriptionStore } from "@/stores/subscription-store";
+import { useUIStore } from "@/stores/ui-store";
+import { format, parseISO } from "date-fns";
+import { tr } from "date-fns/locale";
 import type { Subscription } from "@/types/subscription";
 import { SubscriptionCard } from "./subscription-card";
 import { SubscriptionDetailDialog } from "./subscription-detail-dialog";
@@ -99,10 +102,20 @@ export function SubscriptionList({
   // Virtualization ref
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // Process subscriptions with filter and sort
+  // Story 4.5 - Date filter from UIStore
+  const dateFilter = useUIStore((s) => s.dateFilter);
+  const clearDateFilter = useUIStore((s) => s.clearDateFilter);
+
+  // Process subscriptions with filter and sort (including dateFilter)
   const processedSubscriptions = useMemo(
-    () => processSubscriptions(subscriptions, categoryFilter, sortOption),
-    [subscriptions, categoryFilter, sortOption]
+    () =>
+      processSubscriptions(
+        subscriptions,
+        categoryFilter,
+        sortOption,
+        dateFilter
+      ),
+    [subscriptions, categoryFilter, sortOption, dateFilter]
   );
 
   // Get unique categories for filter dropdown
@@ -111,16 +124,38 @@ export function SubscriptionList({
     [subscriptions]
   );
 
-  // Announce filter changes for screen readers
+  // Announce filter changes for screen readers (Story 4.5: includes date filter)
   useEffect(() => {
     if (subscriptions.length > 0) {
       const count = processedSubscriptions.length;
       const categoryLabel = categoryFilter
         ? categories.get(categoryFilter).label
         : "Tümü";
-      setAnnouncement(`${count} adet ${categoryLabel} abonelik listelendi`);
+      const dateLabel = dateFilter
+        ? dateFilter.includes(",")
+          ? `${format(parseISO(dateFilter.split(",")[0]), "d MMM", {
+              locale: tr,
+            })} +${dateFilter.split(",").length - 1} gün`
+          : format(parseISO(dateFilter), "d MMMM yyyy", { locale: tr })
+        : null;
+
+      const filterInfo =
+        count === 0
+          ? `Seçilen filtrelerle abonelik bulunamadı. (${categoryLabel}${
+              dateLabel ? `, ${dateLabel}` : ""
+            })`
+          : dateLabel
+          ? `${count} adet ${categoryLabel} abonelik, ${dateLabel} için`
+          : `${count} adet ${categoryLabel} abonelik listelendi`;
+
+      setAnnouncement(filterInfo);
     }
-  }, [processedSubscriptions.length, categoryFilter, subscriptions.length]);
+  }, [
+    processedSubscriptions.length,
+    categoryFilter,
+    dateFilter,
+    subscriptions.length,
+  ]);
 
   // Virtualizer for large lists
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Virtual opt-out via "use no memo" at file top
@@ -192,8 +227,18 @@ export function SubscriptionList({
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <Filter className="w-12 h-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground">
-            Bu kategoride abonelik bulunamadı
+            {dateFilter
+              ? "Bu tarihte abonelik bulunamadı"
+              : "Bu kategoride abonelik bulunamadı"}
           </p>
+          {dateFilter && (
+            <button
+              onClick={clearDateFilter}
+              className="mt-4 text-sm text-primary hover:underline"
+            >
+              Tarih filtresini temizle
+            </button>
+          )}
         </div>
       );
     }
@@ -270,6 +315,27 @@ export function SubscriptionList({
           <h2 className="text-lg font-semibold text-foreground font-jakarta">
             Aboneliklerim ({processedSubscriptions.length})
           </h2>
+
+          {/* Story 4.5: Active Date Filter Chip */}
+          {dateFilter && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm">
+              <Calendar className="w-4 h-4" />
+              <span>
+                {dateFilter.includes(",")
+                  ? `${format(parseISO(dateFilter.split(",")[0]), "d MMM", {
+                      locale: tr,
+                    })} +${dateFilter.split(",").length - 1}`
+                  : format(parseISO(dateFilter), "d MMMM yyyy", { locale: tr })}
+              </span>
+              <button
+                onClick={clearDateFilter}
+                className="ml-1 hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                aria-label="Tarih filtresini temizle"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
 
           {/* Sort and Filter Controls */}
           <div className="flex items-center gap-2">

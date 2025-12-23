@@ -5,6 +5,7 @@ import {
   sortByName,
   sortSubscriptions,
   filterByCategory,
+  filterByDate,
   getUniqueCategoryIds,
   processSubscriptions,
   SortOptionSchema,
@@ -248,6 +249,58 @@ describe("subscription-list-utils", () => {
     });
   });
 
+  describe("filterByDate", () => {
+    const subs = [
+      createMockSubscription({
+        name: "Netflix",
+        nextPaymentDate: "2025-12-25T00:00:00.000Z",
+      }),
+      createMockSubscription({
+        name: "Spotify",
+        nextPaymentDate: "2025-12-25T14:30:00.000Z", // Same day, different time
+      }),
+      createMockSubscription({
+        name: "Apple",
+        nextPaymentDate: "2025-12-26T00:00:00.000Z",
+      }),
+      createMockSubscription({
+        name: "Gym",
+        nextPaymentDate: "2025-12-30T00:00:00.000Z",
+      }),
+    ];
+
+    it("filters subscriptions by date (same day check)", () => {
+      const filtered = filterByDate(subs, "2025-12-25");
+
+      expect(filtered).toHaveLength(2);
+      expect(filtered[0].name).toBe("Netflix");
+      expect(filtered[1].name).toBe("Spotify");
+    });
+
+    it("returns all subscriptions when dateFilter is null", () => {
+      const filtered = filterByDate(subs, null);
+
+      expect(filtered).toHaveLength(4);
+    });
+
+    it("returns empty array when no subscriptions match date", () => {
+      const filtered = filterByDate(subs, "2025-12-31");
+
+      expect(filtered).toHaveLength(0);
+    });
+
+    it("handles ISO datetime format for dateFilter", () => {
+      const filtered = filterByDate(subs, "2025-12-25T10:00:00.000Z");
+
+      // Should still match all subscriptions on that day regardless of time
+      expect(filtered).toHaveLength(2);
+    });
+
+    it("handles empty array", () => {
+      expect(filterByDate([], "2025-12-25")).toEqual([]);
+    });
+  });
+
   describe("getUniqueCategoryIds", () => {
     it("returns unique category IDs", () => {
       const subs = [
@@ -289,13 +342,13 @@ describe("subscription-list-utils", () => {
         name: "Netflix",
         amount: 100,
         categoryId: "entertainment",
-        nextPaymentDate: "2025-12-30T00:00:00.000Z",
+        nextPaymentDate: "2025-12-25T00:00:00.000Z",
       }),
       createMockSubscription({
         name: "Apple",
         amount: 500,
         categoryId: "productivity",
-        nextPaymentDate: "2025-12-22T00:00:00.000Z",
+        nextPaymentDate: "2025-12-25T00:00:00.000Z",
       }),
       createMockSubscription({
         name: "Spotify",
@@ -303,29 +356,66 @@ describe("subscription-list-utils", () => {
         categoryId: "entertainment",
         nextPaymentDate: "2025-12-25T00:00:00.000Z",
       }),
+      createMockSubscription({
+        name: "Gym",
+        amount: 200,
+        categoryId: "entertainment",
+        nextPaymentDate: "2025-12-30T00:00:00.000Z",
+      }),
     ];
 
-    it("filters and sorts subscriptions", () => {
+    it("filters by category and sorts subscriptions", () => {
       const processed = processSubscriptions(subs, "entertainment", "price");
 
-      expect(processed).toHaveLength(2);
-      expect(processed[0].name).toBe("Netflix"); // Higher price
-      expect(processed[1].name).toBe("Spotify"); // Lower price
-    });
-
-    it("applies sorting to all subscriptions when filter is null", () => {
-      const processed = processSubscriptions(subs, null, "name");
-
       expect(processed).toHaveLength(3);
-      expect(processed[0].name).toBe("Apple");
+      expect(processed[0].name).toBe("Gym"); // Highest price in entertainment
       expect(processed[1].name).toBe("Netflix");
       expect(processed[2].name).toBe("Spotify");
+    });
+
+    it("applies sorting to all subscriptions when category filter is null", () => {
+      const processed = processSubscriptions(subs, null, "name");
+
+      expect(processed).toHaveLength(4);
+      expect(processed[0].name).toBe("Apple");
     });
 
     it("returns empty array when filter matches nothing", () => {
       const processed = processSubscriptions(subs, "nonexistent", "date");
 
       expect(processed).toHaveLength(0);
+    });
+
+    // Story 4.5 - Combined filtering tests
+    it("filters by both category and date (AND logic)", () => {
+      const processed = processSubscriptions(
+        subs,
+        "entertainment",
+        "price",
+        "2025-12-25"
+      );
+
+      // Should only return entertainment subs on 2025-12-25
+      expect(processed).toHaveLength(2);
+      expect(processed[0].name).toBe("Netflix");
+      expect(processed[1].name).toBe("Spotify");
+      // Gym is entertainment but on 2025-12-30, so excluded
+    });
+
+    it("filters by date only when category is null", () => {
+      const processed = processSubscriptions(subs, null, "price", "2025-12-25");
+
+      // All subscriptions on 2025-12-25 regardless of category
+      expect(processed).toHaveLength(3);
+      expect(processed[0].name).toBe("Apple"); // Highest price
+      expect(processed[1].name).toBe("Netflix");
+      expect(processed[2].name).toBe("Spotify");
+    });
+
+    it("applies no date filter when dateFilter is null", () => {
+      const processed = processSubscriptions(subs, null, "date", null);
+
+      expect(processed).toHaveLength(4);
     });
   });
 });

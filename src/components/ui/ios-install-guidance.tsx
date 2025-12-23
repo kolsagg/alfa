@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Share, PlusSquare, X } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import {
 } from "@/hooks/use-ios-pwa-detection";
 
 import { NOTIFICATION_CONFIG } from "@/config/notifications";
+import { IOS_INSTALL_GUIDANCE_STRINGS as IOS_STRINGS } from "@/lib/i18n/ios-install-guidance";
 
 interface IOSInstallGuidanceProps {
   /**
@@ -41,6 +43,8 @@ interface IOSInstallGuidanceProps {
  *
  * Story 4.2 AC#5: When triggered from notification settings, shows
  * "Bildirimler için Ana Ekrana Ekle" with different buttons.
+ *
+ * Story 4.6: Added auto-dismiss on standalone detection and i18n integration.
  */
 export function IOSInstallGuidance({
   triggeredBySettings = false,
@@ -64,20 +68,65 @@ export function IOSInstallGuidance({
     }
   }, [triggeredBySettings, onOpenChange, dismissIOSPrompt]);
 
+  // Story 4.6 AC#6: Auto-dismiss when PWA mode is detected
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+
+    const checkInstall = () => {
+      if (mediaQuery.matches) {
+        toast.success(IOS_STRINGS.TOAST_INSTALL_SUCCESS);
+        handleClose();
+      }
+    };
+
+    // 1. Media Query Listener - handles PWA install detection
+    // Use modern addEventListener with fallback for older browsers
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", checkInstall);
+    } else if (mediaQuery.addListener) {
+      // Deprecated but needed for older Safari
+      mediaQuery.addListener(checkInstall);
+    }
+
+    // 2. Visibility Change Listener - handles OS-level app switching
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        checkInstall();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Cleanup
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", checkInstall);
+      } else if (mediaQuery.removeListener) {
+        mediaQuery.removeListener(checkInstall);
+      }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isOpen, handleClose]);
+
   // "Kurdum" button handler - re-check if now in standalone mode
+  // Story 4.6 AC#4: If still in Safari, dismiss with 7-day snooze and toast
   const handleInstallConfirm = useCallback(() => {
     setIsCheckingInstall(true);
 
-    // Small delay to allow PWA transition
+    // Small delay to allow PWA transition (if user somehow stayed in same window)
     setTimeout(() => {
       const stillNonStandalone = detectIOSSafariNonStandalone();
 
       if (!stillNonStandalone) {
-        // User is now in PWA mode, close modal
+        // User is now in PWA mode, close modal with success toast
+        // Redundancy check: toast.success is also handled by the matchMedia effect
+        toast.success(IOS_STRINGS.TOAST_INSTALL_SUCCESS);
         handleClose();
       } else {
-        // Still in Safari, dismiss with 7-day snooze
-        dismissIOSPrompt();
+        // AC4: If still in Safari, dismisses with 7-day snooze and toast feedback
+        toast.info(IOS_STRINGS.TOAST_INSTALL_PENDING);
+        dismissIOSPrompt(); // This sets the 7-day snooze
         handleClose();
       }
 
@@ -93,34 +142,47 @@ export function IOSInstallGuidance({
 
   if (!isOpen) return null;
 
-  // Content varies based on mode
+  // Content varies based on mode - using i18n strings
   const title = triggeredBySettings
-    ? "Bildirimler için Ana Ekrana Ekle"
-    : "Ana Ekrana Ekle";
+    ? IOS_STRINGS.TITLE_SETTINGS
+    : IOS_STRINGS.TITLE_AUTOMATIC;
 
   const description = triggeredBySettings
-    ? "iOS'ta bildirim almak için SubTracker'ı ana ekranınıza eklemeniz gerekiyor."
-    : "SubTracker'ı tam ekran modunda kullanmak ve bildirimlerden haberdar olmak için ana ekranınıza ekleyin.";
+    ? IOS_STRINGS.DESCRIPTION_SETTINGS
+    : IOS_STRINGS.DESCRIPTION_AUTOMATIC;
+
+  const titleId = "ios-install-guidance-title";
+  const descriptionId = "ios-install-guidance-description";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-[425px] rounded-t-3xl sm:rounded-3xl border-none bg-background/95 backdrop-blur-xl">
+      <DialogContent
+        className="sm:max-w-[425px] rounded-t-3xl sm:rounded-3xl border-none bg-background/95 backdrop-blur-xl"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+      >
         <DialogHeader>
           <div className="flex justify-between items-center mb-2">
-            <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
+            <DialogTitle
+              id={titleId}
+              className="text-2xl font-bold tracking-tight text-foreground"
+            >
               {title}
             </DialogTitle>
             <Button
               variant="ghost"
               size="icon"
               onClick={handleClose}
-              className="rounded-full h-8 w-8 hover:bg-muted"
+              className="rounded-full h-11 w-11 min-h-[44px] min-w-[44px] hover:bg-muted"
+              aria-label={IOS_STRINGS.BUTTON_CLOSE_ARIA}
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">Kapat</span>
             </Button>
           </div>
-          <DialogDescription className="text-muted-foreground text-sm">
+          <DialogDescription
+            id={descriptionId}
+            className="text-muted-foreground text-sm"
+          >
             {description}
           </DialogDescription>
         </DialogHeader>
@@ -128,21 +190,24 @@ export function IOSInstallGuidance({
         <div className="relative mt-4 mb-6 aspect-square overflow-hidden rounded-2xl bg-muted/50">
           <img
             src={NOTIFICATION_CONFIG.ASSETS.IOS_GUIDANCE}
-            alt="iOS Kurulum Rehberi"
+            alt={IOS_STRINGS.GUIDANCE_IMAGE_ALT}
             className="w-full h-full object-cover transition-opacity duration-300"
           />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/80 to-transparent p-4">
+          <div
+            className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/80 to-transparent p-4"
+            aria-live="polite"
+          >
             <div className="flex items-center gap-2 text-xs font-medium text-foreground/90 tabular-nums">
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
                 1
               </span>
-              <span>Safari'de 'Paylaş' simgesine dokunun</span>
+              <span>{IOS_STRINGS.STEP_1_OVERLAY}</span>
             </div>
             <div className="flex items-center gap-2 text-xs font-medium text-foreground/90 tabular-nums mt-2">
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
                 2
               </span>
-              <span>'Ana Ekrana Ekle' seçeneğini seçin</span>
+              <span>{IOS_STRINGS.STEP_2_OVERLAY}</span>
             </div>
           </div>
         </div>
@@ -151,18 +216,22 @@ export function IOSInstallGuidance({
           <div className="flex items-start gap-4 p-3 rounded-xl bg-accent/50 border border-border/50">
             <Share className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold">1. Paylaş Simgesi</p>
+              <p className="text-sm font-semibold">
+                {IOS_STRINGS.STEP_1_TITLE}
+              </p>
               <p className="text-xs text-muted-foreground">
-                Tarayıcınızın alt kısmındaki yukarı oklu kutucuğa dokunun.
+                {IOS_STRINGS.STEP_1_DESCRIPTION}
               </p>
             </div>
           </div>
           <div className="flex items-start gap-4 p-3 rounded-xl bg-accent/50 border border-border/50">
             <PlusSquare className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold">2. Ana Ekrana Ekle</p>
+              <p className="text-sm font-semibold">
+                {IOS_STRINGS.STEP_2_TITLE}
+              </p>
               <p className="text-xs text-muted-foreground">
-                Açılan menüde aşağı kaydırıp "Ana Ekrana Ekle" butonunu bulun.
+                {IOS_STRINGS.STEP_2_DESCRIPTION}
               </p>
             </div>
           </div>
@@ -174,24 +243,26 @@ export function IOSInstallGuidance({
               <Button
                 variant="outline"
                 onClick={handleLater}
-                className="flex-1 h-12 rounded-xl text-md font-medium"
+                className="flex-1 h-12 min-h-[44px] rounded-xl text-md font-medium"
               >
-                Sonra
+                {IOS_STRINGS.BUTTON_LATER}
               </Button>
               <Button
                 onClick={handleInstallConfirm}
                 disabled={isCheckingInstall}
-                className="flex-1 h-12 rounded-xl text-md font-medium shadow-lg shadow-primary/20"
+                className="flex-1 h-12 min-h-[44px] rounded-xl text-md font-medium shadow-lg shadow-primary/20"
               >
-                {isCheckingInstall ? "Kontrol ediliyor..." : "Kurdum"}
+                {isCheckingInstall
+                  ? IOS_STRINGS.BUTTON_CHECKING
+                  : IOS_STRINGS.BUTTON_INSTALLED}
               </Button>
             </div>
           ) : (
             <Button
               onClick={handleClose}
-              className="w-full h-12 rounded-xl text-md font-medium shadow-lg shadow-primary/20"
+              className="w-full h-12 min-h-[44px] rounded-xl text-md font-medium shadow-lg shadow-primary/20"
             >
-              Anladım
+              {IOS_STRINGS.BUTTON_UNDERSTOOD}
             </Button>
           )}
         </div>

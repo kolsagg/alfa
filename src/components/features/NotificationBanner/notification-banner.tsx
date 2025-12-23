@@ -2,19 +2,23 @@
  * NotificationBanner Component
  *
  * Story 4.2 AC#4: Graceful degradation banner for denied notification permission.
+ * Story 4.7: Extended to handle unsupported browsers and iOS modal priority.
  *
  * Visibility logic:
- * - Shows when permission is "denied" AND not dismissed
+ * - Shows when permission is "denied" OR browser unsupported (AC6)
  * - Within first 7 days after denial: always shows
  * - After 7 days: only shows if a payment is imminent (≤3 days)
  * - User can permanently dismiss with "Bir daha gösterme" button
+ * - IF iOS Install Guidance modal is active, banner is suppressed (AC1)
  */
 
 import { useMemo } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { useSettingsStore } from "@/stores/settings-store";
+import { useIOSPWADetection } from "@/hooks/use-ios-pwa-detection";
 import { cn } from "@/lib/utils";
 import { shouldShowNotificationBanner } from "./utils";
+import { NOTIFICATION_STRINGS } from "@/lib/i18n/notifications";
 
 interface NotificationBannerProps {
   /** Next payment date (ISO string or Date) for imminent payment check */
@@ -34,6 +38,9 @@ export function NotificationBanner({
     dismissNotificationBanner,
   } = useSettingsStore();
 
+  // Story 4.7 AC1: Check if iOS modal is active
+  const { shouldShowPrompt: isIOSModalActive } = useIOSPWADetection();
+
   const shouldShow = useMemo(
     () =>
       shouldShowNotificationBanner(
@@ -42,13 +49,15 @@ export function NotificationBanner({
           notificationPermissionDeniedAt,
           notificationBannerDismissedAt,
         },
-        nextPaymentDate
+        nextPaymentDate,
+        isIOSModalActive // Story 4.7: Suppress if iOS modal is active
       ),
     [
       notificationPermission,
       notificationPermissionDeniedAt,
       notificationBannerDismissedAt,
       nextPaymentDate,
+      isIOSModalActive,
     ]
   );
 
@@ -73,7 +82,7 @@ export function NotificationBanner({
           aria-hidden="true"
         />
         <p className="text-sm font-medium">
-          Bildirimler kapalı — Tarayıcı ayarlarından açabilirsiniz.
+          {NOTIFICATION_STRINGS.BANNER_DENIED}
         </p>
       </div>
       <button
@@ -85,7 +94,7 @@ export function NotificationBanner({
           "focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2",
           "dark:focus:ring-offset-amber-950"
         )}
-        aria-label="Bir daha gösterme"
+        aria-label={NOTIFICATION_STRINGS.BANNER_DISMISS_ARIA}
       >
         <X className="size-4" aria-hidden="true" />
       </button>

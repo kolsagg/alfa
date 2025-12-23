@@ -1,23 +1,37 @@
-import { LayoutDashboard, Plus, Settings } from "lucide-react";
+import { LayoutDashboard, Plus, Settings, Wallet } from "lucide-react";
+import { NavLink } from "react-router";
 import { Button } from "@/components/ui/button";
+import { useUIStore } from "@/stores/ui-store";
+import { ROUTES } from "@/router/routes";
 
-type NavItem = "dashboard" | "add" | "settings";
-
-interface BottomNavProps {
-  activeItem?: NavItem;
-  onNavigate?: (item: NavItem) => void;
+interface NavItemConfig {
+  id: string;
+  path: string | null; // null for action buttons (no routing)
+  label: string;
+  icon: typeof LayoutDashboard;
+  action?: () => void;
 }
 
-export function BottomNav({
-  activeItem = "dashboard",
-  onNavigate,
-}: BottomNavProps) {
-  const items: { id: NavItem; label: string; icon: typeof LayoutDashboard }[] =
-    [
-      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { id: "add", label: "Ekle", icon: Plus },
-      { id: "settings", label: "Ayarlar", icon: Settings },
-    ];
+export function BottomNav() {
+  const openModal = useUIStore((s) => s.openModal);
+
+  const navItems: NavItemConfig[] = [
+    {
+      id: "dashboard",
+      path: ROUTES.DASHBOARD,
+      label: "Dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      id: "add",
+      path: null,
+      label: "Ekle",
+      icon: Plus,
+      action: () => openModal("addSubscription"),
+    },
+    { id: "wallet", path: ROUTES.WALLET, label: "Cüzdan", icon: Wallet },
+    { id: "settings", path: ROUTES.SETTINGS, label: "Ayarlar", icon: Settings },
+  ];
 
   return (
     <nav
@@ -26,25 +40,41 @@ export function BottomNav({
       aria-label="Alt navigasyon"
     >
       <div className="flex h-16 items-center justify-around px-4">
-        {items.map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeItem === item.id;
+
+          // Action button (no routing)
+          if (item.path === null) {
+            return (
+              <Button
+                key={item.id}
+                variant="ghost"
+                onClick={item.action}
+                className="flex flex-col items-center justify-center gap-1 touch-target rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                aria-label={item.label}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-xs font-medium">{item.label}</span>
+              </Button>
+            );
+          }
+
           return (
-            <Button
+            <NavLink
               key={item.id}
-              variant="ghost"
-              onClick={() => onNavigate?.(item.id)}
-              className={`flex flex-col items-center justify-center gap-1 touch-target rounded-lg transition-colors ${
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center gap-1 touch-target rounded-lg transition-colors px-3 py-2 ${
+                  isActive
+                    ? "text-primary font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`
+              }
               aria-label={item.label}
-              aria-current={isActive ? "page" : undefined}
             >
               <Icon className="h-5 w-5" />
               <span className="text-xs font-medium">{item.label}</span>
-            </Button>
+            </NavLink>
           );
         })}
       </div>

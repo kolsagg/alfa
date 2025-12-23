@@ -6,9 +6,17 @@ import {
   syncNotificationPermissions,
 } from "@/services/notification-dispatcher";
 
+const mockRunRecovery = vi.fn();
+
 vi.mock("@/services/notification-dispatcher", () => ({
   checkAndDispatchNotifications: vi.fn(),
   syncNotificationPermissions: vi.fn(),
+}));
+
+vi.mock("./use-missed-notifications-recovery", () => ({
+  useMissedNotificationsRecovery: () => ({
+    runRecovery: mockRunRecovery,
+  }),
 }));
 
 describe("useNotificationLifecycle", () => {
@@ -21,9 +29,10 @@ describe("useNotificationLifecycle", () => {
     vi.useRealTimers();
   });
 
-  it("should trigger dispatch and sync on mount", () => {
+  it("should trigger recovery, dispatch and sync on mount", () => {
     renderHook(() => useNotificationLifecycle());
 
+    expect(mockRunRecovery).toHaveBeenCalledTimes(1);
     expect(checkAndDispatchNotifications).toHaveBeenCalledTimes(1);
     expect(syncNotificationPermissions).toHaveBeenCalledTimes(1);
   });
@@ -37,6 +46,7 @@ describe("useNotificationLifecycle", () => {
     // Fast forward 60s
     vi.advanceTimersByTime(60000);
 
+    expect(mockRunRecovery).toHaveBeenCalledTimes(2);
     expect(checkAndDispatchNotifications).toHaveBeenCalledTimes(2);
     expect(syncNotificationPermissions).toHaveBeenCalledTimes(2);
   });
@@ -54,6 +64,7 @@ describe("useNotificationLifecycle", () => {
     });
     document.dispatchEvent(new Event("visibilitychange"));
 
+    expect(mockRunRecovery).toHaveBeenCalledTimes(2);
     expect(checkAndDispatchNotifications).toHaveBeenCalledTimes(2);
     expect(syncNotificationPermissions).toHaveBeenCalledTimes(2);
   });

@@ -68,25 +68,21 @@ describe("NotificationScheduleStore", () => {
 
     it("should replace existing schedule", () => {
       // Initial schedule
-      useNotificationScheduleStore
-        .getState()
-        .updateSchedule([
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
-          }),
-        ]);
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
+        }),
+      ]);
 
       // New schedule
-      useNotificationScheduleStore
-        .getState()
-        .updateSchedule([
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440002",
-          }),
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440003",
-          }),
-        ]);
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440002",
+        }),
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440003",
+        }),
+      ]);
 
       const { schedule } = useNotificationScheduleStore.getState();
 
@@ -117,13 +113,11 @@ describe("NotificationScheduleStore", () => {
 
   describe("markAsNotified", () => {
     it("should mark entry as notified with timestamp", () => {
-      useNotificationScheduleStore
-        .getState()
-        .updateSchedule([
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
-          }),
-        ]);
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
+        }),
+      ]);
 
       useNotificationScheduleStore
         .getState()
@@ -135,16 +129,14 @@ describe("NotificationScheduleStore", () => {
     });
 
     it("should not affect other entries", () => {
-      useNotificationScheduleStore
-        .getState()
-        .updateSchedule([
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
-          }),
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440002",
-          }),
-        ]);
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
+        }),
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440002",
+        }),
+      ]);
 
       useNotificationScheduleStore
         .getState()
@@ -157,13 +149,11 @@ describe("NotificationScheduleStore", () => {
     });
 
     it("should handle non-existent subscription gracefully", () => {
-      useNotificationScheduleStore
-        .getState()
-        .updateSchedule([
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
-          }),
-        ]);
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
+        }),
+      ]);
 
       // Should not throw
       useNotificationScheduleStore.getState().markAsNotified("non-existent");
@@ -174,18 +164,75 @@ describe("NotificationScheduleStore", () => {
     });
   });
 
-  describe("clearSchedule", () => {
-    it("should clear all entries", () => {
+  describe("markBatchAsNotified", () => {
+    it("should mark multiple entries as notified with same timestamp", () => {
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
+        }),
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440002",
+        }),
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440003",
+        }),
+      ]);
+
       useNotificationScheduleStore
         .getState()
-        .updateSchedule([
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
-          }),
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440002",
-          }),
+        .markBatchAsNotified([
+          "550e8400-e29b-41d4-a716-446655440001",
+          "550e8400-e29b-41d4-a716-446655440003",
         ]);
+
+      const { schedule } = useNotificationScheduleStore.getState();
+
+      expect(schedule[0].notifiedAt).toBe("2025-01-10T08:00:00.000Z");
+      expect(schedule[1].notifiedAt).toBeUndefined(); // Not in batch
+      expect(schedule[2].notifiedAt).toBe("2025-01-10T08:00:00.000Z");
+    });
+
+    it("should handle empty array gracefully", () => {
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
+        }),
+      ]);
+
+      // Should not throw
+      useNotificationScheduleStore.getState().markBatchAsNotified([]);
+
+      const { schedule } = useNotificationScheduleStore.getState();
+      expect(schedule[0].notifiedAt).toBeUndefined();
+    });
+
+    it("should handle non-existent subscription IDs gracefully", () => {
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
+        }),
+      ]);
+
+      // Should not throw
+      useNotificationScheduleStore
+        .getState()
+        .markBatchAsNotified(["non-existent-1", "non-existent-2"]);
+
+      const { schedule } = useNotificationScheduleStore.getState();
+      expect(schedule[0].notifiedAt).toBeUndefined();
+    });
+  });
+
+  describe("clearSchedule", () => {
+    it("should clear all entries", () => {
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
+        }),
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440002",
+        }),
+      ]);
 
       useNotificationScheduleStore.getState().clearSchedule();
 
@@ -243,16 +290,14 @@ describe("NotificationScheduleStore", () => {
 
   describe("getEntryBySubscriptionId", () => {
     it("should return entry when found", () => {
-      useNotificationScheduleStore
-        .getState()
-        .updateSchedule([
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
-          }),
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440002",
-          }),
-        ]);
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
+        }),
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440002",
+        }),
+      ]);
 
       const entry = useNotificationScheduleStore
         .getState()
@@ -265,13 +310,11 @@ describe("NotificationScheduleStore", () => {
     });
 
     it("should return undefined when not found", () => {
-      useNotificationScheduleStore
-        .getState()
-        .updateSchedule([
-          createScheduleEntry({
-            subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
-          }),
-        ]);
+      useNotificationScheduleStore.getState().updateSchedule([
+        createScheduleEntry({
+          subscriptionId: "550e8400-e29b-41d4-a716-446655440001",
+        }),
+      ]);
 
       const entry = useNotificationScheduleStore
         .getState()

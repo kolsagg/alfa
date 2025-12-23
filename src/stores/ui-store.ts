@@ -25,6 +25,9 @@ interface UIState {
   prefillData: SubscriptionPrefillData | null;
   isLoading: boolean;
 
+  /** Story 4.5 - Date filter for subscription list (ISO date string or null) */
+  dateFilter: string | null;
+
   // Actions
   openModal: (
     modal: ModalType,
@@ -33,6 +36,11 @@ interface UIState {
   ) => void;
   closeModal: () => void;
   setLoading: (loading: boolean) => void;
+
+  /** Story 4.5 - Set date filter for subscription list */
+  setDateFilter: (dateFilter: string | null) => void;
+  /** Story 4.5 - Clear date filter */
+  clearDateFilter: () => void;
 }
 
 export const useUIStore = createStore<UIState>(
@@ -41,6 +49,7 @@ export const useUIStore = createStore<UIState>(
     editingSubscriptionId: null,
     prefillData: null,
     isLoading: false,
+    dateFilter: null,
 
     openModal: (modal, subscriptionId, prefill) =>
       set({
@@ -55,6 +64,9 @@ export const useUIStore = createStore<UIState>(
         prefillData: null,
       }),
     setLoading: (loading) => set({ isLoading: loading }),
+
+    setDateFilter: (dateFilter) => set({ dateFilter }),
+    clearDateFilter: () => set({ dateFilter: null }),
   }),
   {
     name: "UIStore",

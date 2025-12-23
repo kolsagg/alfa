@@ -8,7 +8,7 @@
  * - Handles denied/unsupported states gracefully
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useSettingsStore } from "@/stores/settings-store";
@@ -17,6 +17,8 @@ import {
   isNotificationSupported,
   getBrowserNotificationPermission,
 } from "@/lib/notification-permission";
+import { isPushNotificationActive } from "@/lib/notification/utils";
+import { NOTIFICATION_STRINGS } from "@/lib/i18n/notifications";
 import { detectIOSSafariNonStandalone } from "@/hooks/use-ios-pwa-detection";
 import {
   Bell,
@@ -75,9 +77,12 @@ export function NotificationToggle({
     }
   }, [browserPermission, notificationPermission, setNotificationPermission]);
 
-  // Determine the effective enabled state
-  const isEffectivelyEnabled =
-    notificationsEnabled && notificationPermission === "granted" && isSupported;
+  // Story 4.7: Use shared utility for push notification state
+  const isEffectivelyEnabled = useMemo(
+    () =>
+      isPushNotificationActive(notificationsEnabled, notificationPermission),
+    [notificationsEnabled, notificationPermission]
+  );
 
   // Determine if toggle should be disabled
   const isDisabled =
@@ -154,7 +159,7 @@ export function NotificationToggle({
       return (
         <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
           <AlertCircle className="size-4" />
-          <span>Bu tarayıcı bildirimleri desteklemiyor</span>
+          <span>{NOTIFICATION_STRINGS.SETTINGS_UNSUPPORTED}</span>
         </div>
       );
     }
@@ -163,7 +168,7 @@ export function NotificationToggle({
       return (
         <div className="flex items-center gap-1.5 text-warning text-sm">
           <AlertCircle className="size-4" />
-          <span>Tarayıcı ayarlarından izin verin</span>
+          <span>{NOTIFICATION_STRINGS.SETTINGS_DENIED}</span>
         </div>
       );
     }
@@ -173,7 +178,9 @@ export function NotificationToggle({
         <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 text-sm">
           <CheckCircle2 className="size-4" />
           <span>
-            {notificationsEnabled ? "Bildirimler aktif" : "İzin verildi"}
+            {notificationsEnabled
+              ? NOTIFICATION_STRINGS.SETTINGS_ACTIVE
+              : NOTIFICATION_STRINGS.SETTINGS_GRANTED}
           </span>
         </div>
       );

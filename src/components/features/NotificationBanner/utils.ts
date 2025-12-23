@@ -2,15 +2,31 @@
  * NotificationBanner utility functions
  *
  * Story 4.2: Helpers for banner visibility logic
+ * Story 4.7: Extended for unsupported browser detection
  */
 
 import { NOTIFICATION_CONFIG } from "@/config/notifications";
+import { isNotificationSupported } from "@/lib/notification-permission";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const { BANNER_VISIBILITY_DAYS, IMMINENT_PAYMENT_DAYS } = NOTIFICATION_CONFIG;
 
 /**
+ * Check if notifications are unavailable (denied or unsupported)
+ * Story 4.7 AC6: Includes unsupported browser check
+ */
+export function isNotificationUnavailable(permission: string): boolean {
+  // Unsupported browser
+  if (!isNotificationSupported()) {
+    return true;
+  }
+  // Permission denied
+  return permission === "denied";
+}
+
+/**
  * Helper to determine if banner should be shown based on settings and next payment
+ * Story 4.7: Now also shows for unsupported browsers (AC6)
  */
 export function shouldShowNotificationBanner(
   settings: {
@@ -18,15 +34,22 @@ export function shouldShowNotificationBanner(
     notificationPermissionDeniedAt?: string;
     notificationBannerDismissedAt?: string;
   },
-  nextPaymentDate?: string | Date
+  nextPaymentDate?: string | Date,
+  /** Story 4.7: If iOS modal is active, suppress banner */
+  isIOSModalActive?: boolean
 ): boolean {
-  // Not denied = no banner
-  if (settings.notificationPermission !== "denied") {
+  // Story 4.7 AC1: iOS modal takes priority
+  if (isIOSModalActive) {
     return false;
   }
 
   // Already dismissed = no banner
   if (settings.notificationBannerDismissedAt) {
+    return false;
+  }
+
+  // Not unavailable = no banner (supported + not denied)
+  if (!isNotificationUnavailable(settings.notificationPermission)) {
     return false;
   }
 
