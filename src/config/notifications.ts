@@ -16,7 +16,7 @@ export const NOTIFICATION_CONFIG = {
    * Debounce time for schedule recalculation (ms)
    * Story 4.3: Prevents excessive recalculations during rapid changes
    */
-  SCHEDULE_DEBOUNCE_MS: 500,
+  SCHEDULE_DEBOUNCE_MS: 100,
 
   /**
    * How many days to show the notification banner after permission is denied?

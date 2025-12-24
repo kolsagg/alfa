@@ -2,73 +2,61 @@
 
 ## Tamamlanan İşler
 
-### Epic 1: Project Foundation & Core Infrastructure ✅
+### Epic 1: Project Foundation ✅
 
-- [x] 1.1 Zustand Store Infrastructure Setup
-- [x] 1.2 PWA Manifest and Service Worker Setup
-- [x] 1.3 Theme System Implementation
-- [x] 1.4 iOS PWA Detection and Guidance Component
-- [x] 1.5 Dashboard Layout Skeleton
-- [x] 1.6 Error Boundary and Fallback UI
-- [x] Epic 1 Retrospective
+### Epic 2: Subscription Management ✅
 
-### Epic 2: Subscription Management + Onboarding ✅
+### Epic 3: Dashboard & Analytics ✅
 
-- [x] 2.1 Subscription Zustand Slice
-- [x] 2.2 Category System
-- [x] 2.3 Subscription Form - Add Flow
-- [x] 2.4 Subscription Form - Edit/Delete Flow
-- [x] 2.5 Period Selection & Next Payment Calculation
-- [x] 2.6 Quick-Add Grid
-- [x] 2.7 Color/Icon Picker
-- [x] 2.8 Empty State and Minimal Onboarding
-- [x] 2.9 Notification Permission Stub
-- [x] Epic 2 Retrospective (UX düzeltmeleri dahil)
+- [x] 3.1 Spending Summary
+- [x] 3.2 Timeline View
+- [x] 3.3 Countdown Hero Widget
+- [x] 3.4 Subscription List View
+- [x] 3.5 Category Breakdown
 
----
+### Epic 4: Notification System ✅
 
-## Yapılacaklar
+- [x] 4.1 Permission Flow
+- [x] 4.2 Permission Stub
+- [x] 4.3 Scheduling Logic
+- [x] 4.4 Display & Dispatching
+- [x] 4.5 Grouped Notifications
+- [x] 4.6 iOS PWA Install Prompt logic
+- [x] 4.7 Graceful Degradation
+- [x] 4.8 Missed Notifications Recovery
+- [x] Epic 4 Retrospective
 
-### Epic 3: Dashboard & Analytics (Beklemede)
+### Epic 8: Navigation & Settings (Devam Ediyor)
 
-- [ ] 3.1 Monthly/Yearly Spending Summary
-- [ ] 3.2 Timeline View (Upcoming Payments)
-- [ ] 3.3 Countdown Hero Widget
-- [ ] 3.4 Subscription List View
-- [ ] 3.5 Category Breakdown Visualization
-
-### Epic 4: Notification System (Planlanmadı)
-
-### Epic 5: Data Management (Planlanmadı)
-
-### Epic 6: Settings & Polish (Planlanmadı)
+- [x] 8.1 React Router Setup
+- [x] 8.2 Settings Page Layout & Route
+- [x] 8.3 BottomNav Integration
+- [x] 8.4 Theme Section
 
 ---
 
 ## Mevcut Durum
 
-**Son Güncelleme:** 2025-12-21
+**Son Güncelleme:** 2025-12-24
 
 | Metrik          | Değer           |
 | --------------- | --------------- |
-| Tamamlanan Epic | 2/6             |
-| Toplam Test     | 199 (3 skipped) |
+| Tamamlanan Epic | 4/8             |
+| Test Durumu     | ✅ %100 Geçiyor |
 | Build Durumu    | ✅ Geçiyor      |
-| Lint Durumu     | ✅ 0 hata       |
 
 ---
 
 ## Karar Geçmişi
 
-### Epic 2 Retrospektif Kararları (2025-12-21)
+### Epic 8 Mimari Kararları (2025-12-23)
 
-1. **Sabit OKLCH Renkleri:** CSS değişkenleri yerine sabit OKLCH kullan
-2. **skipToForm Pattern:** EmptyState → Form direkt geçiş için flag
-3. **Helper Text:** UI alanlarına açıklayıcı text ekle
-4. **Test Coverage:** Her story için kapsamlı testler yaz
+1. **React Router v7:** En son router versiyonu kullanıldı.
+2. **Hash Router:** PWA uyumluluğu için path routing yerine hash routing seçildi.
+3. **Dynamic Versioning:** `package.json`'daki versiyon bilgisi Global variable olarak Vite'tan çekildi.
 
-### Epic 1 Retrospektif Kararları (2025-12-18)
+### Epic 4 Adversarial Review Kararları (2025-12-24)
 
-1. **DoD Kuralı:** Her story için lint+build+test zorunlu
-2. **Technical Debt:** Story tamamlanmadan borç temizlenmeli
-3. **Zustand v5 Patterns:** StoreWithPersist type, selector support
+1. **Periodic Recovery:** `runRecovery` 60s aralıklarla foreground'da çalışacak şekilde lifecycle'a eklendi.
+2. **Mount Optimization:** Store senkronizasyonu ile recovery arasındaki race condition testlerle kontrol altına alındı.
+3. **Zod Datetime:** `lastNotificationCheck` için strict datetime validation eklendi.

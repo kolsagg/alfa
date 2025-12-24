@@ -98,22 +98,23 @@ describe("SettingsPage", () => {
   });
 
   describe("Görünüm (Theme) Section (AC2, AC3)", () => {
-    it("renders theme section with ThemeToggle", () => {
+    it("renders theme section with ThemeSelector (Story 8.4)", () => {
       renderWithRouter(<SettingsPage />);
 
       const themeSection = screen.getByRole("region", { name: /görünüm/i });
       expect(themeSection).toBeInTheDocument();
 
-      // ThemeToggle should be present (it renders a button)
-      const themeButton = within(themeSection).getByRole("button");
-      expect(themeButton).toBeInTheDocument();
+      // Story 8.4: ThemeSelector renders tabs instead of dropdown button
+      const tablist = within(themeSection).getByRole("tablist");
+      expect(tablist).toBeInTheDocument();
     });
 
-    it("displays theme section description", () => {
+    it("displays theme section description (Story 8.4 updated)", () => {
       renderWithRouter(<SettingsPage />);
 
+      // Story 8.4: Updated description for enhanced section
       expect(
-        screen.getByText(/açık, koyu veya sistem tercihini seçin/i)
+        screen.getByText(/uygulama temasını özelleştirin/i)
       ).toBeInTheDocument();
     });
   });

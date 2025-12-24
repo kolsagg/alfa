@@ -138,6 +138,18 @@
   animation: attention-shake 0.5s ease-in-out infinite;
 }
 
+/* Nav Transition Easing - Spring-like premium feel */
+.transition-nav {
+  transition-property: transform, opacity, background-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Safe Area Support for iOS PWA */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* Reduced Motion Fallback */
 @media (prefers-reduced-motion: reduce) {
   .animate-countdown-pulse,
@@ -145,5 +157,9 @@
   .animate-confetti-fall,
   .animate-success-pulse {
     animation: none;
+  }
+
+  .transition-nav {
+    transition: none;
   }
 }
