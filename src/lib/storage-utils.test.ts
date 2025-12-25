@@ -63,8 +63,8 @@ describe("Storage Utils", () => {
       expect(result.isWarning).toBe(false);
     });
 
-    it("calculates bytes correctly for SubTracker keys (UTF-16: length * 2)", () => {
-      // 100 characters = 200 bytes
+    it("calculates bytes correctly for SubTracker keys (UTF-8)", () => {
+      // 100 ASCII characters = 100 bytes
       const store = (
         localStorage as unknown as { _store: Record<string, string> }
       )._store;
@@ -72,16 +72,16 @@ describe("Storage Utils", () => {
 
       const result = calculateStorageUsage();
 
-      expect(result.usedBytes).toBe(200);
+      expect(result.usedBytes).toBe(100);
     });
 
     it("sums bytes across all SubTracker keys", () => {
       const store = (
         localStorage as unknown as { _store: Record<string, string> }
       )._store;
-      store["subtracker-subscriptions"] = "a".repeat(50); // 100 bytes
-      store["subtracker-settings"] = "b".repeat(50); // 100 bytes
-      store["subtracker-cards-dev"] = "c".repeat(50); // 100 bytes
+      store["subtracker-subscriptions"] = "a".repeat(100); // 100 bytes
+      store["subtracker-settings"] = "b".repeat(100); // 100 bytes
+      store["subtracker-cards-dev"] = "c".repeat(100); // 100 bytes
 
       const result = calculateStorageUsage();
 
@@ -92,7 +92,7 @@ describe("Storage Utils", () => {
       const store = (
         localStorage as unknown as { _store: Record<string, string> }
       )._store;
-      store["subtracker-subscriptions"] = "a".repeat(50);
+      store["subtracker-subscriptions"] = "a".repeat(100);
       store["some-other-key"] = "x".repeat(1000);
 
       const result = calculateStorageUsage();
@@ -108,13 +108,12 @@ describe("Storage Utils", () => {
     });
 
     it("calculates percentage correctly", () => {
-      // 5% of 5MB = 256KB = 131072 chars (262144 bytes)
+      // 5% of 5MB = 262144 bytes
       const store = (
         localStorage as unknown as { _store: Record<string, string> }
       )._store;
-      const targetBytes = BACKUP_SIZE_THRESHOLD * 0.05;
-      const charCount = Math.floor(targetBytes / 2);
-      store["subtracker-subscriptions"] = "a".repeat(charCount);
+      const targetBytes = Math.floor(BACKUP_SIZE_THRESHOLD * 0.05);
+      store["subtracker-subscriptions"] = "a".repeat(targetBytes);
 
       const result = calculateStorageUsage();
 
@@ -126,9 +125,8 @@ describe("Storage Utils", () => {
       const store = (
         localStorage as unknown as { _store: Record<string, string> }
       )._store;
-      const targetBytes = BACKUP_SIZE_THRESHOLD * 0.85;
-      const charCount = Math.floor(targetBytes / 2);
-      store["subtracker-subscriptions"] = "a".repeat(charCount);
+      const targetBytes = Math.floor(BACKUP_SIZE_THRESHOLD * 0.85);
+      store["subtracker-subscriptions"] = "a".repeat(targetBytes);
 
       const result = calculateStorageUsage();
 
@@ -141,9 +139,8 @@ describe("Storage Utils", () => {
       const store = (
         localStorage as unknown as { _store: Record<string, string> }
       )._store;
-      const targetBytes = BACKUP_SIZE_THRESHOLD * 0.7;
-      const charCount = Math.floor(targetBytes / 2);
-      store["subtracker-subscriptions"] = "a".repeat(charCount);
+      const targetBytes = Math.floor(BACKUP_SIZE_THRESHOLD * 0.7);
+      store["subtracker-subscriptions"] = "a".repeat(targetBytes);
 
       const result = calculateStorageUsage();
 
