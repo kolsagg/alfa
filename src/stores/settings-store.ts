@@ -27,6 +27,12 @@ export interface SettingsState extends Settings {
   completeOnboarding: () => void;
   dismissIOSPrompt: () => void;
   setHasSeenNotificationPrompt: (seen: boolean) => void;
+  // Story 5.4: Backup reminder actions
+  setBackupReminderDismissed: () => void;
+  setBackupReminderDisabled: (disabled: boolean) => void;
+  // Story 5.5: Storage limit warning actions
+  setStorageWarningDismissed: () => void;
+  setRecordCountWarningDisabled: (disabled: boolean) => void;
 }
 
 export const useSettingsStore = createStore<SettingsState>(
@@ -45,6 +51,12 @@ export const useSettingsStore = createStore<SettingsState>(
     onboardingCompleted: false,
     lastIOSPromptDismissed: undefined,
     hasSeenNotificationPrompt: false,
+    // Story 5.4: Backup reminder defaults
+    backupReminderDismissedAt: undefined,
+    backupReminderDisabled: false,
+    // Story 5.5: Storage limit warning defaults
+    storageWarningDismissedAt: undefined,
+    recordCountWarningDisabled: false,
 
     // Actions
     setTheme: (theme) => set({ theme }),
@@ -178,10 +190,24 @@ export const useSettingsStore = createStore<SettingsState>(
       set({ lastIOSPromptDismissed: new Date().toISOString() }),
     setHasSeenNotificationPrompt: (seen) =>
       set({ hasSeenNotificationPrompt: seen }),
+
+    // Story 5.4: Backup reminder actions
+    setBackupReminderDismissed: () =>
+      set({ backupReminderDismissedAt: new Date().toISOString() }),
+
+    setBackupReminderDisabled: (disabled) =>
+      set({ backupReminderDisabled: disabled }),
+
+    // Story 5.5: Storage limit warning actions
+    setStorageWarningDismissed: () =>
+      set({ storageWarningDismissedAt: new Date().toISOString() }),
+
+    setRecordCountWarningDisabled: (disabled) =>
+      set({ recordCountWarningDisabled: disabled }),
   }),
   {
     name: "SettingsStore",
-    version: 4,
+    version: 6,
     migrate: (persistedState: unknown, version: number) => {
       const state = persistedState as Partial<SettingsState>;
 
@@ -213,6 +239,23 @@ export const useSettingsStore = createStore<SettingsState>(
           state.notificationPermissionDeniedAt ?? undefined;
         state.notificationBannerDismissedAt =
           state.notificationBannerDismissedAt ?? undefined;
+      }
+
+      if (version < 5) {
+        // Migration to v5: Add backup reminder fields (Story 5.4)
+        console.log("[SettingsStore] Migrating to v5");
+        state.backupReminderDismissedAt =
+          state.backupReminderDismissedAt ?? undefined;
+        state.backupReminderDisabled = state.backupReminderDisabled ?? false;
+      }
+
+      if (version < 6) {
+        // Migration to v6: Add storage limit warning fields (Story 5.5)
+        console.log("[SettingsStore] Migrating to v6");
+        state.storageWarningDismissedAt =
+          state.storageWarningDismissedAt ?? undefined;
+        state.recordCountWarningDisabled =
+          state.recordCountWarningDisabled ?? false;
       }
 
       return state as SettingsState;

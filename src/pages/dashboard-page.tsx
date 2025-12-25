@@ -5,6 +5,7 @@ import { useSubscriptionStore } from "@/stores/subscription-store";
 import { SpendingSummary } from "@/components/features/spending";
 import { TimelineView } from "@/components/features/timeline";
 import { CategoryBreakdown } from "@/components/features/analytics/category-breakdown";
+import { DashboardAlerts } from "@/components/features/dashboard-alerts";
 
 /**
  * Dashboard Page Component
@@ -21,6 +22,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6" data-testid="dashboard-page">
+      {/* Story 5.5: Centralized Alerts Container */}
+      <DashboardAlerts />
       <SpendingSummary />
       <CountdownHero />
       {hasSubscriptions && <TimelineView />}

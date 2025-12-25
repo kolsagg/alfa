@@ -173,29 +173,31 @@ export function NotificationSettings({
             >
               {SETTINGS_STRINGS.DAYS_BEFORE_HELPER}
             </p>
-            <Select
-              value={notificationDaysBefore.toString()}
-              onValueChange={handleDaysChange}
-            >
-              <SelectTrigger
-                id={daysSelectId}
-                className={cn(
-                  "w-full ml-6", // Removed w-fit conflict by keeping w-full as intended for mobile-first layout
-                  "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
-                  "motion-reduce:transition-none"
-                )}
-                aria-describedby={`${daysSelectId}-desc`}
+            <div className="pl-6">
+              <Select
+                value={notificationDaysBefore.toString()}
+                onValueChange={handleDaysChange}
               >
-                <SelectValue placeholder="Gün seçin" />
-              </SelectTrigger>
-              <SelectContent>
-                {DAYS_OPTIONS.map((day) => (
-                  <SelectItem key={day} value={day.toString()}>
-                    {day} {SETTINGS_STRINGS.DAYS_BEFORE_UNIT}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <SelectTrigger
+                  id={daysSelectId}
+                  className={cn(
+                    "w-full",
+                    "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                    "motion-reduce:transition-none"
+                  )}
+                  aria-describedby={`${daysSelectId}-desc`}
+                >
+                  <SelectValue placeholder="Gün seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DAYS_OPTIONS.map((day) => (
+                    <SelectItem key={day} value={day.toString()}>
+                      {day} {SETTINGS_STRINGS.DAYS_BEFORE_UNIT}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* AC3: Notification Time Input */}
@@ -215,22 +217,25 @@ export function NotificationSettings({
             >
               {SETTINGS_STRINGS.TIME_HELPER}
             </p>
-            <Input
-              id={timeInputId}
-              type="time"
-              value={timeValue}
-              onChange={handleTimeChange}
-              className={cn(
-                "w-full ml-6",
-                "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
-                "motion-reduce:transition-none",
-                timeError && "border-destructive focus-visible:ring-destructive"
-              )}
-              aria-describedby={
-                timeError ? `${timeInputId}-error` : `${timeInputId}-desc`
-              }
-              aria-invalid={!!timeError}
-            />
+            <div className="pl-6">
+              <Input
+                id={timeInputId}
+                type="time"
+                value={timeValue}
+                onChange={handleTimeChange}
+                className={cn(
+                  "w-full",
+                  "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                  "motion-reduce:transition-none",
+                  timeError &&
+                    "border-destructive focus-visible:ring-destructive"
+                )}
+                aria-describedby={
+                  timeError ? `${timeInputId}-error` : `${timeInputId}-desc`
+                }
+                aria-invalid={!!timeError}
+              />
+            </div>
             {/* Inline error feedback */}
             {timeError && (
               <p

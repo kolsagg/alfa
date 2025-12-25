@@ -79,18 +79,18 @@ export function BottomNav() {
         {navItems.map((item) => {
           const Icon = item.icon;
 
-          // Center Action Button (Elevated FAB pattern)
+          // Center Action Button - same style as other nav items
           if (item.path === null && item.isCenter) {
             return (
               <Button
                 key={item.id}
-                variant="default"
+                variant="ghost"
                 onClick={() => handleActionClick(item.action)}
-                className="relative -top-4 flex flex-col items-center justify-center gap-0.5 touch-target rounded-full w-14 h-14 shadow-lg transition-nav hover:scale-110 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="flex flex-col items-center justify-center gap-1 touch-target rounded-lg transition-nav text-muted-foreground hover:text-foreground hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-primary px-3 py-2"
                 aria-label={item.label}
               >
-                <Icon strokeWidth={2.5} className="h-6 w-6" />
-                <span className="text-[10px] font-medium whitespace-nowrap">
+                <Icon className="h-5 w-5" />
+                <span className="text-xs font-medium whitespace-nowrap">
                   {item.label}
                 </span>
               </Button>

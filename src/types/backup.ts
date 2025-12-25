@@ -23,6 +23,9 @@ export const CURRENT_STORE_VERSIONS = {
 // NFR15: 5MB threshold in bytes
 export const BACKUP_SIZE_THRESHOLD = 5 * 1024 * 1024;
 
+// Story 5.5: Record count threshold for performance warning
+export const RECORD_COUNT_THRESHOLD = 500;
+
 /**
  * Settings fields safe to import across devices
  * AC3: Excludes browser-dependent and device-specific fields

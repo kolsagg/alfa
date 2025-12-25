@@ -34,6 +34,12 @@ export const SettingsSchema = z.object({
   onboardingCompleted: z.boolean().default(false),
   lastIOSPromptDismissed: z.string().datetime().optional(),
   hasSeenNotificationPrompt: z.boolean().default(false),
+  // Story 5.4: Backup reminder settings
+  backupReminderDismissedAt: z.string().datetime().optional(),
+  backupReminderDisabled: z.boolean().default(false),
+  // Story 5.5: Storage limit warning settings
+  storageWarningDismissedAt: z.string().datetime().optional(),
+  recordCountWarningDisabled: z.boolean().default(false),
 });
 
 export type Settings = z.infer<typeof SettingsSchema>;

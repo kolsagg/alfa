@@ -82,6 +82,29 @@ export const SETTINGS_STRINGS = {
   PWA_MODE: "Uygulama", // "App" - PWA standalone mode
   BROWSER_MODE: "Tarayıcı", // "Browser" - web mode
   PLATFORM_LABEL: "Platform", // "Platform"
+
+  // Story 5.4: Backup Reminder Banner Strings
+  BACKUP_REMINDER_TITLE: "Yedekleme Hatırlatıcısı", // "Backup Reminder"
+  BACKUP_REMINDER_DESCRIPTION: "Son yedeğinizin üzerinden 7 gün geçti", // "It's been 7 days since your last backup"
+  BACKUP_NOW_BUTTON: "Şimdi Yedekle", // "Backup Now"
+  REMIND_LATER_BUTTON: "Daha Sonra Hatırlat", // "Remind Me Later"
+  DONT_REMIND_BUTTON: "Bir Daha Gösterme", // "Don't remind me again"
+  BACKUP_SUCCESS_TOAST: "Yedek başarıyla oluşturuldu", // "Backup created successfully"
+  FIRST_BACKUP_SUGGESTION: "Verilerinizi yedeklemeyi düşünün", // "Consider backing up your data"
+  BACKUP_REMINDERS_TOGGLE: "Yedek Hatırlatıcıları", // "Backup Reminders"
+  BACKUP_REMINDERS_HELPER: "Düzenli yedekleme hatırlatıcıları al", // "Get regular backup reminders"
+
+  // Story 5.5: Storage Limit Warnings
+  STORAGE_WARNING_TITLE: "Depolama Alanı Uyarısı", // "Storage Warning"
+  STORAGE_WARNING_CRITICAL_TITLE: "Depolama Alanı Dolu", // "Storage Full"
+  STORAGE_WARNING_DESCRIPTION:
+    "Depolama alanı %80 doluluk oranına ulaştı ({used} / {total}).", // "Storage usage reached 80%..."
+  STORAGE_FULL_DESCRIPTION:
+    "Depolama alanı tamamen doldu. Yeni veri kaydedilemiyor. Lütfen gereksiz verileri silin.",
+  RECORD_COUNT_WARNING_TITLE: "Yüksek Kayıt Sayısı", // "High Record Count"
+  RECORD_COUNT_WARNING_DESCRIPTION:
+    "{count} kayıt var. Performans için yedek alıp geçmiş verileri temizlemeyi düşünün.", // AC1: Accurate count with placeholder
+  MANAGE_DATA_BUTTON: "Verileri Yönet", // "Manage Data"
 } as const;
 
 export type SettingsStrings = typeof SETTINGS_STRINGS;

@@ -11,6 +11,8 @@
 import { useState, useRef } from "react";
 import { Download, Upload, Loader2, Check, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { SETTINGS_STRINGS } from "@/lib/i18n/settings";
 import { useSubscriptionStore } from "@/stores/subscription-store";
 import { useSettingsStore } from "@/stores/settings-store";
@@ -305,6 +307,9 @@ export function DataSettings() {
         {SETTINGS_STRINGS.LAST_BACKUP_LABEL} {formatLastBackup()}
       </p>
 
+      {/* Backup Reminder Toggle - Story 5.4 AC8 */}
+      <BackupReminderToggle />
+
       {/* Import confirmation dialog - AC4 */}
       <ImportConfirmDialog
         open={showConfirmDialog}
@@ -318,6 +323,52 @@ export function DataSettings() {
         onAutoBackupChange={setAutoBackup}
         onConfirm={handleConfirmImport}
         isProcessing={importState === "processing"}
+      />
+    </div>
+  );
+}
+
+/**
+ * Backup Reminder Toggle Component
+ * Story 5.4 AC8: Toggle for enabling/disabling backup reminders
+ */
+function BackupReminderToggle() {
+  const backupReminderDisabled = useSettingsStore(
+    (state) => state.backupReminderDisabled
+  );
+  const setBackupReminderDisabled = useSettingsStore(
+    (state) => state.setBackupReminderDisabled
+  );
+
+  // Toggle is "enabled" when backupReminderDisabled is false
+  const isEnabled = !backupReminderDisabled;
+
+  const handleToggle = (checked: boolean) => {
+    // When toggle is ON (checked=true), reminders are enabled (disabled=false)
+    setBackupReminderDisabled(!checked);
+  };
+
+  return (
+    <div
+      className="flex items-center justify-between gap-4 py-2"
+      data-testid="backup-reminder-toggle"
+    >
+      <div className="space-y-0.5">
+        <Label
+          htmlFor="backup-reminder-switch"
+          className="text-sm font-medium cursor-pointer"
+        >
+          {SETTINGS_STRINGS.BACKUP_REMINDERS_TOGGLE}
+        </Label>
+        <p className="text-xs text-muted-foreground">
+          {SETTINGS_STRINGS.BACKUP_REMINDERS_HELPER}
+        </p>
+      </div>
+      <Switch
+        id="backup-reminder-switch"
+        checked={isEnabled}
+        onCheckedChange={handleToggle}
+        aria-label={SETTINGS_STRINGS.BACKUP_REMINDERS_TOGGLE}
       />
     </div>
   );

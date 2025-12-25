@@ -3,7 +3,7 @@ import { useSettingsStore, type SettingsState } from "./settings-store";
 
 describe("useSettingsStore", () => {
   beforeEach(() => {
-    // Reset store state before each test with v4 fields
+    // Reset store state before each test with v5 fields
     useSettingsStore.setState({
       theme: "system",
       notificationPermission: "default",
@@ -14,6 +14,12 @@ describe("useSettingsStore", () => {
       // Story 4.2 v4 fields
       notificationPermissionDeniedAt: undefined,
       notificationBannerDismissedAt: undefined,
+      // Story 5.4 v5 fields
+      backupReminderDismissedAt: undefined,
+      backupReminderDisabled: false,
+      // Story 5.5 v6 fields
+      storageWarningDismissedAt: undefined,
+      recordCountWarningDisabled: false,
       onboardingCompleted: false,
       lastIOSPromptDismissed: undefined,
       hasSeenNotificationPrompt: false,
@@ -143,6 +149,93 @@ describe("useSettingsStore", () => {
       expect(second).toBeDefined();
       // Note: With fake timers, second should be 1 second later
       vi.useRealTimers();
+    });
+  });
+
+  // ============ STORY 5.4 TESTS ============
+
+  describe("setBackupReminderDismissed (v5)", () => {
+    it("should record dismissal timestamp", () => {
+      const before = new Date();
+      useSettingsStore.getState().setBackupReminderDismissed();
+      const after = new Date();
+
+      const state = useSettingsStore.getState();
+      expect(state.backupReminderDismissedAt).toBeDefined();
+
+      const dismissedAt = new Date(state.backupReminderDismissedAt!);
+      expect(dismissedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+      expect(dismissedAt.getTime()).toBeLessThanOrEqual(after.getTime());
+    });
+
+    it("should update timestamp on repeated dismissals", () => {
+      useSettingsStore.getState().setBackupReminderDismissed();
+      const first = useSettingsStore.getState().backupReminderDismissedAt;
+
+      vi.useFakeTimers();
+      vi.advanceTimersByTime(1000);
+
+      useSettingsStore.getState().setBackupReminderDismissed();
+      const second = useSettingsStore.getState().backupReminderDismissedAt;
+
+      expect(first).toBeDefined();
+      expect(second).toBeDefined();
+      vi.useRealTimers();
+    });
+  });
+
+  describe("setBackupReminderDisabled (v5)", () => {
+    it("should have default backupReminderDisabled = false", () => {
+      expect(useSettingsStore.getState().backupReminderDisabled).toBe(false);
+    });
+
+    it("should set backupReminderDisabled to true", () => {
+      useSettingsStore.getState().setBackupReminderDisabled(true);
+      expect(useSettingsStore.getState().backupReminderDisabled).toBe(true);
+    });
+
+    it("should set backupReminderDisabled back to false", () => {
+      useSettingsStore.getState().setBackupReminderDisabled(true);
+      useSettingsStore.getState().setBackupReminderDisabled(false);
+      expect(useSettingsStore.getState().backupReminderDisabled).toBe(false);
+    });
+  });
+
+  // ============ STORY 5.5 TESTS ============
+
+  describe("setStorageWarningDismissed (v6)", () => {
+    it("should record dismissal timestamp", () => {
+      const before = new Date();
+      useSettingsStore.getState().setStorageWarningDismissed();
+      const after = new Date();
+
+      const state = useSettingsStore.getState();
+      expect(state.storageWarningDismissedAt).toBeDefined();
+
+      const dismissedAt = new Date(state.storageWarningDismissedAt!);
+      expect(dismissedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+      expect(dismissedAt.getTime()).toBeLessThanOrEqual(after.getTime());
+    });
+  });
+
+  describe("setRecordCountWarningDisabled (v6)", () => {
+    it("should have default recordCountWarningDisabled = false", () => {
+      expect(useSettingsStore.getState().recordCountWarningDisabled).toBe(
+        false
+      );
+    });
+
+    it("should set recordCountWarningDisabled to true", () => {
+      useSettingsStore.getState().setRecordCountWarningDisabled(true);
+      expect(useSettingsStore.getState().recordCountWarningDisabled).toBe(true);
+    });
+
+    it("should set recordCountWarningDisabled back to false", () => {
+      useSettingsStore.getState().setRecordCountWarningDisabled(true);
+      useSettingsStore.getState().setRecordCountWarningDisabled(false);
+      expect(useSettingsStore.getState().recordCountWarningDisabled).toBe(
+        false
+      );
     });
   });
 
@@ -426,6 +519,134 @@ describe("useSettingsStore", () => {
       expect(
         useSettingsStore.getState().notificationBannerDismissedAt
       ).toBeUndefined();
+
+      consoleSpy.mockRestore();
+    });
+
+    it("should migrate from v4 to v5 with backup reminder fields", async () => {
+      const consoleSpy = vi.spyOn(console, "log");
+
+      // Pre-populate with v4 data (no backupReminderDismissedAt or backupReminderDisabled)
+      localStorage.setItem(
+        "subtracker-settings-dev",
+        JSON.stringify({
+          state: {
+            theme: "dark",
+            notificationPermission: "granted",
+            notificationsEnabled: true,
+            notificationDaysBefore: 5,
+            notificationTime: "10:00",
+            notificationPermissionDeniedAt: undefined,
+            notificationBannerDismissedAt: undefined,
+            onboardingCompleted: true,
+            lastBackupDate: "2025-12-20T10:00:00.000Z",
+          },
+          version: 4,
+        })
+      );
+
+      await useSettingsStore.persist.rehydrate();
+
+      // Verify migration happened
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating to v5"
+      );
+
+      // Verify existing data preserved
+      expect(useSettingsStore.getState().theme).toBe("dark");
+      expect(useSettingsStore.getState().lastBackupDate).toBe(
+        "2025-12-20T10:00:00.000Z"
+      );
+
+      // Verify new fields have defaults
+      expect(
+        useSettingsStore.getState().backupReminderDismissedAt
+      ).toBeUndefined();
+      expect(useSettingsStore.getState().backupReminderDisabled).toBe(false);
+
+      consoleSpy.mockRestore();
+    });
+
+    it("should migrate from v5 to v6 with storage warning fields", async () => {
+      const consoleSpy = vi.spyOn(console, "log");
+
+      // Pre-populate with v5 data
+      localStorage.setItem(
+        "subtracker-settings-dev",
+        JSON.stringify({
+          state: {
+            theme: "dark",
+            notificationsEnabled: true,
+            backupReminderDisabled: true,
+          },
+          version: 5,
+        })
+      );
+
+      await useSettingsStore.persist.rehydrate();
+
+      // Verify migration happened
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating to v6"
+      );
+
+      // Verify existing data preserved
+      expect(useSettingsStore.getState().backupReminderDisabled).toBe(true);
+
+      // Verify new fields have defaults
+      expect(
+        useSettingsStore.getState().storageWarningDismissedAt
+      ).toBeUndefined();
+      expect(useSettingsStore.getState().recordCountWarningDisabled).toBe(
+        false
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it("should handle migration from v0 to v6", async () => {
+      const consoleSpy = vi.spyOn(console, "log");
+
+      // Pre-populate with v0 data (minimal)
+      localStorage.setItem(
+        "subtracker-settings-dev",
+        JSON.stringify({
+          state: { theme: "dark" },
+          version: 0,
+        })
+      );
+
+      await useSettingsStore.persist.rehydrate();
+
+      // Verify all migrations ran
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating from v0 to v1"
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating to v2"
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating to v3"
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating to v4"
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating to v5"
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating to v6"
+      );
+
+      // Verify state has all v6 defaults
+      expect(useSettingsStore.getState().theme).toBe("dark");
+      expect(useSettingsStore.getState().notificationsEnabled).toBe(true);
+      expect(
+        useSettingsStore.getState().storageWarningDismissedAt
+      ).toBeUndefined();
+      expect(useSettingsStore.getState().recordCountWarningDisabled).toBe(
+        false
+      );
 
       consoleSpy.mockRestore();
     });
