@@ -285,12 +285,12 @@ describe("DataSettings", () => {
         storeVersions: { subscriptions: 2, settings: 4 },
         exportDate: "2025-01-01T00:00:00.000Z",
         subscriptions: [mockSubscription],
-        settings: { theme: "dark" },
+        settings: { theme: "dark" as const },
       };
 
       vi.mocked(backupModule.parseAndValidateBackup).mockResolvedValue({
         success: true,
-        data: mockBackup as any,
+        data: mockBackup,
         subscriptionCount: 1,
         mostRecentSubscription: "Netflix",
       });
@@ -330,7 +330,12 @@ describe("DataSettings", () => {
       const { toast } = await import("sonner");
       vi.mocked(backupModule.parseAndValidateBackup).mockResolvedValue({
         success: true,
-        data: { subscriptions: [] } as any,
+        data: {
+          version: "1.0",
+          storeVersions: { subscriptions: 2, settings: 4 },
+          exportDate: new Date().toISOString(),
+          subscriptions: [mockSubscription],
+        },
         subscriptionCount: 1,
       });
 

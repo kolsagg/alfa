@@ -143,24 +143,27 @@ export const useSettingsStore = createStore<SettingsState>(
     setLastBackupDate: (date) => set({ lastBackupDate: date }),
 
     mergeSettings: (data) => {
-      // Filter provided data against whitelist
-      const updates: Partial<Settings> = {};
-      const keys = Object.keys(data) as Array<keyof Settings>;
+      // Define importable/mergeable keys whitelist
+      const WHITELIST = [
+        "theme",
+        "notificationsEnabled",
+        "notificationDaysBefore",
+        "notificationTime",
+      ] as const;
+      type WhitelistKey = (typeof WHITELIST)[number];
 
-      for (const key of keys) {
-        // Only merge if in whitelist and has value
-        if (
-          (
-            [
-              "theme",
-              "notificationsEnabled",
-              "notificationDaysBefore",
-              "notificationTime",
-            ] as const
-          ).includes(key as any) &&
-          data[key] !== undefined
-        ) {
-          (updates as any)[key] = data[key];
+      // Filter provided data against whitelist
+      const updates: Pick<Settings, WhitelistKey> = {} as Pick<
+        Settings,
+        WhitelistKey
+      >;
+
+      for (const key of WHITELIST) {
+        if (key in data && data[key] !== undefined) {
+          // Safe assignment: key is guaranteed to be in whitelist
+          (updates[key] as Settings[typeof key]) = data[
+            key
+          ] as Settings[typeof key];
         }
       }
 
