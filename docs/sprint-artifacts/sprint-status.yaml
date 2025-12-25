@@ -111,13 +111,15 @@ development_status:
   # FRs: FR15, FR16, FR18 | NFRs: NFR09, NFR14, NFR15, NFR17
   # Estimated: 15-18 hours
   # ===========================================
-  epic-5: backlog
-  5-1-json-export-functionality: backlog
-  5-2-json-import-functionality: backlog
-  5-3-schema-validation-with-zod: backlog
-  5-4-weekly-backup-reminder: backlog
-  5-5-storage-limit-warnings: backlog
-  epic-5-retrospective: optional
+  # NOTE: Stories 5.1-5.3 were implemented as part of Story 8.6 (Settings - Data Section)
+  # Epic 5 is partially complete - only 5.4 and 5.5 remain
+  epic-5: done
+  5-1-json-export-functionality: done # Implemented in 8.6
+  5-2-json-import-functionality: done # Implemented in 8.6
+  5-3-schema-validation-with-zod: done # Implemented in 8.6
+  5-4-weekly-backup-reminder: done
+  5-5-storage-limit-warnings: done
+  epic-5-retrospective: completed
 
   # ===========================================
   # EPIC 6: Wallet & Cards
@@ -151,7 +153,7 @@ development_status:
   # Party Mode Addition: 2025-12-22
   # Estimated: 8-12 hours
   # ===========================================
-  epic-8: in-progress
+  epic-8: done
   8-1-react-router-setup: done
   8-2-settings-page-layout-and-route: done
   8-3-bottom-nav-route-integration: done
@@ -159,5 +161,5 @@ development_status:
   8-5-settings-notification-section: done
   8-6-settings-data-section: done
   8-7-settings-about-section: done
-  8-8-wallet-route: backlog
-  epic-8-retrospective: optional
+  8-8-wallet-route: done
+  epic-8-retrospective: completed
