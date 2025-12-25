@@ -181,7 +181,7 @@ export function NotificationSettings({
                 <SelectTrigger
                   id={daysSelectId}
                   className={cn(
-                    "w-full",
+                    "w-32", // Match time input width for consistency and mobile safety
                     "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                     "motion-reduce:transition-none"
                   )}
@@ -224,7 +224,7 @@ export function NotificationSettings({
                 value={timeValue}
                 onChange={handleTimeChange}
                 className={cn(
-                  "w-full",
+                  "w-32", // Fixed width to prevent overflow on mobile (AC7)
                   "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                   "motion-reduce:transition-none",
                   timeError &&

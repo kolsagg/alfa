@@ -55,8 +55,8 @@ export function ThemeSelector() {
         <TabsList
           className={cn(
             "grid w-full grid-cols-3",
-            // Premium styling: ensure minimum touch target (AC1)
-            "h-11"
+            // Premium styling: ensure enough height for touch target + padding (AC1)
+            "h-12"
           )}
           aria-label={SETTINGS_STRINGS.THEME_ARIA_LABEL}
         >
@@ -67,8 +67,6 @@ export function ThemeSelector() {
               className={cn(
                 // Base trigger styling
                 "gap-2 text-sm font-medium",
-                // Touch target ≥ 44x44px (AC1)
-                "min-h-[44px]",
                 // AC2: Active state with brand color
                 "data-[state=active]:text-primary",
                 // AC2: Correct focus ring and transition duration (200ms)

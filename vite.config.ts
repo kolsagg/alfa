@@ -55,7 +55,7 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: [".ngrok-free.dev", ".loca.lt"],
+    allowedHosts: [".ngrok-free.dev", ".loca.lt", ".trycloudflare.com"],
   },
   test: {
     globals: true,

@@ -127,9 +127,10 @@ development_status:
   # FRs: FR06, FR07, FR08 | NFRs: NFR06
   # Estimated: 15-18 hours
   # ===========================================
-  epic-6: backlog
-  6-1-cards-zustand-slice: backlog
-  6-2-card-management-ui-add-edit-delete: backlog
+  epic-6: in-progress
+  6-1-cards-zustand-slice: done
+  6-2-card-management-ui-add-edit-delete: done
+  6-2b-debit-card-support-visual-enhancements: done
   6-3-card-assignment-to-subscriptions: backlog
   6-4-per-card-monthly-spending-view: backlog
   6-5-card-cut-off-date-awareness: backlog

@@ -2,10 +2,11 @@
  * WalletEmptyState Component Tests
  *
  * Story 8.8: AC2, AC3, AC4 validation
+ * Story 6.2: AC5 - Add Card CTA
  */
 
-import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
 import { WalletEmptyState } from "./wallet-empty-state";
 import { WALLET_STRINGS } from "@/lib/i18n/wallet";
 
@@ -36,14 +37,6 @@ describe("WalletEmptyState", () => {
       );
     });
 
-    it("displays Coming Soon badge", () => {
-      render(<WalletEmptyState />);
-
-      const badge = screen.getByTestId("wallet-coming-soon-badge");
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveTextContent(WALLET_STRINGS.COMING_SOON_BADGE);
-    });
-
     it("uses project-standard styling with rounded containers", () => {
       render(<WalletEmptyState />);
 
@@ -51,6 +44,40 @@ describe("WalletEmptyState", () => {
       expect(section).toHaveClass("rounded-2xl");
       expect(section).toHaveClass("border");
       expect(section).toHaveClass("bg-muted/20");
+    });
+  });
+
+  describe("AC5: Add Card CTA", () => {
+    it("renders Add First Card button", () => {
+      render(<WalletEmptyState />);
+
+      const button = screen.getByTestId("wallet-empty-add-button");
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveTextContent(WALLET_STRINGS.ADD_FIRST_CARD);
+    });
+
+    it("calls onAddCard when button is clicked", () => {
+      const handleAddCard = vi.fn();
+      render(<WalletEmptyState onAddCard={handleAddCard} />);
+
+      const button = screen.getByTestId("wallet-empty-add-button");
+      fireEvent.click(button);
+
+      expect(handleAddCard).toHaveBeenCalledTimes(1);
+    });
+
+    it("button has accessible label", () => {
+      render(<WalletEmptyState />);
+
+      const button = screen.getByTestId("wallet-empty-add-button");
+      expect(button).toHaveAccessibleName(WALLET_STRINGS.ADD_FIRST_CARD);
+    });
+
+    it("button has min-height for touch targets", () => {
+      render(<WalletEmptyState />);
+
+      const button = screen.getByTestId("wallet-empty-add-button");
+      expect(button).toHaveClass("min-h-[44px]");
     });
   });
 
@@ -72,9 +99,7 @@ describe("WalletEmptyState", () => {
       expect(
         screen.getByTestId("wallet-empty-description")
       ).toBeInTheDocument();
-      expect(
-        screen.getByTestId("wallet-coming-soon-badge")
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("wallet-empty-add-button")).toBeInTheDocument();
     });
 
     it("has h2 heading for title", () => {

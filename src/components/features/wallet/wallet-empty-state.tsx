@@ -1,19 +1,25 @@
-import { Wallet } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Wallet, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { WALLET_STRINGS } from "@/lib/i18n/wallet";
 
 /**
  * WalletEmptyState - Shown when no cards exist
  *
- * Story 8.8: AC2
+ * Story 8.8: AC2 (initial implementation)
+ * Story 6.2: AC5 (enhanced with Add Card CTA)
  * - Centered Wallet icon (48x48px icon in a larger container)
  * - Title: "Henüz kart eklenmedi"
  * - Description: High-level purpose of card management
- * - Badge: "Yakında" (Coming Soon)
+ * - CTA Button: "İlk Kartınızı Ekleyin" (Add Your First Card)
  *
  * Styling matches src/components/layout/empty-state.tsx patterns
  */
-export function WalletEmptyState() {
+
+interface WalletEmptyStateProps {
+  onAddCard?: () => void;
+}
+
+export function WalletEmptyState({ onAddCard }: WalletEmptyStateProps) {
   return (
     <section
       className="flex flex-col items-center justify-center gap-6 rounded-2xl border border-border/30 bg-muted/20 px-6 py-12 md:py-16 text-center"
@@ -50,10 +56,17 @@ export function WalletEmptyState() {
         </p>
       </div>
 
-      {/* Coming Soon Badge */}
-      <Badge variant="secondary" data-testid="wallet-coming-soon-badge">
-        {WALLET_STRINGS.COMING_SOON_BADGE}
-      </Badge>
+      {/* Add Card CTA Button (Story 6.2: AC5) */}
+      <Button
+        onClick={onAddCard}
+        size="lg"
+        className="min-h-[44px] gap-2"
+        aria-label={WALLET_STRINGS.ADD_FIRST_CARD}
+        data-testid="wallet-empty-add-button"
+      >
+        <Plus className="h-5 w-5" aria-hidden="true" />
+        {WALLET_STRINGS.ADD_FIRST_CARD}
+      </Button>
     </section>
   );
 }
