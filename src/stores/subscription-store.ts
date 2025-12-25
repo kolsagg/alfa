@@ -24,6 +24,7 @@ export interface SubscriptionStoreActions {
   deleteSubscription: (id: string) => boolean;
   getSubscriptions: () => Subscription[];
   getSubscriptionById: (id: string) => Subscription | undefined;
+  importSubscriptions: (subscriptions: Subscription[]) => boolean;
 }
 
 // Combined store type
@@ -128,6 +129,23 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
 
     getSubscriptionById: (id) => {
       return get().subscriptions.find((sub) => sub.id === id);
+    },
+
+    importSubscriptions: (newSubscriptions) => {
+      // Validate all records before applying
+      const valid = newSubscriptions.every(
+        (sub) => SubscriptionSchema.safeParse(sub).success
+      );
+
+      if (!valid) {
+        console.error(
+          "[SubscriptionStore] Import cancelled: Invalid records detected"
+        );
+        return false;
+      }
+
+      set({ subscriptions: newSubscriptions });
+      return true;
     },
   }),
   {

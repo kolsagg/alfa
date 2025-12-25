@@ -15,17 +15,52 @@ import SettingsPage from "./settings-page";
 
 // Mock the stores
 vi.mock("@/stores/settings-store", () => ({
-  useSettingsStore: vi.fn((selector) => {
-    const state = {
-      theme: "system",
-      setTheme: vi.fn(),
-      notificationsEnabled: false,
-      notificationPermission: "default",
-      setNotificationsEnabled: vi.fn(),
-      setNotificationPermission: vi.fn(),
-    };
-    return selector ? selector(state) : state;
-  }),
+  useSettingsStore: Object.assign(
+    vi.fn((selector) => {
+      const state = {
+        theme: "system",
+        setTheme: vi.fn(),
+        notificationsEnabled: false,
+        notificationPermission: "default",
+        setNotificationsEnabled: vi.fn(),
+        setNotificationPermission: vi.fn(),
+        lastBackupDate: undefined,
+        setLastBackupDate: vi.fn(),
+      };
+      return selector ? selector(state) : state;
+    }),
+    {
+      getState: () => ({
+        theme: "system",
+        setTheme: vi.fn(),
+        notificationsEnabled: false,
+        notificationPermission: "default",
+        setNotificationsEnabled: vi.fn(),
+        setNotificationPermission: vi.fn(),
+        setNotificationDaysBefore: vi.fn(),
+        setNotificationTime: vi.fn(),
+        lastBackupDate: undefined,
+        setLastBackupDate: vi.fn(),
+      }),
+    }
+  ),
+}));
+
+vi.mock("@/stores/subscription-store", () => ({
+  useSubscriptionStore: Object.assign(
+    vi.fn((selector) => {
+      const state = {
+        subscriptions: [],
+      };
+      return selector ? selector(state) : state;
+    }),
+    {
+      getState: () => ({
+        subscriptions: [],
+      }),
+      setState: vi.fn(),
+    }
+  ),
 }));
 
 // Mock notification utilities
@@ -140,8 +175,8 @@ describe("SettingsPage", () => {
     });
   });
 
-  describe("Veri Yönetimi (Data) Section (AC3)", () => {
-    it("renders data management section as placeholder", () => {
+  describe("Veri Yönetimi (Data) Section - Story 8.6", () => {
+    it("renders data management section with export/import buttons", () => {
       renderWithRouter(<SettingsPage />);
 
       const dataSection = screen.getByRole("region", {
@@ -149,34 +184,45 @@ describe("SettingsPage", () => {
       });
       expect(dataSection).toBeInTheDocument();
 
-      // Should indicate it's coming soon
-      expect(screen.getByText(/yakında/i)).toBeInTheDocument();
+      // Story 8.6: Should have DataSettings component with export/import functionality
+      expect(screen.getByTestId("data-settings")).toBeInTheDocument();
+      expect(screen.getByTestId("export-button")).toBeInTheDocument();
+      expect(screen.getByTestId("import-button")).toBeInTheDocument();
     });
   });
 
-  describe("Hakkında (About) Section (AC3)", () => {
-    it("renders about section with version info", () => {
+  describe("Hakkında (About) Section - Story 8.7", () => {
+    it("renders about section with AboutSettings component", () => {
       renderWithRouter(<SettingsPage />);
 
       const aboutSection = screen.getByRole("region", { name: /hakkında/i });
       expect(aboutSection).toBeInTheDocument();
 
-      // Version number - just check that it's rendered next to "Versiyon"
-      expect(screen.getByText(/versiyon/i)).toBeInTheDocument();
+      // Story 8.7: AboutSettings component should be present
+      expect(screen.getByTestId("about-settings")).toBeInTheDocument();
     });
 
-    it("displays privacy statement", () => {
+    it("displays app identity header", () => {
       renderWithRouter(<SettingsPage />);
 
+      // Story 8.7 AC1: Identity header with app name
+      expect(screen.getByText("SubTracker")).toBeInTheDocument();
+    });
+
+    it("displays version info", () => {
+      renderWithRouter(<SettingsPage />);
+
+      expect(screen.getByTestId("about-version")).toBeInTheDocument();
+    });
+
+    it("displays privacy section with no-tracking statement", () => {
+      renderWithRouter(<SettingsPage />);
+
+      // Story 8.7 AC3: Privacy statements
+      expect(screen.getByTestId("about-privacy")).toBeInTheDocument();
       expect(
-        screen.getByText(/tüm verilerinizi cihazınızda saklar/i)
+        screen.getByText(/verileriniz asla sunucuya gönderilmez/i)
       ).toBeInTheDocument();
-    });
-
-    it("shows data storage info", () => {
-      renderWithRouter(<SettingsPage />);
-
-      expect(screen.getByText(/yalnızca yerel/i)).toBeInTheDocument();
     });
   });
 

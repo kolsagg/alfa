@@ -23,6 +23,7 @@ export interface SettingsState extends Settings {
   setNotificationDaysBefore: (days: number) => boolean;
   // Other actions
   setLastBackupDate: (date: string) => void;
+  mergeSettings: (data: Partial<Settings>) => boolean;
   completeOnboarding: () => void;
   dismissIOSPrompt: () => void;
   setHasSeenNotificationPrompt: (seen: boolean) => void;
@@ -140,6 +141,35 @@ export const useSettingsStore = createStore<SettingsState>(
     },
 
     setLastBackupDate: (date) => set({ lastBackupDate: date }),
+
+    mergeSettings: (data) => {
+      // Filter provided data against whitelist
+      const updates: Partial<Settings> = {};
+      const keys = Object.keys(data) as Array<keyof Settings>;
+
+      for (const key of keys) {
+        // Only merge if in whitelist and has value
+        if (
+          (
+            [
+              "theme",
+              "notificationsEnabled",
+              "notificationDaysBefore",
+              "notificationTime",
+            ] as const
+          ).includes(key as any) &&
+          data[key] !== undefined
+        ) {
+          (updates as any)[key] = data[key];
+        }
+      }
+
+      if (Object.keys(updates).length === 0) return false;
+
+      set(updates);
+      return true;
+    },
+
     completeOnboarding: () => set({ onboardingCompleted: true }),
     dismissIOSPrompt: () =>
       set({ lastIOSPromptDismissed: new Date().toISOString() }),

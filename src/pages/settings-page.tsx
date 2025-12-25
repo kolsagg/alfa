@@ -15,6 +15,8 @@ import { Palette, Bell, Database, Info } from "lucide-react";
 import { SettingsSection } from "@/components/features/settings/settings-section";
 import { ThemeSelector } from "@/components/features/settings/theme-selector";
 import { NotificationSettings } from "@/components/features/settings/notification-settings";
+import { DataSettings } from "@/components/features/settings/data-settings";
+import { AboutSettings } from "@/components/features/settings/about-settings";
 import { IOSInstallGuidance } from "@/components/ui/ios-install-guidance";
 import { SETTINGS_STRINGS } from "@/lib/i18n/settings";
 
@@ -58,43 +60,22 @@ export default function SettingsPage() {
           />
         </SettingsSection>
 
-        {/* Section 3: Veri Yönetimi (Data Management) - AC3, placeholder for Epic 5 */}
+        {/* Section 3: Veri Yönetimi (Data Management) - Story 8.6: Full implementation */}
         <SettingsSection
           icon={Database}
           title={SETTINGS_STRINGS.SECTION_DATA_TITLE}
           description={SETTINGS_STRINGS.SECTION_DATA_DESC}
         >
-          <div className="text-center py-4 text-muted-foreground">
-            <p className="text-sm">
-              {SETTINGS_STRINGS.SECTION_DATA_COMING_SOON}
-            </p>
-            <p className="text-xs mt-1">(Epic 5)</p>
-          </div>
+          <DataSettings />
         </SettingsSection>
 
-        {/* Section 4: Hakkında (About) - AC3 */}
+        {/* Section 4: Hakkında (About) - AC3, Story 8.7: Enhanced AboutSettings */}
         <SettingsSection
           icon={Info}
           title={SETTINGS_STRINGS.SECTION_ABOUT_TITLE}
           description={SETTINGS_STRINGS.SECTION_ABOUT_DESC}
         >
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                {SETTINGS_STRINGS.VERSION}
-              </span>
-              <span className="font-mono">{__APP_VERSION__}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                {SETTINGS_STRINGS.DATA_STORAGE}
-              </span>
-              <span>{SETTINGS_STRINGS.LOCAL_ONLY}</span>
-            </div>
-            <p className="text-xs text-muted-foreground pt-2 border-t">
-              {SETTINGS_STRINGS.PRIVACY_STATEMENT}
-            </p>
-          </div>
+          <AboutSettings />
         </SettingsSection>
       </div>
 
