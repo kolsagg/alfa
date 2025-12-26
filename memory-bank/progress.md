@@ -32,12 +32,13 @@
 - [x] 8.2 Settings Page Layout & Route
 - [x] 8.3 BottomNav Integration
 - [x] 8.4 Theme Section
+- [x] UI Polish: IconPicker, CountdownHero, Localization
 
 ---
 
 ## Mevcut Durum
 
-**Son Güncelleme:** 2025-12-24
+**Son Güncelleme:** 2025-12-26
 
 | Metrik          | Değer           |
 | --------------- | --------------- |

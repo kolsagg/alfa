@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { SETTINGS_STRINGS } from "@/lib/i18n/settings";
 import { useSubscriptionStore } from "@/stores/subscription-store";
 import { useSettingsStore } from "@/stores/settings-store";
+import { useCardStore } from "@/stores/card-store";
 import {
   exportBackup,
   parseAndValidateBackup,
@@ -86,10 +87,11 @@ export function DataSettings() {
     setExportState("processing");
 
     try {
-      // Get current settings for export
+      // Get current settings and cards for export
       const settings = useSettingsStore.getState();
+      const cards = useCardStore.getState().cards;
 
-      const result = exportBackup(subscriptions, settings);
+      const result = exportBackup(subscriptions, settings, cards);
 
       if (result.success) {
         setExportState("success");
@@ -189,13 +191,29 @@ export function DataSettings() {
 
     try {
       // AC5: Create auto-backup if enabled
-      if (autoBackup && subscriptions.length > 0) {
+      if (
+        autoBackup &&
+        (subscriptions.length > 0 || useCardStore.getState().cards.length > 0)
+      ) {
         const settings = useSettingsStore.getState();
-        const backupResult = createPreImportBackup(subscriptions, settings);
+        const cards = useCardStore.getState().cards;
+        const backupResult = createPreImportBackup(
+          subscriptions,
+          settings,
+          cards
+        );
 
         if (!backupResult.success) {
           throw new Error("Pre-import backup failed");
         }
+      }
+
+      // Replace cards via store action if present in backup
+      if (pendingImport.backup.cards) {
+        const cardSuccess = useCardStore
+          .getState()
+          .importCards(pendingImport.backup.cards);
+        if (!cardSuccess) throw new Error("Card import failed");
       }
 
       // Replace subscriptions via store action

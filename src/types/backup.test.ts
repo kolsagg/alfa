@@ -254,11 +254,11 @@ describe("AC3: Settings Whitelisting", () => {
 
 describe("Constants", () => {
   it("should export expected backup format version", () => {
-    expect(BACKUP_FORMAT_VERSION).toBe("1.0");
+    expect(BACKUP_FORMAT_VERSION).toBe("1.1");
   });
 
   it("should export expected store versions", () => {
     expect(CURRENT_STORE_VERSIONS.subscriptions).toBe(2);
-    expect(CURRENT_STORE_VERSIONS.settings).toBe(4);
+    expect(CURRENT_STORE_VERSIONS.settings).toBe(6);
   });
 });

@@ -1,6 +1,10 @@
 import React, { useMemo } from "react";
 import { CreditCard, Wallet } from "lucide-react";
 import type { Card } from "@/types/card";
+import {
+  renderSpendingDisplay,
+  type SpendingInfo,
+} from "@/lib/spending-calculator";
 import { WALLET_STRINGS } from "@/lib/i18n/wallet";
 import { PRESET_COLORS } from "@/components/features/subscription/color-picker-constants";
 import { getContrastType } from "@/lib/colors";
@@ -11,17 +15,21 @@ import { cn } from "@/lib/utils";
  *
  * Story 6.2: AC2
  * Story 6.2b: AC4 - Enhanced with type badge, bank name, conditional cutoff
+ * Story 6.4: AC1, AC2, AC4 - Per-card spending display with multi-currency support
  * - Glassmorphism styling with OKLCH color support
  * - Standard credit card aspect ratio (1.586)
  * - Displays: Card Name, Masked digits (**** 1234), formatted Cut-off date
  * - Type badge: "Kredi" or "Banka"
  * - Bank name (optional)
+ * - Spending info with multi-currency support
+ * - Next statement hint for credit cards
  * - Privacy Note: "Sadece son 4 hane saklanır" (NFR06)
  * - 44x44px touch target compliance
  */
 
 interface CardVisualProps {
   card: Card;
+  spending?: SpendingInfo;
   onClick?: () => void;
   className?: string;
 }
@@ -31,6 +39,7 @@ const DEFAULT_CARD_COLOR = PRESET_COLORS[3]?.value || "oklch(0.6 0.2 250)"; // B
 
 export const CardVisual = React.memo(function CardVisual({
   card,
+  spending,
   onClick,
   className = "",
 }: CardVisualProps) {
@@ -133,6 +142,27 @@ export const CardVisual = React.memo(function CardVisual({
           </div>
         </div>
 
+        {/* Middle Section: Spending Display (Story 6.4: AC1, AC2) */}
+        {spending && (
+          <div
+            className="flex-shrink-0 h-8 flex items-center"
+            data-testid="card-visual-spending"
+          >
+            <p
+              className={cn(
+                "text-lg font-bold tabular-nums transition-colors",
+                textColorClass
+              )}
+            >
+              {renderSpendingDisplay(
+                spending,
+                WALLET_STRINGS.NO_SUBSCRIPTIONS,
+                WALLET_STRINGS.SPENDING_MIXED_CURRENCY
+              )}
+            </p>
+          </div>
+        )}
+
         {/* Bottom Section: Card Number & Cut-off */}
         <div className="space-y-1">
           {/* Masked Card Number */}
@@ -146,14 +176,14 @@ export const CardVisual = React.memo(function CardVisual({
             •••• •••• •••• {card.lastFourDigits}
           </p>
 
-          {/* Cut-off Date - Only for credit cards (Story 6.2b: AC4) */}
+          {/* Cut-off Date / Next Statement - Only for credit cards (Story 6.4: AC4) */}
           <div className="flex items-center justify-between">
             {cardType === "credit" && card.cutoffDate ? (
               <p
                 className={cn("text-xs transition-colors", mutedTextClass)}
                 data-testid="card-visual-cutoff"
               >
-                {WALLET_STRINGS.CUTOFF_DATE_LABEL}: {card.cutoffDate}. gün
+                {WALLET_STRINGS.CUTOFF_DAY}: {card.cutoffDate}
               </p>
             ) : (
               <p

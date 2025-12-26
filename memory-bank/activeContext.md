@@ -11,31 +11,23 @@
 - ✅ **Epic 3:** Dashboard & Analytics (Summary, Timeline, CountdownHero, SubscriptionList)
 - ✅ **Epic 4:** Notification System (Scheduling, Grouping, iOS PWA, Recovery)
 
-### Mevcut Çalışma (Epic 8: Navigation & Settings)
+### Mevcut Çalışma (UI/UX İyileştirmeleri & Hata Düzeltmeleri)
 
-- ✅ **8.1:** React Router Setup (v7, HashRouter)
-- ✅ **8.2:** Settings Page Layout (View, Notifications, Data, About)
-- ✅ **8.3:** BottomNav Route Integration
-- ✅ **8.4:** Settings Theme Section (Segmented Control, i18n, System Indicator)
+- ✅ **Icon Picker Refactor:** Select yerine Popover+Grid, arama/filtreleme altyapısı (hazırlık), gelişmiş kategori ikonları.
+- ✅ **Countdown Hero Polish:** Dolar işaretinin sabitlenmesi, döviz kuru entegrasyonu, tasarım sadeleştirmesi (ikon -> harf revert).
+- ✅ **Localization:** Tarih seçici ve ikon isimlerinin Türkçeleştirilmesi.
+- ✅ **Card Visual Fixes:** Abonelik kartlarında layout taşmalarının giderilmesi.
 
 ---
 
 ## Son Yapılan Değişiklikler
 
-### Story 4.8: Missed Notifications Recovery (Tamamlandı)
+### UI/UX Polish (2025-12-26)
 
-- `useMissedNotificationsRecovery` hook'u eklendi.
-- Uygulama açıkken (periodic) veya açıldığında (mount) kaçırılan bildirimlerin tespiti ve gösterimi sağlandı.
-- Geçmişte kalan (stale) ödemelerin temizlenmesi mantığı entegre edildi.
-- `useNotificationLifecycle` hook'u ile tüm bildirim döngüsü RootLayout'a bağlandı.
-
-### Epic 8 Navigasyon Altyapısı (Tamamlandı)
-
-- React Router v7 kurulumu yapıldı.
-- `RootLayout` oluşturuldu ve paylaşılan bileşenler (Header, BottomNav, Notifications) buraya taşındı.
-- Settings sayfası placeholder olmaktan çıkarıldı ve gerçek bileşenlerle (Theme, Notifications) donatıldı.
-- `ThemeSelector` bileşeni (Segmented Control) implement edildi ve i18n altyapısına bağlandı.
-- Vite üzerinden uygulama versiyonu (`__APP_VERSION__`) dinamik olarak çekildi.
+- **Subscription Card:** Layout "wrap" yapısına geri döndürüldü. Varsayılan kredi kartı ikonu sorunu, ikon tipi kontrolü gevşetilerek çözüldü.
+- **Countdown Widget:** Toplam tutar alanı `useFXStore` kullanılarak döviz kurlarıyla TL'ye çevrildi. "Bugün" ve "Yaklaşan" görünümleri sadeleştirildi (harf avatarları).
+- **Icon Picker:** `Popover` ve Grid yapısına geçildi. İkon isimleri kategori yerine şekil bazlı (Kutu, Çanta vb.) olarak Türkçeleştirildi.
+- **Localization:** `SubscriptionForm` içindeki takvim bileşenine `tr` locale eklendi.
 
 ---
 

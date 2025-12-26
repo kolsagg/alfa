@@ -168,7 +168,7 @@ describe("countdown-utils", () => {
       expect(result).toBeNull();
     });
 
-    it("should return null if all subscriptions are past due", () => {
+    it("should return null if all subscriptions are past due (previous days)", () => {
       const subscriptions = [
         createSubscription("1", "2025-01-10T00:00:00.000Z"),
         createSubscription("2", "2025-01-05T00:00:00.000Z"),
@@ -177,10 +177,18 @@ describe("countdown-utils", () => {
       const result = getNextPayment(subscriptions, MOCK_NOW);
       expect(result).toBeNull();
     });
+
+    it("should include payments scheduled for today (even if time has passed)", () => {
+      // MOCK_NOW is 2025-01-15T12:00:00Z
+      const earlierToday = "2025-01-15T00:00:00.000Z";
+      const subscriptions = [createSubscription("1", earlierToday)];
+      const result = getNextPayment(subscriptions, MOCK_NOW);
+      expect(result?.id).toBe("1");
+    });
   });
 
   describe("formatCountdown", () => {
-    it("should return 'Bugün!' for past dates", () => {
+    it("should return 'BUGÜN' for past dates", () => {
       const time = {
         days: 0,
         hours: 0,
@@ -189,7 +197,7 @@ describe("countdown-utils", () => {
         totalMs: 0,
         isPast: true,
       };
-      expect(formatCountdown(time, "subtle")).toBe("Bugün!");
+      expect(formatCountdown(time, "subtle")).toBe("BUGÜN");
     });
 
     it("should format critical (<1h) with HH:MM:SS", () => {

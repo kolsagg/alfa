@@ -198,7 +198,11 @@ export function CardFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md" data-testid="card-form-dialog">
+      <DialogContent
+        className="max-w-md"
+        data-testid="card-form-dialog"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle data-testid="card-form-title">
             {mode === "add"

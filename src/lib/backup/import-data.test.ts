@@ -34,14 +34,14 @@ describe("getCurrentStoreVersions", () => {
     expect(versions.subscriptions).toBe(2);
   });
 
-  it("should have settings version 4", () => {
+  it("should have settings version 6", () => {
     const versions = getCurrentStoreVersions();
-    expect(versions.settings).toBe(4);
+    expect(versions.settings).toBe(6);
   });
 });
 
 describe("BACKUP_FORMAT_VERSION", () => {
-  it("should be 1.0", () => {
-    expect(BACKUP_FORMAT_VERSION).toBe("1.0");
+  it("should be 1.1", () => {
+    expect(BACKUP_FORMAT_VERSION).toBe("1.1");
   });
 });

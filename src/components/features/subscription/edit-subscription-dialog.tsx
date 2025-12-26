@@ -86,7 +86,10 @@ export function EditSubscriptionDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+      <DialogContent
+        className="sm:max-w-[500px] p-0 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>Aboneliği Düzenle</DialogTitle>
           <DialogDescription>

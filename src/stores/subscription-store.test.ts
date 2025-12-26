@@ -443,4 +443,78 @@ describe("useSubscriptionStore", () => {
       consoleSpy.mockRestore();
     });
   });
+
+  describe("AC4 - Orphan Card Reference Cleanup", () => {
+    it("should remove cardId if it does not exist in CardStore during rehydration", async () => {
+      const now = new Date().toISOString();
+      const orphanCardId = crypto.randomUUID();
+      const validCardId = crypto.randomUUID();
+
+      // Mock CardStore data in localStorage
+      localStorage.setItem(
+        "subtracker-cards-dev",
+        JSON.stringify({
+          state: {
+            cards: [{ id: validCardId, name: "Valid Card" }],
+          },
+          version: 2,
+        })
+      );
+
+      // Subscription data with one orphan and one valid card reference
+      localStorage.setItem(
+        "subtracker-subscriptions-dev",
+        JSON.stringify({
+          state: {
+            subscriptions: [
+              {
+                id: crypto.randomUUID(),
+                name: "Orphaned Sub",
+                amount: 10,
+                currency: "TRY",
+                billingCycle: "monthly",
+                nextPaymentDate: now,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+                cardId: orphanCardId,
+              },
+              {
+                id: crypto.randomUUID(),
+                name: "Valid Sub",
+                amount: 20,
+                currency: "TRY",
+                billingCycle: "monthly",
+                nextPaymentDate: now,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+                cardId: validCardId,
+              },
+            ],
+          },
+          version: 1,
+        })
+      );
+
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      // Trigger rehydration
+      await useSubscriptionStore.persist.rehydrate();
+
+      const subscriptions = useSubscriptionStore.getState().getSubscriptions();
+
+      const orphaned = subscriptions.find((s) => s.name === "Orphaned Sub");
+      const valid = subscriptions.find((s) => s.name === "Valid Sub");
+
+      expect(orphaned?.cardId).toBeUndefined(); // AC4: Should be cleaned up
+      expect(valid?.cardId).toBe(validCardId); // Should remain
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Cleaning up orphaned cardId")
+      );
+
+      consoleSpy.mockRestore();
+    });
+  });
 });

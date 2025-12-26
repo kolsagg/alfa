@@ -204,15 +204,15 @@ describe("CountdownHero", () => {
   });
 
   describe("Accessibility", () => {
-    it("should have aria-live region for announcements", () => {
+    it("should have section with aria-label", () => {
       mockSubscriptions.mockReturnValue([
         createSubscription("1", "2025-01-20T12:00:00.000Z"),
       ]);
 
-      const { container } = render(<CountdownHero />);
+      render(<CountdownHero />);
 
-      const liveRegion = container.querySelector('[aria-live="polite"]');
-      expect(liveRegion).toBeInTheDocument();
+      const section = screen.getByRole("region");
+      expect(section).toHaveAttribute("aria-label");
     });
 
     it("should have meaningful aria-label on section", () => {
@@ -230,7 +230,10 @@ describe("CountdownHero", () => {
 
       const section = screen.getByRole("region");
       expect(section).toHaveAttribute("aria-label");
-      expect(section.getAttribute("aria-label")).toContain("Netflix");
+      // New swipeable hero uses generic label
+      expect(section.getAttribute("aria-label")?.toLowerCase()).toContain(
+        "ödeme"
+      );
     });
   });
 

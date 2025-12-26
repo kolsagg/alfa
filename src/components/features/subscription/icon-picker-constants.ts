@@ -12,4 +12,8 @@ export const POPULAR_ICONS = [
   "Gamepad2",
   "Dumbbell",
   "Sparkles",
+  "Github",
+  "Youtube",
+  "ShoppingCart",
+  "Globe",
 ];

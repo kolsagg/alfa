@@ -40,9 +40,17 @@ vi.mock("@/lib/notification/utils", () => ({
   isPushNotificationActive: vi.fn(() => false),
 }));
 
-// Mock subscription store
+// Mock subscription store with selector support
 vi.mock("@/stores/subscription-store", () => ({
-  useSubscriptionStore: vi.fn(() => []),
+  useSubscriptionStore: (
+    selector?: (state: { subscriptions: unknown[] }) => unknown
+  ) => {
+    const mockState = {
+      subscriptions: [],
+    };
+    if (selector) return selector(mockState);
+    return mockState;
+  },
 }));
 
 // Mock ui-store with proper selector function support

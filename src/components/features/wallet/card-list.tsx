@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useCardStore } from "@/stores/card-store";
+import { useAllCardSpending } from "@/hooks/use-card-spending";
 import { CardVisual } from "./card-visual";
 import { CardFormDialog } from "./card-form-dialog";
+import { UnassignedSpending } from "./unassigned-spending";
 import { Button } from "@/components/ui/button";
 import { WALLET_STRINGS } from "@/lib/i18n/wallet";
 import type { Card } from "@/types/card";
 
 /**
- * CardList - Grid layout for displaying all cards
+ * CardList - Grid layout for displaying all cards with spending
  *
  * Story 6.2: AC1, AC3, AC4
+ * Story 6.4: Per-card spending display integration
  * - Responsive grid: 1-col mobile, 2-col desktop
  * - Efficient Zustand selector for minimal re-renders
  * - Handles Add/Edit dialog state
  * - Header with Add Card button
+ * - Per-card spending display
+ * - Unassigned subscriptions section
  */
 
 interface CardListProps {
@@ -24,6 +29,10 @@ interface CardListProps {
 export function CardList({ onAddCard }: CardListProps) {
   // Efficient selector - only re-renders when cards array changes
   const cards = useCardStore((s) => s.cards);
+
+  // Get all card spending with memoization (Story 6.4)
+  const { cardSpending, unassignedSpending, hasUnassigned } =
+    useAllCardSpending();
 
   // Dialog state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -75,20 +84,30 @@ export function CardList({ onAddCard }: CardListProps) {
         </Button>
       </div>
 
-      {/* Cards Grid */}
+      {/* Cards Grid with Spending (Story 6.4) */}
       {cards.length > 0 && (
         <div
           className="grid grid-cols-1 gap-4 md:grid-cols-2"
           data-testid="card-list-grid"
         >
-          {cards.map((card) => (
+          {cardSpending.map(({ card, spending }) => (
             <CardVisual
               key={card.id}
               card={card}
+              spending={spending}
               onClick={() => handleCardClick(card)}
             />
           ))}
         </div>
+      )}
+
+      {/* Unassigned Subscriptions Section (Story 6.4: AC3) */}
+      {hasUnassigned && (
+        <UnassignedSpending
+          spending={unassignedSpending}
+          className="mt-4"
+          data-testid="card-list-unassigned"
+        />
       )}
 
       {/* Card Form Dialog */}

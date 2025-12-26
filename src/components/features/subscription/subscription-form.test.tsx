@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+import { startOfDay } from "date-fns";
 import userEvent from "@testing-library/user-event";
 import { SubscriptionForm } from "./subscription-form";
 import { useSubscriptionStore } from "@/stores/subscription-store";
@@ -156,8 +157,10 @@ describe("SubscriptionForm", () => {
         if (calls.length > 0) {
           const addedSubscription = calls[0][0];
           const nextPaymentDate = new Date(addedSubscription.nextPaymentDate);
-          expect(nextPaymentDate.getTime()).toBeGreaterThan(
-            new Date().getTime()
+          // With the fix, if first payment is today, next payment is today
+          // We use startOfDay for both to be consistent with implementation
+          expect(startOfDay(nextPaymentDate).getTime()).toBeGreaterThanOrEqual(
+            startOfDay(new Date()).getTime()
           );
         }
       });

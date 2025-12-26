@@ -1,19 +1,29 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useSubscriptionStore } from "@/stores/subscription-store";
 import { useSettingsStore } from "@/stores/settings-store";
+import { useFXStore } from "@/stores/fx-store";
 import { isPushNotificationActive } from "@/lib/notification/utils";
 import { formatCurrency } from "@/lib/formatters";
 import {
   getTimeRemaining,
   getCountdownUrgency,
-  getNextPayment,
+  getNextFuturePayment,
+  getTodaysPayments,
+  getAllTodaysPayments,
+  getUpcoming7DaysPayments,
   formatCountdown,
   getIntervalMs,
   type CountdownUrgency,
   type TimeRemaining,
 } from "@/lib/countdown-utils";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Clock, BellOff } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  BellOff,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { NOTIFICATION_CONFIG } from "@/config/notifications";
 import { NOTIFICATION_STRINGS } from "@/lib/i18n/notifications";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
@@ -32,32 +42,145 @@ const urgencyTextStyles: Record<CountdownUrgency, string> = {
   critical: "text-[var(--color-critical)]",
 } as const;
 
+type HeroView = "today" | "upcoming";
+
 export function CountdownHero() {
   const subscriptions = useSubscriptionStore((state) => state.subscriptions);
   const { notificationsEnabled, notificationPermission } = useSettingsStore();
   const reducedMotion = useReducedMotion();
 
-  // Story 4.7: Use shared utility for push notification state
+  // Get today's top 3 payments for display
+  const todaysPayments = useMemo(
+    () => getTodaysPayments(subscriptions),
+    [subscriptions]
+  );
+
+  // Get ALL today's payments for total count and amount
+  const allTodaysPayments = useMemo(
+    () => getAllTodaysPayments(subscriptions),
+    [subscriptions]
+  );
+
+  // Get upcoming payments within 7 days (excluding today)
+  const upcoming7Days = useMemo(
+    () => getUpcoming7DaysPayments(subscriptions),
+    [subscriptions]
+  );
+
+  const nextFuturePayment = useMemo(
+    () => getNextFuturePayment(subscriptions),
+    [subscriptions]
+  );
+
+  const hasPaymentsToday = todaysPayments.length > 0;
+  const hasUpcoming = upcoming7Days.length > 0 || nextFuturePayment !== null;
+
+  // Display payment: first from 7-day list, or next future payment
+  const displayPayment = upcoming7Days[0] || nextFuturePayment;
+
+  // Track current view
+  const [currentView, setCurrentView] = useState<HeroView>(
+    hasPaymentsToday ? "today" : "upcoming"
+  );
+
+  // Smooth swipe state
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (isAnimating) return;
+      touchStartX.current = e.touches[0].clientX;
+    },
+    [isAnimating]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current === null || isAnimating) return;
+      const currentX = e.touches[0].clientX;
+      const diff = touchStartX.current - currentX;
+
+      // Limit swipe offset and add resistance at edges
+      const maxOffset = 150;
+      let offset = Math.max(-maxOffset, Math.min(maxOffset, diff));
+
+      // Add resistance if trying to swipe in unavailable direction
+      if (currentView === "today" && diff < 0 && !hasPaymentsToday) {
+        offset = diff * 0.2;
+      }
+      if (currentView === "upcoming" && diff > 0 && !hasUpcoming) {
+        offset = diff * 0.2;
+      }
+
+      setSwipeOffset(offset);
+    },
+    [currentView, hasPaymentsToday, hasUpcoming, isAnimating]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchStartX.current === null) return;
+
+    const threshold = 50;
+    setIsAnimating(true);
+
+    if (Math.abs(swipeOffset) > threshold) {
+      if (swipeOffset > 0 && currentView === "today" && hasUpcoming) {
+        setCurrentView("upcoming");
+      } else if (
+        swipeOffset < 0 &&
+        currentView === "upcoming" &&
+        hasPaymentsToday
+      ) {
+        setCurrentView("today");
+      }
+    }
+
+    // Animate back to center
+    setSwipeOffset(0);
+    touchStartX.current = null;
+
+    // Reset animation lock after transition
+    setTimeout(() => setIsAnimating(false), 300);
+  }, [swipeOffset, currentView, hasUpcoming, hasPaymentsToday]);
+
+  // Arrow navigation
+  const canGoLeft = currentView === "upcoming" && hasPaymentsToday;
+  const canGoRight = currentView === "today" && hasUpcoming;
+
+  const goLeft = useCallback(() => {
+    if (canGoLeft && !isAnimating) {
+      setIsAnimating(true);
+      setCurrentView("today");
+      setTimeout(() => setIsAnimating(false), 300);
+    }
+  }, [canGoLeft, isAnimating]);
+
+  const goRight = useCallback(() => {
+    if (canGoRight && !isAnimating) {
+      setIsAnimating(true);
+      setCurrentView("upcoming");
+      setTimeout(() => setIsAnimating(false), 300);
+    }
+  }, [canGoRight, isAnimating]);
+
+  // Push notification status
   const isPushActive = useMemo(
     () =>
       isPushNotificationActive(notificationsEnabled, notificationPermission),
     [notificationsEnabled, notificationPermission]
   );
 
-  // 1. Optimize nextPayment calculation
-  const nextPayment = useMemo(
-    () => getNextPayment(subscriptions),
-    [subscriptions]
-  );
-
-  // 2. Initialize state with fresh calculation
+  // Time remaining for upcoming payment
   const [timeRemaining, setTimeRemaining] = useState<TimeRemaining | null>(() =>
-    nextPayment ? getTimeRemaining(nextPayment.nextPaymentDate) : null
+    displayPayment ? getTimeRemaining(displayPayment.nextPaymentDate) : null
   );
 
   const lastAnnouncedRef = useRef<string>("");
 
-  // 3. Derived values (Performant)
+  // Derived values for upcoming view
   const urgency: CountdownUrgency = useMemo(
     () =>
       timeRemaining ? getCountdownUrgency(timeRemaining.totalMs) : "subtle",
@@ -69,58 +192,46 @@ export function CountdownHero() {
     [timeRemaining, urgency]
   );
 
-  const announcementText = useMemo(() => {
-    if (!timeRemaining || !nextPayment) return "";
-    return `${nextPayment.name}, ${formatCurrency(
-      nextPayment.amount,
-      nextPayment.currency
-    )}, ${
-      timeRemaining.isPast
-        ? "bugün"
-        : `${timeRemaining.days} gün ${timeRemaining.hours} saat sonra`
-    }`;
-  }, [timeRemaining, nextPayment]);
-
+  // Sync time remaining when future payment changes
   const [prevPaymentId, setPrevPaymentId] = useState<string | undefined>(
-    nextPayment?.id
+    displayPayment?.id
   );
 
-  // Synchronous state adjustment when nextPayment changes
-  if (nextPayment?.id !== prevPaymentId) {
-    setPrevPaymentId(nextPayment?.id);
+  if (displayPayment?.id !== prevPaymentId) {
+    setPrevPaymentId(displayPayment?.id);
     setTimeRemaining(
-      nextPayment ? getTimeRemaining(nextPayment.nextPaymentDate) : null
+      displayPayment ? getTimeRemaining(displayPayment.nextPaymentDate) : null
     );
   }
 
-  // 5. Timer: only calls setState in callback
+  // Timer for countdown
   useEffect(() => {
-    if (!nextPayment) return;
+    if (!displayPayment) return;
 
     const intervalMs = getIntervalMs(urgency);
     const timer = setInterval(() => {
-      setTimeRemaining(getTimeRemaining(nextPayment.nextPaymentDate));
+      setTimeRemaining(getTimeRemaining(displayPayment.nextPaymentDate));
     }, intervalMs);
 
     return () => clearInterval(timer);
-  }, [nextPayment, urgency]);
+  }, [displayPayment, urgency]);
 
-  // 6. Refresh on visibility change
+  // Refresh on visibility change
   useEffect(() => {
-    if (!nextPayment) return;
+    if (!displayPayment) return;
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
-        setTimeRemaining(getTimeRemaining(nextPayment.nextPaymentDate));
+        setTimeRemaining(getTimeRemaining(displayPayment.nextPaymentDate));
       }
     };
 
     window.addEventListener("visibilitychange", handleVisibility);
     return () =>
       window.removeEventListener("visibilitychange", handleVisibility);
-  }, [nextPayment]);
+  }, [displayPayment]);
 
-  // 7. Update announcement ref (Side effect)
+  // Update announcement ref
   useEffect(() => {
     if (
       countdownText &&
@@ -131,8 +242,8 @@ export function CountdownHero() {
     }
   }, [countdownText, urgency]);
 
-  // Empty state
-  if (!nextPayment || !timeRemaining) {
+  // Empty state - no payments at all
+  if (!hasPaymentsToday && !hasUpcoming) {
     return (
       <section
         className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-secondary/5 to-background p-6 border border-border/50"
@@ -156,52 +267,97 @@ export function CountdownHero() {
     );
   }
 
-  const formattedAmount = formatCurrency(
-    nextPayment.amount,
-    nextPayment.currency
-  );
-  const initial = (nextPayment.name || "?").charAt(0).toUpperCase();
+  // Payment info for upcoming view
+  const formattedUpcomingAmount = displayPayment
+    ? formatCurrency(displayPayment.amount, displayPayment.currency)
+    : "";
 
-  const ariaLabel = `${nextPayment.name}, ${formattedAmount}, ${
-    timeRemaining.isPast
-      ? "bugün"
-      : `${timeRemaining.days} gün ${timeRemaining.hours} saat sonra`
-  }`;
+  // Calculate total for ALL today's payments (not just top 3)
+  // Convert all amounts to TRY using exchange rates
+  const rates = useFXStore((state) => state.rates);
+  const todayTotal = allTodaysPayments.reduce((sum, s) => {
+    const rate = rates[s.currency] || 1;
+    return sum + s.amount * rate;
+  }, 0);
 
-  // AC7: Payment is imminent if it's within the configured threshold
+  const todayTotalFormatted = formatCurrency(todayTotal, "TRY");
+  const remainingTodayCount = allTodaysPayments.length - todaysPayments.length;
+
+  // AC7: Payment is imminent
   const isImminent =
+    timeRemaining !== null &&
     timeRemaining.totalMs <
-    NOTIFICATION_CONFIG.IMMINENT_PAYMENT_DAYS * 24 * 60 * 60 * 1000;
+      NOTIFICATION_CONFIG.IMMINENT_PAYMENT_DAYS * 24 * 60 * 60 * 1000;
+
+  // Determine which urgency to use based on view
+  const activeUrgency = currentView === "today" ? "critical" : urgency;
+
+  const showNavIndicators = hasPaymentsToday && hasUpcoming;
+
+  // Calculate view positions for smooth animation
+  const todayTransform =
+    currentView === "today"
+      ? `translateX(${-swipeOffset}px)`
+      : "translateX(-100%)";
+  const upcomingTransform =
+    currentView === "upcoming"
+      ? `translateX(${-swipeOffset}px)`
+      : "translateX(100%)";
 
   return (
     <section
+      ref={containerRef}
       className={cn(
-        "relative overflow-hidden rounded-2xl bg-gradient-to-br p-6 border border-border/50",
-        urgencyStyles[urgency],
-        (urgency === "urgent" || urgency === "critical") &&
+        "relative overflow-hidden rounded-2xl bg-gradient-to-br p-6 border border-border/50 select-none",
+        urgencyStyles[activeUrgency],
+        (activeUrgency === "urgent" || activeUrgency === "critical") &&
           !reducedMotion &&
           "animate-countdown-pulse",
-        // AC4/AC7: Emphasize if notifications are not helping
         !isPushActive &&
           isImminent &&
           !reducedMotion &&
           "ring-2 ring-primary/20 ring-offset-2",
-        // AC4: respect prefers-reduced-motion - use bold border instead
         !isPushActive &&
           isImminent &&
           reducedMotion &&
           "border-2 border-[var(--color-urgent)]"
       )}
-      aria-label={ariaLabel}
+      aria-label="Ödeme sayacı"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
-      {/* AC7: Persistent Alert Badge for high urgency without push notifications */}
-      {!isPushActive && isImminent && (
+      {/* Navigation arrows */}
+      {showNavIndicators && (
+        <>
+          {canGoLeft && (
+            <button
+              onClick={goLeft}
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-colors z-10"
+              aria-label="Bugünün ödemelerine git"
+            >
+              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+            </button>
+          )}
+          {canGoRight && (
+            <button
+              onClick={goRight}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-colors z-10"
+              aria-label="Yaklaşan ödemeye git"
+            >
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </button>
+          )}
+        </>
+      )}
+
+      {/* Alert badge */}
+      {!isPushActive && isImminent && currentView === "upcoming" && (
         <div
           className={cn(
             "absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full",
             "bg-[var(--color-urgent)]/10 text-[var(--color-urgent)]",
             "animate-in fade-in zoom-in duration-300",
-            // AC4: respect prefers-reduced-motion
             reducedMotion &&
               "!animate-none border-2 border-[var(--color-urgent)]"
           )}
@@ -213,54 +369,161 @@ export function CountdownHero() {
           </span>
         </div>
       )}
-      <div aria-live="polite" aria-atomic="true" className="sr-only">
-        {announcementText}
-      </div>
 
-      <div className="flex flex-col items-center justify-center gap-4 text-center">
-        <div className="flex items-center gap-2">
-          {(urgency === "urgent" || urgency === "critical") && (
-            <AlertTriangle
-              className={cn("w-4 h-4", urgencyTextStyles[urgency])}
-              aria-hidden="true"
-            />
-          )}
-          {urgency !== "urgent" && urgency !== "critical" && (
-            <Clock
-              className="w-4 h-4 text-muted-foreground"
-              aria-hidden="true"
-            />
-          )}
-          <p className="text-sm font-medium text-muted-foreground">
-            Bir sonraki ödeme
-          </p>
+      {/* View indicator dots */}
+      {showNavIndicators && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+          <div
+            className={cn(
+              "w-2 h-2 rounded-full transition-colors duration-300",
+              currentView === "today"
+                ? "bg-[var(--color-critical)]"
+                : "bg-muted-foreground/30"
+            )}
+          />
+          <div
+            className={cn(
+              "w-2 h-2 rounded-full transition-colors duration-300",
+              currentView === "upcoming"
+                ? "bg-primary"
+                : "bg-muted-foreground/30"
+            )}
+          />
         </div>
+      )}
 
-        <div
-          className={cn(
-            "text-5xl font-extrabold tracking-tight tabular-nums font-jakarta",
-            urgencyTextStyles[urgency],
-            urgency === "critical" && "animate-attention-shake"
-          )}
-        >
-          {countdownText}
-        </div>
+      {/* Sliding Container */}
+      <div className="relative min-h-[200px]">
+        {/* TODAY VIEW */}
+        {hasPaymentsToday && (
+          <div
+            className={cn(
+              "absolute inset-0 flex flex-col items-center justify-center gap-4 text-center",
+              "transition-transform duration-300 ease-out",
+              currentView !== "today" && "pointer-events-none"
+            )}
+            style={{ transform: todayTransform }}
+          >
+            <div className="flex items-center gap-2">
+              <AlertTriangle
+                className="w-4 h-4 text-[var(--color-critical)]"
+                aria-hidden="true"
+              />
+              <p className="text-sm font-medium text-muted-foreground">
+                {allTodaysPayments.length > 1
+                  ? `GÜNÜN ÖDEMELERİ (${allTodaysPayments.length})`
+                  : "GÜNÜN ÖDEMESİ"}
+              </p>
+            </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-            <span className="text-lg font-semibold text-muted-foreground">
-              {initial}
-            </span>
+            <div
+              className={cn(
+                "text-5xl font-extrabold tracking-tight tabular-nums font-jakarta",
+                urgencyTextStyles.critical,
+                !reducedMotion && "animate-attention-shake"
+              )}
+            >
+              BUGÜN
+            </div>
+
+            {/* Top 3 payments with letter avatars */}
+            <div className="flex items-center justify-center gap-4">
+              {todaysPayments.map((payment) => (
+                <div key={payment.id} className="flex items-center gap-2">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <span className="text-lg font-semibold text-muted-foreground">
+                      {(payment.name || "?").charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-foreground">
+                      {payment.name}
+                    </p>
+                    <p className="text-xs font-medium text-muted-foreground">
+                      {formatCurrency(payment.amount, payment.currency)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Show remaining count and total for ALL payments */}
+            {allTodaysPayments.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {remainingTodayCount > 0 && (
+                  <span>+{remainingTodayCount} ödeme daha • </span>
+                )}
+                Toplam: {todayTotalFormatted}
+              </p>
+            )}
           </div>
-          <div className="text-left">
-            <p className="text-lg font-semibold text-foreground">
-              {nextPayment.name}
-            </p>
-            <p className="text-sm font-medium text-muted-foreground">
-              {formattedAmount}
-            </p>
+        )}
+
+        {/* UPCOMING VIEW */}
+        {hasUpcoming && displayPayment && (
+          <div
+            className={cn(
+              "absolute inset-0 flex flex-col items-center justify-center gap-4 text-center pb-4",
+              "transition-transform duration-300 ease-out",
+              currentView !== "upcoming" && "pointer-events-none"
+            )}
+            style={{ transform: upcomingTransform }}
+          >
+            <div className="flex items-center gap-2">
+              {(urgency === "urgent" || urgency === "critical") && (
+                <AlertTriangle
+                  className={cn("w-4 h-4", urgencyTextStyles[urgency])}
+                  aria-hidden="true"
+                />
+              )}
+              {urgency !== "urgent" && urgency !== "critical" && (
+                <Clock
+                  className="w-4 h-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              )}
+              <p className="text-sm font-medium text-muted-foreground">
+                Bir sonraki ödeme
+              </p>
+            </div>
+
+            <div
+              className={cn(
+                "text-5xl font-extrabold tracking-tight tabular-nums font-jakarta",
+                urgencyTextStyles[urgency],
+                urgency === "critical" &&
+                  !reducedMotion &&
+                  "animate-attention-shake"
+              )}
+            >
+              {countdownText}
+            </div>
+
+            {/* Upcoming payment with letter avatar */}
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                <span className="text-lg font-semibold text-muted-foreground">
+                  {(displayPayment.name || "?").charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="text-left">
+                <p className="text-lg font-semibold text-foreground">
+                  {displayPayment.name}
+                </p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {formattedUpcomingAmount}
+                </p>
+              </div>
+            </div>
+
+            {/* Show count if more payments in 7 days */}
+            {upcoming7Days.length > 1 && (
+              <p className="text-xs text-muted-foreground">
+                +{upcoming7Days.length - 1} ödeme daha bu hafta
+              </p>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

@@ -10,14 +10,16 @@
 import { z } from "zod";
 import { SubscriptionSchema } from "./subscription";
 import { ThemeSchema } from "./settings";
+import { CardSchema } from "./card";
 
 // Backup format version for schema evolution
-export const BACKUP_FORMAT_VERSION = "1.0" as const;
+export const BACKUP_FORMAT_VERSION = "1.1" as const;
 
 // Current store versions - MUST match actual store versions
 export const CURRENT_STORE_VERSIONS = {
   subscriptions: 2, // From subscription-store.ts version: 2
-  settings: 4, // From settings-store.ts version: 4
+  settings: 6, // From settings-store.ts version: 6
+  cards: 2, // From card-store.ts version: 2
 } as const;
 
 // NFR15: 5MB threshold in bytes
@@ -87,6 +89,7 @@ export const BackupSchema = z.object({
   subscriptions: z
     .array(SubscriptionSchema)
     .min(1, "Yedek dosyası en az 1 abonelik içermelidir"), // AC4: 0 subscription rejection
+  cards: z.array(CardSchema).optional(),
   settings: ImportableSettingsSchema.optional(),
 });
 

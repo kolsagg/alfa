@@ -176,7 +176,42 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
       };
 
       // Always validate subscriptions during rehydration
+      // AC4: Clean up invalid cardId references if card is not found in CardStore
+      // Note: We attempt to read cards directly from localStorage for sync rehydration
+      let availableCardIds: Set<string> | null = null;
+      try {
+        const cardStoreData = localStorage.getItem("subtracker-cards-dev");
+        if (cardStoreData) {
+          const parsed = JSON.parse(cardStoreData);
+          if (parsed?.state?.cards) {
+            availableCardIds = new Set(
+              parsed.state.cards.map((c: { id: string }) => c.id)
+            );
+          }
+        }
+      } catch (e) {
+        console.warn(
+          "[SubscriptionStore] Failed to pre-load cards for cleanup",
+          e
+        );
+      }
+
       if (merged.subscriptions) {
+        merged.subscriptions = merged.subscriptions.map((sub) => {
+          // If we have card list and cardId is not in it, remove the reference
+          if (
+            sub.cardId &&
+            availableCardIds &&
+            !availableCardIds.has(sub.cardId)
+          ) {
+            console.log(
+              `[SubscriptionStore] Cleaning up orphaned cardId ${sub.cardId} for sub ${sub.id}`
+            );
+            return { ...sub, cardId: undefined };
+          }
+          return sub;
+        });
+
         const validSubscriptions = merged.subscriptions.filter((sub) => {
           const result = SubscriptionSchema.safeParse(sub);
           if (!result.success) {

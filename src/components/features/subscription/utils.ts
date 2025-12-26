@@ -1,4 +1,11 @@
-import { addMonths, addYears, addWeeks, addDays } from "date-fns";
+import {
+  addMonths,
+  addYears,
+  addWeeks,
+  addDays,
+  startOfDay,
+  isAfter,
+} from "date-fns";
 import type { BillingCycle } from "@/types/common";
 
 /**
@@ -13,11 +20,11 @@ export function calculateNextPaymentDate(
   billingCycle: BillingCycle,
   customDays?: number
 ): Date {
-  const now = new Date();
-  let nextDate = new Date(firstPaymentDate);
+  const today = startOfDay(new Date());
+  let nextDate = startOfDay(new Date(firstPaymentDate));
 
-  // If first payment is in the future, use it directly
-  if (nextDate > now) {
+  // If first payment is today or in the future, use it directly
+  if (!isAfter(today, nextDate)) {
     return nextDate;
   }
 
@@ -25,14 +32,14 @@ export function calculateNextPaymentDate(
   const MAX_ITERATIONS = 1200; // ~100 years of monthly payments
   let iterations = 0;
 
-  // Calculate next occurrence after today
-  while (nextDate <= now) {
+  // Calculate next occurrence starting from today or after
+  while (nextDate < today) {
     iterations++;
     if (iterations > MAX_ITERATIONS) {
       console.warn(
         "calculateNextPaymentDate: Max iterations reached, returning today"
       );
-      return now;
+      return today;
     }
 
     switch (billingCycle) {

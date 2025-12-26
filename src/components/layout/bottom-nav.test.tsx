@@ -6,6 +6,18 @@ import { ROUTES } from "@/router/routes";
 
 // Mock useUIStore
 const mockOpenModal = vi.fn();
+// Mock subscription store with selector support
+vi.mock("@/stores/subscription-store", () => ({
+  useSubscriptionStore: (
+    selector?: (state: { subscriptions: unknown[] }) => unknown
+  ) => {
+    const mockState = {
+      subscriptions: [],
+    };
+    if (selector) return selector(mockState);
+    return mockState;
+  },
+}));
 vi.mock("@/stores/ui-store", () => ({
   useUIStore: (
     selector: (state: { openModal: typeof mockOpenModal }) => unknown
@@ -54,13 +66,12 @@ describe("BottomNav", () => {
       expect(nav).toHaveAttribute("aria-label", "Alt navigasyon");
     });
 
-    it("should render center button with elevated styling", () => {
+    it("should render center button with standard nav item styling", () => {
       renderWithRouter();
-
       const addButton = screen.getByLabelText("Ekle");
-      expect(addButton).toHaveClass("rounded-full");
-      expect(addButton).toHaveClass("shadow-lg");
-      expect(addButton).toHaveClass("-top-4"); // Elevated positioning
+      expect(addButton).toHaveClass("rounded-lg");
+      expect(addButton).toHaveClass("px-3");
+      expect(addButton).toHaveClass("py-2");
       expect(addButton).toHaveClass("focus-visible:ring-2");
     });
   });
@@ -174,11 +185,11 @@ describe("BottomNav", () => {
       renderWithRouter();
 
       const addButton = screen.getByLabelText("Ekle");
-      expect(addButton).toHaveClass("rounded-full");
-      expect(addButton).toHaveClass("w-14");
-      expect(addButton).toHaveClass("h-14");
-      expect(addButton).toHaveClass("shadow-lg");
-      expect(addButton).toHaveClass("-top-4");
+      expect(addButton).toHaveClass("rounded-lg");
+      // Center button is no longer a large FAB (Floating Action Button),
+      // it now matches other nav items' sizing
+      expect(addButton).toHaveClass("px-3");
+      expect(addButton).toHaveClass("py-2");
     });
   });
 

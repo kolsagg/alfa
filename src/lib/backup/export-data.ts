@@ -8,6 +8,7 @@
 
 import type { Subscription } from "@/types/subscription";
 import type { Settings } from "@/types/settings";
+import type { Card } from "@/types/card";
 import {
   BACKUP_FORMAT_VERSION,
   CURRENT_STORE_VERSIONS,
@@ -71,7 +72,8 @@ function generateBackupFilename(): string {
  */
 export function exportBackup(
   subscriptions: Subscription[],
-  settings: Partial<Settings>
+  settings: Partial<Settings>,
+  cards: Card[] = []
 ): ExportResult {
   try {
     // Build backup object
@@ -80,6 +82,7 @@ export function exportBackup(
       storeVersions: { ...CURRENT_STORE_VERSIONS },
       exportDate: new Date().toISOString(),
       subscriptions,
+      cards,
       settings: filterWhitelistedSettings(settings),
     };
 
@@ -130,7 +133,8 @@ export function exportBackup(
  */
 export function createPreImportBackup(
   subscriptions: Subscription[],
-  settings: Partial<Settings>
+  settings: Partial<Settings>,
+  cards: Card[] = []
 ): ExportResult {
   try {
     const backup: Backup = {
@@ -138,6 +142,7 @@ export function createPreImportBackup(
       storeVersions: { ...CURRENT_STORE_VERSIONS },
       exportDate: new Date().toISOString(),
       subscriptions,
+      cards,
       settings: filterWhitelistedSettings(settings),
     };
 

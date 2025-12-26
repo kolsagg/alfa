@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { CardVisual } from "./card-visual";
 import type { Card } from "@/types/card";
+import type { SpendingInfo } from "@/lib/spending-calculator";
 import { WALLET_STRINGS } from "@/lib/i18n/wallet";
 
 /**
@@ -9,10 +10,12 @@ import { WALLET_STRINGS } from "@/lib/i18n/wallet";
  *
  * Story 6.2: AC2 - Visual Card Representation
  * Story 6.2b: AC4 - Enhanced with type badge, bank name, conditional cutoff
+ * Story 6.4: AC1, AC2, AC4 - Per-card spending display
  * - Glassmorphism styling with OKLCH color
  * - Card Name, Masked digits (**** 1234), formatted Cut-off date
  * - Type badge (Kredi/Banka)
  * - Bank name display
+ * - Spending display with multi-currency support
  * - Privacy Note visibility (NFR06)
  * - Click handler functionality
  */
@@ -45,6 +48,30 @@ const mockCardNoColor: Card = {
   color: undefined,
 };
 
+const mockSpendingSingleCurrency: SpendingInfo = {
+  totalMonthly: 1500,
+  currency: "TRY",
+  subscriptionCount: 3,
+  hasMultipleCurrencies: false,
+  byCurrency: { TRY: 1500 },
+};
+
+const mockSpendingMixedCurrency: SpendingInfo = {
+  totalMonthly: 0,
+  currency: "MIXED",
+  subscriptionCount: 2,
+  hasMultipleCurrencies: true,
+  byCurrency: { TRY: 1200, USD: 40 },
+};
+
+const mockSpendingEmpty: SpendingInfo = {
+  totalMonthly: 0,
+  currency: "TRY",
+  subscriptionCount: 0,
+  hasMultipleCurrencies: false,
+  byCurrency: {},
+};
+
 describe("CardVisual", () => {
   it("renders card name correctly", () => {
     render(<CardVisual card={mockCreditCard} />);
@@ -61,13 +88,11 @@ describe("CardVisual", () => {
     expect(numberElement).toHaveTextContent("•••• •••• •••• 4567");
   });
 
-  it("renders cut-off date with formatted label for credit cards", () => {
+  it("renders cutoff day for credit cards (Story 6.4: AC4)", () => {
     render(<CardVisual card={mockCreditCard} />);
 
     const cutoffElement = screen.getByTestId("card-visual-cutoff");
-    expect(cutoffElement).toHaveTextContent(
-      `${WALLET_STRINGS.CUTOFF_DATE_LABEL}: 15. gün`
-    );
+    expect(cutoffElement).toHaveTextContent(`${WALLET_STRINGS.CUTOFF_DAY}: 15`);
   });
 
   it("renders privacy note instead of cutoff for debit cards (NFR06)", () => {
@@ -153,5 +178,63 @@ describe("CardVisual", () => {
 
     const cardButton = screen.getByTestId(`card-visual-${mockCreditCard.id}`);
     expect(cardButton).toHaveClass("aspect-[1.586]");
+  });
+
+  describe("Spending Display (Story 6.4)", () => {
+    it("renders spending section when spending prop is provided", () => {
+      render(
+        <CardVisual
+          card={mockCreditCard}
+          spending={mockSpendingSingleCurrency}
+        />
+      );
+
+      expect(screen.getByTestId("card-visual-spending")).toBeInTheDocument();
+    });
+
+    it("does not render spending section when spending prop is not provided", () => {
+      render(<CardVisual card={mockCreditCard} />);
+
+      expect(
+        screen.queryByTestId("card-visual-spending")
+      ).not.toBeInTheDocument();
+    });
+
+    it("displays single currency spending formatted correctly (AC1)", () => {
+      render(
+        <CardVisual
+          card={mockCreditCard}
+          spending={mockSpendingSingleCurrency}
+        />
+      );
+
+      const spendingEl = screen.getByTestId("card-visual-spending");
+      // ₺1.500 (Turkish formatting with dot separator)
+      expect(spendingEl).toHaveTextContent("₺1.500");
+    });
+
+    it("displays mixed currency spending with + separator (AC2)", () => {
+      render(
+        <CardVisual
+          card={mockCreditCard}
+          spending={mockSpendingMixedCurrency}
+        />
+      );
+
+      const spendingEl = screen.getByTestId("card-visual-spending");
+      // "₺1.200 + $40"
+      expect(spendingEl).toHaveTextContent("₺1.200");
+      expect(spendingEl).toHaveTextContent(
+        WALLET_STRINGS.SPENDING_MIXED_CURRENCY
+      );
+      expect(spendingEl).toHaveTextContent("$40");
+    });
+
+    it("displays 'Abonelik yok' when no subscriptions (AC5)", () => {
+      render(<CardVisual card={mockCreditCard} spending={mockSpendingEmpty} />);
+
+      const spendingEl = screen.getByTestId("card-visual-spending");
+      expect(spendingEl).toHaveTextContent(WALLET_STRINGS.NO_SUBSCRIPTIONS);
+    });
   });
 });

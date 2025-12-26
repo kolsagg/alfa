@@ -1,10 +1,13 @@
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import * as Icons from "lucide-react";
+import { CreditCard } from "lucide-react";
 import type { Subscription } from "@/types/subscription";
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { formatCurrency } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
+import { useCardStore } from "@/stores/card-store";
+import { SUBSCRIPTION_STRINGS } from "@/lib/i18n/subscriptions";
 
 interface SubscriptionCardProps {
   subscription: Subscription;
@@ -15,6 +18,7 @@ interface SubscriptionCardProps {
 /**
  * SubscriptionCard displays a subscription with its details
  * - Shows icon, name, amount, currency, next payment date, category
+ * - Shows assigned card info (Story 6.3)
  * - Keyboard accessible with Enter/Space triggering click
  * - Hover effect for visual feedback
  */
@@ -23,6 +27,12 @@ export function SubscriptionCard({
   onClick,
   className,
 }: SubscriptionCardProps) {
+  // Get card info if assigned
+  const getCardById = useCardStore((state) => state.getCardById);
+  const assignedCard = subscription.cardId
+    ? getCardById(subscription.cardId)
+    : undefined;
+
   const handleClick = () => {
     onClick?.(subscription);
   };
@@ -47,9 +57,7 @@ export function SubscriptionCard({
 
   // Dynamic icon rendering with fallback
   const IconComponent =
-    subscription.icon &&
-    Icons[subscription.icon as keyof typeof Icons] &&
-    typeof Icons[subscription.icon as keyof typeof Icons] === "function"
+    subscription.icon && Icons[subscription.icon as keyof typeof Icons]
       ? (Icons[subscription.icon as keyof typeof Icons] as React.ComponentType<{
           size?: number;
           className?: string;
@@ -86,8 +94,23 @@ export function SubscriptionCard({
         <span className="font-medium text-foreground truncate">
           {subscription.name}
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <CategoryBadge categoryId={subscription.categoryId} size="sm" />
+          {/* Card info pill (Story 6.3) */}
+          {assignedCard ? (
+            <div className="flex items-center gap-1 text-[10px] bg-secondary/50 px-1.5 py-0.5 rounded">
+              <CreditCard size={10} className="shrink-0" />
+              <span className="truncate max-w-[60px]" title={assignedCard.name}>
+                *{assignedCard.lastFourDigits}
+              </span>
+            </div>
+          ) : subscription.cardId ? (
+            /* Orphan card reference - show graceful fallback */
+            <div className="flex items-center gap-1 text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
+              <CreditCard size={10} className="shrink-0 opacity-50" />
+              <span>{SUBSCRIPTION_STRINGS.NO_CARD_ASSIGNED}</span>
+            </div>
+          ) : null}
           <span className="text-xs text-muted-foreground truncate">
             {formattedDate}
           </span>

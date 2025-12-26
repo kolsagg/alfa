@@ -66,6 +66,15 @@ export const WALLET_STRINGS = {
   // Card Badges (Story 6.2b)
   CARD_BADGE_CREDIT: "Kredi", // "Credit"
   CARD_BADGE_DEBIT: "Banka", // "Debit"
+
+  // Per-Card Spending Display (Story 6.4)
+  MONTHLY_SPENDING_LABEL: "Aylık Harcama", // "Monthly Spending"
+  NO_SUBSCRIPTIONS: "Abonelik yok", // "No subscriptions"
+  CUTOFF_DAY: "Kesim günü", // "Cut-off day"
+  UNASSIGNED_TITLE: "Kartsız Abonelikler", // "Unassigned Subscriptions"
+  UNASSIGNED_DESCRIPTION: "Bu abonelikler henüz bir karta atanmadı", // "These subscriptions are not assigned to any card"
+  VIEW_DETAILS: "Detayları Gör", // "View Details"
+  SPENDING_MIXED_CURRENCY: "+", // Separator for mixed currencies "₺1.200 + $40"
 } as const;
 
 export type WalletStrings = typeof WALLET_STRINGS;

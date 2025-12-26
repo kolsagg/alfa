@@ -32,6 +32,18 @@ import { cn } from "@/lib/utils";
 import * as Icons from "lucide-react";
 import { ColorPicker } from "./color-picker";
 import { IconPicker } from "./icon-picker";
+import { CardSelect } from "@/components/forms/card-select";
+import { SUBSCRIPTION_STRINGS } from "@/lib/i18n/subscriptions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export interface SubscriptionFormProps {
   initialValues?: Partial<SubscriptionInput>;
@@ -69,7 +81,9 @@ export function SubscriptionForm({
   );
   const [color, setColor] = useState(initialValues?.color || "");
   const [icon, setIcon] = useState(initialValues?.icon || "");
-  const [cardId, setCardId] = useState(initialValues?.cardId || "");
+  const [cardId, setCardId] = useState<string | undefined>(
+    initialValues?.cardId
+  );
   const [customDays, setCustomDays] = useState(
     initialValues?.customDays?.toString() || "30"
   );
@@ -81,6 +95,7 @@ export function SubscriptionForm({
     !!initialValues?.color
   );
   const [manuallySetIcon, setManuallySetIcon] = useState(!!initialValues?.icon);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
   // Store
   const addSubscription = useSubscriptionStore(
@@ -130,7 +145,7 @@ export function SubscriptionForm({
     setCategory(undefined);
     setColor("");
     setIcon("");
-    setCardId("");
+    setCardId(undefined);
     setManuallySetColor(false);
     setManuallySetIcon(false);
     setCustomDays("30");
@@ -240,7 +255,7 @@ export function SubscriptionForm({
         categoryId: finalCategory,
         color: finalColor,
         icon: finalIcon,
-        cardId: cardId || undefined,
+        cardId,
         ...(billingCycle === "custom" && {
           customDays: parseInt(customDays) || 30,
         }),
@@ -502,6 +517,7 @@ export function SubscriptionForm({
               mode="single"
               selected={firstPaymentDate}
               onSelect={setFirstPaymentDate}
+              locale={tr}
               initialFocus
             />
           </PopoverContent>
@@ -551,6 +567,54 @@ export function SubscriptionForm({
         }}
         disabled={isSubmitting}
       />
+
+      {/* Card Select (Story 6.3) */}
+      <CardSelect
+        value={cardId || undefined}
+        onValueChange={(v) => setCardId(v || "")}
+        disabled={isSubmitting}
+        onNavigateToWallet={() => {
+          // Check if form has been modified
+          const isDirty =
+            name !== (initialValues?.name || "") ||
+            amount !== (initialValues?.amount?.toString() || "") ||
+            currency !== (initialValues?.currency || "TRY") ||
+            billingCycle !== (initialValues?.billingCycle || "monthly") ||
+            category !== initialValues?.categoryId;
+
+          if (isDirty) {
+            setShowUnsavedDialog(true);
+          } else {
+            window.location.hash = "#/wallet";
+          }
+        }}
+      />
+
+      {/* Unsaved Changes Dialog */}
+      <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {SUBSCRIPTION_STRINGS.UNSAVED_CHANGES_TITLE}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {SUBSCRIPTION_STRINGS.UNSAVED_CHANGES_DESC}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {SUBSCRIPTION_STRINGS.UNSAVED_CHANGES_CANCEL}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                window.location.hash = "#/wallet";
+              }}
+            >
+              {SUBSCRIPTION_STRINGS.UNSAVED_CHANGES_CONTINUE}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4">
