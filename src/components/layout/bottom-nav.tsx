@@ -1,16 +1,16 @@
+import { useState } from "react";
 import { LayoutDashboard, Plus, Settings, Wallet } from "lucide-react";
 import { NavLink } from "react-router";
-import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/stores/ui-store";
 import { ROUTES } from "@/router/routes";
+import { CreateOptionsPanel } from "@/components/features/create-options-sheet";
+import { CardFormDialog } from "@/components/features/wallet/card-form-dialog";
 
 interface NavItemConfig {
   id: string;
-  path: string | null; // null for action buttons (no routing)
+  path: string;
   label: string;
   icon: typeof LayoutDashboard;
-  action?: () => void;
-  isCenter?: boolean;
 }
 
 /**
@@ -27,23 +27,27 @@ function triggerHapticFeedback(): void {
   }
 }
 
+/**
+ * BottomNav - Spotify-inspired bottom navigation
+ *
+ * Features:
+ * - Navigation items: Dashboard, Wallet, Settings
+ * - Create button (+ / ×) on the right - opens floating panel
+ * - Panel floats above navbar (navbar stays visible)
+ * - Icon toggles between + and × when panel is open
+ */
 export function BottomNav() {
   const openModal = useUIStore((s) => s.openModal);
+  const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(false);
+  const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
 
+  // Navigation items
   const navItems: NavItemConfig[] = [
     {
       id: "dashboard",
       path: ROUTES.DASHBOARD,
       label: "Dashboard",
       icon: LayoutDashboard,
-    },
-    {
-      id: "add",
-      path: null,
-      label: "Ekle",
-      icon: Plus,
-      action: () => openModal("addSubscription"),
-      isCenter: true,
     },
     { id: "wallet", path: ROUTES.WALLET, label: "Cüzdan", icon: Wallet },
     { id: "settings", path: ROUTES.SETTINGS, label: "Ayarlar", icon: Settings },
@@ -57,94 +61,137 @@ export function BottomNav() {
   };
 
   /**
-   * Handle center action button click
+   * Handle create button click - toggle panel
    */
-  const handleActionClick = (action?: () => void) => {
+  const handleCreateClick = () => {
     triggerHapticFeedback();
-    action?.();
+    setIsCreatePanelOpen(!isCreatePanelOpen);
   };
 
   /**
-   * Check if current path matches the nav item
-   * For dashboard, we need exact match since it's the root
-   * Note: NavLink handle this internally, but we keep this for consistent Icon strokeWidth prop
+   * Handle subscription selection from panel
    */
+  const handleSelectSubscription = () => {
+    openModal("addSubscription");
+  };
+
+  /**
+   * Handle card selection from panel
+   */
+  const handleSelectCard = () => {
+    setIsCardDialogOpen(true);
+  };
 
   return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-bottom"
-      aria-label="Alt navigasyon"
-    >
-      <div className="flex h-16 items-center justify-around px-4">
-        {navItems.map((item) => {
-          const Icon = item.icon;
+    <>
+      {/* Floating Create Panel - above navbar */}
+      <CreateOptionsPanel
+        open={isCreatePanelOpen}
+        onClose={() => setIsCreatePanelOpen(false)}
+        onSelectSubscription={handleSelectSubscription}
+        onSelectCard={handleSelectCard}
+      />
 
-          // Center Action Button - same style as other nav items
-          if (item.path === null && item.isCenter) {
+      {/* Bottom Navigation */}
+      <nav
+        className="fixed bottom-[-1px] left-0 right-0 z-50 border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-bottom"
+        aria-label="Alt navigasyon"
+      >
+        <div className="flex h-16 items-center justify-around px-4">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+
             return (
-              <Button
+              <NavLink
                 key={item.id}
-                variant="ghost"
-                onClick={() => handleActionClick(item.action)}
-                className="flex flex-col items-center justify-center gap-1 touch-target rounded-lg transition-nav text-muted-foreground hover:text-foreground hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-primary px-3 py-2"
+                to={item.path}
+                end={item.path === ROUTES.DASHBOARD}
+                onClick={handleNavigationClick}
+                className={({ isActive }) =>
+                  `flex flex-col items-center justify-center gap-1 touch-target rounded-lg transition-nav px-3 py-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
+                    isActive
+                      ? "text-primary bg-primary/10 scale-105 font-semibold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`
+                }
                 aria-label={item.label}
               >
-                <Icon className="h-5 w-5" />
-                <span className="text-xs font-medium whitespace-nowrap">
-                  {item.label}
-                </span>
-              </Button>
+                {({ isActive }) => (
+                  <>
+                    <Icon
+                      strokeWidth={isActive ? 2.5 : 2}
+                      className="h-5 w-5 transition-all"
+                    />
+                    <span className="text-xs font-medium whitespace-nowrap">
+                      {item.label}
+                    </span>
+                  </>
+                )}
+              </NavLink>
             );
-          }
+          })}
 
-          // Regular action button (non-routing, not center)
-          if (item.path === null) {
-            return (
-              <Button
-                key={item.id}
-                variant="ghost"
-                onClick={() => handleActionClick(item.action)}
-                className="flex flex-col items-center justify-center gap-1 touch-target rounded-lg transition-nav text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label={item.label}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="text-xs font-medium whitespace-nowrap">
-                  {item.label}
-                </span>
-              </Button>
-            );
-          }
+          {/* Create Button - rightmost, toggles + / × with circle animation */}
+          <button
+            type="button"
+            onClick={handleCreateClick}
+            className="relative flex flex-col items-center justify-center gap-1 touch-target px-3 py-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none text-muted-foreground hover:text-foreground"
+            aria-label={isCreatePanelOpen ? "Kapat" : "Ekle"}
+            aria-expanded={isCreatePanelOpen}
+          >
+            {/* White circle highlight - centered, animates size */}
+            <div
+              className={`
+                absolute rounded-full bg-foreground transition-all duration-500 ease-out
+                left-1/2 -translate-x-1/2
+                ${
+                  isCreatePanelOpen
+                    ? "w-10 h-10 opacity-100 top-0"
+                    : "w-0 h-0 opacity-0 top-2"
+                }
+              `}
+              aria-hidden="true"
+            />
 
-          return (
-            <NavLink
-              key={item.id}
-              to={item.path}
-              end={item.path === ROUTES.DASHBOARD}
-              onClick={handleNavigationClick}
-              className={({ isActive }) =>
-                `flex flex-col items-center justify-center gap-1 touch-target rounded-lg transition-nav px-3 py-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
-                  isActive
-                    ? "text-primary bg-primary/10 scale-105 font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                }`
-              }
-              aria-label={item.label}
+            {/* Plus icon with rotation - centered in circle when open */}
+            <div
+              className={`
+                relative z-10 h-5 w-5 transition-all duration-300 ease-out
+                ${
+                  isCreatePanelOpen
+                    ? "rotate-[135deg] text-background"
+                    : "rotate-0"
+                }
+              `}
             >
-              {({ isActive }) => (
-                <>
-                  <Icon
-                    strokeWidth={isActive ? 2.5 : 2}
-                    className="h-5 w-5 transition-all"
-                  />
-                  <span className="text-xs font-medium whitespace-nowrap">
-                    {item.label}
-                  </span>
-                </>
-              )}
-            </NavLink>
-          );
-        })}
-      </div>
-    </nav>
+              <Plus className="h-5 w-5" />
+            </div>
+
+            {/* Label - fades out when open */}
+            <span
+              className={`
+                text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out
+                ${
+                  isCreatePanelOpen
+                    ? "opacity-0 max-h-0 overflow-hidden"
+                    : "opacity-100 max-h-6"
+                }
+              `}
+            >
+              Ekle
+            </span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Card Form Dialog - triggered from panel */}
+      <CardFormDialog
+        open={isCardDialogOpen}
+        onOpenChange={setIsCardDialogOpen}
+        mode="add"
+        onSuccess={() => setIsCardDialogOpen(false)}
+        onCancel={() => setIsCardDialogOpen(false)}
+      />
+    </>
   );
 }

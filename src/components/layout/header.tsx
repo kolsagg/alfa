@@ -1,7 +1,6 @@
 import { Link, useLocation } from "react-router";
-import { Settings, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ImminentPaymentsBadge } from "@/components/features/ImminentPaymentsBadge";
 import { ROUTES } from "@/router/routes";
 
@@ -11,7 +10,9 @@ import { ROUTES } from "@/router/routes";
  * Story 4.7 AC5: Added ImminentPaymentsBadge - shows count of imminent payments
  * when push notifications are not active.
  *
- * Story 8.2 AC1: Settings button navigates to /#/settings instead of opening a Sheet
+ * Simplified: Removed theme toggle and settings button from header
+ * - Theme is in Settings page
+ * - Settings is in bottom navbar
  */
 export function Header() {
   const location = useLocation();
@@ -35,15 +36,6 @@ export function Header() {
         <div className="flex items-center gap-2">
           {/* Story 4.7 AC5: Badge for imminent payments when notifications are off */}
           <ImminentPaymentsBadge />
-          <ThemeToggle />
-          {/* Story 8.2 AC1: Navigate to Settings page instead of opening Sheet */}
-          {!isSettingsPage && (
-            <Button variant="outline" size="icon" asChild>
-              <Link to={ROUTES.SETTINGS} aria-label="Ayarlar">
-                <Settings className="h-5 w-5" />
-              </Link>
-            </Button>
-          )}
         </div>
       </div>
     </header>

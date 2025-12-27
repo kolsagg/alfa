@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
 import { WalletEmptyState } from "@/components/features/wallet/wallet-empty-state";
 import { CardList } from "@/components/features/wallet/card-list";
 import { CardFormDialog } from "@/components/features/wallet/card-form-dialog";
-import { Button } from "@/components/ui/button";
 import { useCardStore } from "@/stores/card-store";
 import { WALLET_STRINGS } from "@/lib/i18n/wallet";
 
@@ -45,7 +43,6 @@ export default function WalletPage() {
 
   return (
     <div className="px-4 pt-2 space-y-6" data-testid="wallet-page">
-      {/* Page Header - AC1 */}
       <header
         className="flex items-center justify-between"
         data-testid="wallet-header"
@@ -61,21 +58,6 @@ export default function WalletPage() {
             {WALLET_STRINGS.WALLET_DESCRIPTION}
           </p>
         </div>
-
-        {/* Header Add Card Button - AC3 */}
-        {hasCards && (
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleOpenAddDialog}
-            className="min-h-[44px] min-w-[44px] gap-2"
-            aria-label={WALLET_STRINGS.ADD_CARD}
-            data-testid="wallet-header-add-button"
-          >
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden sm:inline">{WALLET_STRINGS.ADD_CARD}</span>
-          </Button>
-        )}
       </header>
 
       {/* Conditional Content - AC1, AC5 */}

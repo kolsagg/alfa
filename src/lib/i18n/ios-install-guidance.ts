@@ -41,7 +41,7 @@ export const IOS_INSTALL_GUIDANCE_STRINGS = {
   // Toast Messages
   TOAST_INSTALL_SUCCESS: "Harika! SubTracker ana ekranınıza eklendi. 🎉", // "Great! SubTracker has been added to your home screen. 🎉"
   TOAST_INSTALL_PENDING:
-    "Henüz PWA modunda değilsiniz. Lütfen adımları takip edin.", // "You're not in PWA mode yet. Please follow the steps."
+    "Henüz uygulama yüklenmedi. Lütfen adımları tamamlayın.", // Simplified user-friendly message
 } as const;
 
 // Type export for strict type checking

@@ -2,7 +2,7 @@
 
 ## Genel Durum
 
-Proje **Faz 4: Implementasyon** aşamasındadır. Temel altyapı (Setup, Theme, Layout) tamamlanmış, ana özelliklere (Abonelik Yönetimi) geçilmiştir.
+Proje **Faz 4: Implementasyon** aşamasındadır ve **v1.0.0** sürümüne ulaşmıştır. Temel altyapı, abonelik yönetimi ve UI cilalamaları tamamlanmıştır.
 
 ## Kilometre Taşları (Epics)
 

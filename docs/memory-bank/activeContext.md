@@ -9,6 +9,20 @@
 
 ## Son Değişiklikler
 
+- **2025-12-27 (UI Polish & v1.0.0):**
+
+  - **iOS Install Guidance:**
+    - Görsel Türkçe versiyonu ile güncellendi (`ios-guidance-tr.png`).
+    - İkonlar dikey olarak ortalandı ve hizalamalar düzeltildi.
+    - Gereksiz "Kapat" butonu kaldırıldı, sadece aksiyon butonları bırakıldı.
+    - Uyarı mesajı basitleştirildi.
+    - `DialogTitle` erişilebilirlik ve hizalama sorunları çözüldü (Radix automatic context).
+  - **Abonelik Listesi:** Filtre dropdown genişlikleri artırıldı (metin kesilmesi önlendi).
+  - **Genel UI:**
+    - Alt navigasyon çubuğu altındaki 1px boşluk düzeltildi.
+    - Dashboard header boşlukları optimize edildi.
+  - **Sürüm:** Uygulama sürümü `1.0.0` olarak güncellendi.
+
 - **2025-12-18 (Story 2.4):**
 
   - `SubscriptionCard`, `SubscriptionDetailDialog`, `EditSubscriptionDialog`, `DeleteConfirmationDialog` bileşenleri oluşturuldu.

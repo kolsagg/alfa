@@ -109,7 +109,7 @@ export function AboutSettings() {
       {/* Credits Footer - AC1 */}
       <div className="pt-3 border-t text-center" data-testid="about-credits">
         <p className="text-xs text-muted-foreground">
-          {SETTINGS_STRINGS.MADE_WITH_LOVE}
+          {SETTINGS_STRINGS.COPYRIGHT}
         </p>
       </div>
     </div>

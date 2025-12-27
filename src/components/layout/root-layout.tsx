@@ -38,10 +38,8 @@ export function RootLayout() {
     <div className="flex min-h-screen flex-col bg-background font-jakarta">
       <Header />
       <IOSInstallGuidance />
-      <div className="px-4 pt-2">
-        <NotificationBanner />
-      </div>
-      <main className="flex-1 px-4 py-6 pb-24">
+      <NotificationBanner className="mx-4 mt-2" />
+      <main className="flex-1 px-4 pt-3 pb-24">
         <Outlet />
       </main>
       <BottomNav />

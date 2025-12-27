@@ -348,7 +348,7 @@ export function SubscriptionList({
                 }
               >
                 <SelectTrigger
-                  className="w-[130px] h-9 min-h-[44px]"
+                  className="w-[140px] h-9 min-h-[44px]"
                   aria-label="Kategori filtresi"
                 >
                   <Filter className="w-4 h-4 mr-1" />
@@ -374,7 +374,7 @@ export function SubscriptionList({
               }}
             >
               <SelectTrigger
-                className="w-[140px] h-9 min-h-[44px]"
+                className="w-[160px] h-9 min-h-[44px]"
                 aria-label="Sıralama seçeneği"
               >
                 <ArrowUpDown className="w-4 h-4 mr-1" />

@@ -39,7 +39,7 @@ export const NOTIFICATION_CONFIG = {
    * Assets for notification guidance
    */
   ASSETS: {
-    IOS_GUIDANCE: "/assets/ios-guidance.png",
+    IOS_GUIDANCE: "/assets/ios-guidance-tr.png",
   },
 
   /**

@@ -78,7 +78,7 @@ export const SETTINGS_STRINGS = {
   PRIVACY_TITLE: "Gizlilik", // "Privacy"
   NO_TRACKING_STATEMENT: "Verileriniz asla sunucuya gönderilmez", // "Your data is never sent to the server"
   NO_THIRD_PARTY: "Üçüncü taraf izleme scripti kullanılmamaktadır", // "No third-party tracking script included"
-  MADE_WITH_LOVE: "Made with ❤️ in Istanbul", // Credits footer
+  COPYRIGHT: "© 2025 SubTracker. Tüm hakları saklıdır.", // Copyright footer
   PWA_MODE: "Uygulama", // "App" - PWA standalone mode
   BROWSER_MODE: "Tarayıcı", // "Browser" - web mode
   PLATFORM_LABEL: "Platform", // "Platform"

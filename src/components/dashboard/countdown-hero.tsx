@@ -48,6 +48,7 @@ export function CountdownHero() {
   const subscriptions = useSubscriptionStore((state) => state.subscriptions);
   const { notificationsEnabled, notificationPermission } = useSettingsStore();
   const reducedMotion = useReducedMotion();
+  const rates = useFXStore((state) => state.rates);
 
   // Get today's top 3 payments for display
   const todaysPayments = useMemo(
@@ -246,22 +247,38 @@ export function CountdownHero() {
   if (!hasPaymentsToday && !hasUpcoming) {
     return (
       <section
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-secondary/5 to-background p-6 border border-border/50"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/10 p-8 border border-border/30"
         aria-label="Yaklaşan ödeme sayacı"
       >
-        <div className="flex flex-col items-center justify-center gap-4 text-center">
-          <p className="text-sm font-medium text-muted-foreground">
-            Bir sonraki ödeme
-          </p>
-          <div className="text-5xl font-extrabold tracking-tight text-foreground tabular-nums font-jakarta">
-            --:--:--
+        {/* Decorative background circles */}
+        <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-primary/5 blur-2xl" />
+        <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-secondary/10 blur-xl" />
+
+        <div className="relative flex flex-col items-center justify-center gap-5 text-center py-4">
+          {/* Animated icon container */}
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping opacity-30" />
+            <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border border-primary/20">
+              <Clock className="w-8 h-8 text-primary/60" />
+            </div>
           </div>
-          <p className="text-lg font-semibold text-foreground/80">
-            Henüz abonelik yok
-          </p>
-          <p className="text-xs text-muted-foreground">
-            İlk aboneliğinizi ekleyin ve ödemeleri takip etmeye başlayın
-          </p>
+
+          {/* Main message */}
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold text-foreground">
+              Henüz abonelik yok
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-[240px] leading-relaxed">
+              İlk aboneliğinizi ekleyin ve ödemelerinizi takip etmeye başlayın
+            </p>
+          </div>
+
+          {/* Subtle hint */}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground/60 mt-2">
+            <div className="w-1 h-1 rounded-full bg-primary/40" />
+            <span>Aşağıdaki + butonunu kullanın</span>
+            <div className="w-1 h-1 rounded-full bg-primary/40" />
+          </div>
         </div>
       </section>
     );
@@ -274,7 +291,6 @@ export function CountdownHero() {
 
   // Calculate total for ALL today's payments (not just top 3)
   // Convert all amounts to TRY using exchange rates
-  const rates = useFXStore((state) => state.rates);
   const todayTotal = allTodaysPayments.reduce((sum, s) => {
     const rate = rates[s.currency] || 1;
     return sum + s.amount * rate;

@@ -77,10 +77,9 @@ describe("AboutSettings", () => {
     it("renders credits footer", () => {
       render(<AboutSettings />);
 
-      expect(screen.getByTestId("about-credits")).toBeInTheDocument();
-      expect(
-        screen.getByText(SETTINGS_STRINGS.MADE_WITH_LOVE)
-      ).toBeInTheDocument();
+      const creditsFooter = screen.getByTestId("about-credits");
+      expect(creditsFooter).toBeInTheDocument();
+      expect(screen.getByText(SETTINGS_STRINGS.COPYRIGHT)).toBeInTheDocument();
     });
   });
 

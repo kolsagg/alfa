@@ -14,7 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { formatCurrency } from "@/lib/formatters";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, CreditCard } from "lucide-react";
+import { useCardStore } from "@/stores/card-store";
 
 interface SubscriptionDetailDialogProps {
   subscription: Subscription | null;
@@ -37,6 +38,12 @@ export function SubscriptionDetailDialog({
   onEdit,
   onDelete,
 }: SubscriptionDetailDialogProps) {
+  // Get linked card info (must be before any conditional returns)
+  const cards = useCardStore((s) => s.cards);
+  const linkedCard = subscription?.cardId
+    ? cards.find((c) => c.id === subscription.cardId)
+    : null;
+
   // Handle subscription not found (rehydration might have deleted it)
   useEffect(() => {
     if (open && !subscription) {
@@ -90,12 +97,29 @@ export function SubscriptionDetailDialog({
             <DialogTitle className="text-xl">{subscription.name}</DialogTitle>
             <DialogDescription asChild>
               <div className="flex flex-col gap-3 pt-2">
-                {/* Category Badge */}
-                <div className="flex items-center gap-2">
+                {/* Badges Row: Category (Left) - Card (Right) */}
+                <div className="flex items-center justify-between gap-2">
                   <CategoryBadge
                     categoryId={subscription.categoryId}
                     size="default"
                   />
+
+                  {/* Linked Card Badge */}
+                  {linkedCard && (
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/80 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                      <CreditCard className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate max-w-[180px]">
+                        {linkedCard.name}
+                        <span className="mx-1 opacity-50">|</span>
+                        {linkedCard.bankName}
+                        {linkedCard.lastFourDigits && (
+                          <span className="ml-1 font-mono text-[10px] opacity-70">
+                            •••• {linkedCard.lastFourDigits}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Amount */}

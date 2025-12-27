@@ -75,6 +75,14 @@ export const WALLET_STRINGS = {
   UNASSIGNED_DESCRIPTION: "Bu abonelikler henüz bir karta atanmadı", // "These subscriptions are not assigned to any card"
   VIEW_DETAILS: "Detayları Gör", // "View Details"
   SPENDING_MIXED_CURRENCY: "+", // Separator for mixed currencies "₺1.200 + $40"
+
+  // Statement Display (Story 6.5)
+  THIS_STATEMENT: "Bu Ekstre", // "This Statement"
+  NEXT_STATEMENT: "Sonraki Ekstre", // "Next Statement"
+  DAYS_REMAINING: "gün kaldı", // "days remaining"
+  ACTUAL_BILL: "Ekstre Tutarı", // "Statement Amount" / "Actual Bill"
+  NORMALIZED_LOAD: "Aylık Ortalama", // "Monthly Average" - Normalized view
+  STATEMENT_PROGRESS: "Ekstre Dönemi", // "Statement Period"
 } as const;
 
 export type WalletStrings = typeof WALLET_STRINGS;

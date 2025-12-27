@@ -17,7 +17,7 @@ import type { Card } from "@/types/card";
  * - Responsive grid: 1-col mobile, 2-col desktop
  * - Efficient Zustand selector for minimal re-renders
  * - Handles Add/Edit dialog state
- * - Header with Add Card button
+ * - All cards: Click opens edit dialog
  * - Per-card spending display
  * - Unassigned subscriptions section
  */
@@ -47,6 +47,7 @@ export function CardList({ onAddCard }: CardListProps) {
   };
 
   const handleCardClick = (card: Card) => {
+    // All cards: open edit dialog
     setSelectedCard(card);
     setDialogMode("edit");
     setIsDialogOpen(true);

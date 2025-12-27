@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from "react";
 import { useSubscriptionStore } from "@/stores/subscription-store";
 import { useSettingsStore } from "@/stores/settings-store";
 import { showNotificationPermissionPrompt } from "@/lib/notification-permission";
-import { Plus, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -110,10 +110,6 @@ export function AddSubscriptionDialog() {
     [openModal, closeModal]
   );
 
-  const handleFABClick = useCallback(() => {
-    openModal("addSubscription");
-  }, [openModal]);
-
   // Build initial values from selected service OR prefillData
   const getInitialValues = useCallback(() => {
     // Priority 1: PrefillData from UIStore (EmptyState Quick-Add)
@@ -156,16 +152,6 @@ export function AddSubscriptionDialog() {
 
   return (
     <>
-      {/* Floating Action Button */}
-      <Button
-        onClick={handleFABClick}
-        size="icon"
-        className="fixed bottom-24 md:bottom-8 right-6 z-50 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow min-h-[56px] min-w-[56px]"
-        aria-label="Abonelik ekle"
-      >
-        <Plus size={24} />
-      </Button>
-
       {/* Dialog - Controlled by UIStore */}
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogContent

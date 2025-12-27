@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Share, PlusSquare, X } from "lucide-react";
+import { Share, PlusSquare } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -151,38 +151,17 @@ export function IOSInstallGuidance({
     ? IOS_STRINGS.DESCRIPTION_SETTINGS
     : IOS_STRINGS.DESCRIPTION_AUTOMATIC;
 
-  const titleId = "ios-install-guidance-title";
-  const descriptionId = "ios-install-guidance-description";
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent
         className="sm:max-w-[425px] rounded-t-3xl sm:rounded-3xl border-none bg-background/95 backdrop-blur-xl"
-        aria-labelledby={titleId}
-        aria-describedby={descriptionId}
+        showCloseButton={false}
       >
         <DialogHeader>
-          <div className="flex justify-between items-center mb-2">
-            <DialogTitle
-              id={titleId}
-              className="text-2xl font-bold tracking-tight text-foreground"
-            >
-              {title}
-            </DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="rounded-full h-11 w-11 min-h-[44px] min-w-[44px] hover:bg-muted"
-              aria-label={IOS_STRINGS.BUTTON_CLOSE_ARIA}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <DialogDescription
-            id={descriptionId}
-            className="text-muted-foreground text-sm"
-          >
+          <DialogTitle className="text-2xl font-bold tracking-tight text-foreground text-center w-full">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground text-sm">
             {description}
           </DialogDescription>
         </DialogHeader>
@@ -213,8 +192,8 @@ export function IOSInstallGuidance({
         </div>
 
         <div className="grid gap-3">
-          <div className="flex items-start gap-4 p-3 rounded-xl bg-accent/50 border border-border/50">
-            <Share className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+          <div className="flex items-center gap-4 p-3 rounded-xl bg-accent/50 border border-border/50">
+            <Share className="h-5 w-5 text-primary flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold">
                 {IOS_STRINGS.STEP_1_TITLE}
@@ -224,8 +203,8 @@ export function IOSInstallGuidance({
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-4 p-3 rounded-xl bg-accent/50 border border-border/50">
-            <PlusSquare className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+          <div className="flex items-center gap-4 p-3 rounded-xl bg-accent/50 border border-border/50">
+            <PlusSquare className="h-5 w-5 text-primary flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold">
                 {IOS_STRINGS.STEP_2_TITLE}

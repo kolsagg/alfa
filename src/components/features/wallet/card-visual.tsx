@@ -22,7 +22,6 @@ import { cn } from "@/lib/utils";
  * - Type badge: "Kredi" or "Banka"
  * - Bank name (optional)
  * - Spending info with multi-currency support
- * - Next statement hint for credit cards
  * - Privacy Note: "Sadece son 4 hane saklanır" (NFR06)
  * - 44x44px touch target compliance
  */
