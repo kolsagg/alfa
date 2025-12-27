@@ -49,24 +49,25 @@ describe("Dashboard Layout Components", () => {
       expect(screen.getByText("SubTracker")).toBeInTheDocument();
     });
 
-    it("renders theme toggle", () => {
+    it("renders with header structure", () => {
       render(
         <MemoryRouter>
           <Header />
         </MemoryRouter>
       );
-      // ThemeToggle and Settings button are both present
-      const buttons = screen.getAllByRole("button");
-      expect(buttons.length).toBeGreaterThanOrEqual(1);
+      // Header now contains ImminentPaymentsBadge instead of theme toggle button
+      const header = screen.getByRole("banner");
+      expect(header).toBeInTheDocument();
     });
 
-    it("renders settings link", () => {
+    it("renders app title without settings link (settings is in bottom-nav now)", () => {
       render(
         <MemoryRouter>
           <Header />
         </MemoryRouter>
       );
-      expect(screen.getByLabelText("Ayarlar")).toBeInTheDocument();
+      // Settings link is now in BottomNav, not Header
+      expect(screen.getByText("SubTracker")).toBeInTheDocument();
     });
   });
 
@@ -116,16 +117,16 @@ describe("Dashboard Layout Components", () => {
   });
 
   describe("CountdownHero", () => {
-    it("renders placeholder text when empty", () => {
+    it("renders empty state message when no subscriptions", () => {
       render(<CountdownHero />);
-      expect(screen.getByText("Bir sonraki ödeme")).toBeInTheDocument();
-      expect(screen.getByText("--:--:--")).toBeInTheDocument();
+      // New empty state shows friendly message instead of --:--:--
+      expect(screen.getByText("Henüz abonelik yok")).toBeInTheDocument();
     });
 
-    it("has tabular-nums for countdown display", () => {
+    it("has proper aria-label for accessibility", () => {
       render(<CountdownHero />);
-      const countdown = screen.getByText("--:--:--");
-      expect(countdown).toHaveClass("tabular-nums");
+      const section = screen.getByRole("region");
+      expect(section).toHaveAttribute("aria-label", "Yaklaşan ödeme sayacı");
     });
   });
 

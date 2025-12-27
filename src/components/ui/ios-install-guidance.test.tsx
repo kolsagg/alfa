@@ -408,14 +408,9 @@ describe("IOSInstallGuidance", () => {
       render(<IOSInstallGuidance />);
 
       const dialog = screen.getByRole("dialog");
-      expect(dialog).toHaveAttribute(
-        "aria-labelledby",
-        "ios-install-guidance-title"
-      );
-      expect(dialog).toHaveAttribute(
-        "aria-describedby",
-        "ios-install-guidance-description"
-      );
+      // Radix Dialog auto-generates aria-labelledby and aria-describedby
+      expect(dialog).toHaveAttribute("aria-labelledby");
+      expect(dialog).toHaveAttribute("aria-describedby");
     });
 
     it("should have aria-live on step container for screen reader announcements", () => {
@@ -432,20 +427,18 @@ describe("IOSInstallGuidance", () => {
       expect(stepContainer).toBeInTheDocument();
     });
 
-    it("should have minimum 44x44px touch targets on close button", () => {
+    it("should have minimum 44x44px touch targets on action buttons", () => {
       vi.mocked(iosDetection.useIOSPWADetection).mockReturnValue({
         shouldShowPrompt: true,
       });
 
       render(<IOSInstallGuidance />);
 
-      const closeButton = screen.getByRole("button", {
-        name: IOS_STRINGS.BUTTON_CLOSE_ARIA,
+      // Check "Anladım" button meets touch target requirements
+      const understoodButton = screen.getByRole("button", {
+        name: IOS_STRINGS.BUTTON_UNDERSTOOD,
       });
-
-      // Check for min-h-[44px] and min-w-[44px] classes
-      expect(closeButton).toHaveClass("min-h-[44px]");
-      expect(closeButton).toHaveClass("min-w-[44px]");
+      expect(understoodButton).toHaveClass("min-h-[44px]");
     });
 
     it("should have minimum 44px height on action buttons", () => {

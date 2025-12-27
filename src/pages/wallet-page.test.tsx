@@ -142,12 +142,11 @@ describe("WalletPage", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("renders header Add button when cards exist", () => {
+    it("renders CardList component which provides add functionality", () => {
       renderWithRouter(<WalletPage />);
 
-      expect(
-        screen.getByTestId("wallet-header-add-button")
-      ).toBeInTheDocument();
+      // CardList component handles its own add button/flow now
+      expect(screen.getByTestId("card-list")).toBeInTheDocument();
     });
 
     it("displays card visual in the list", () => {
@@ -174,15 +173,17 @@ describe("WalletPage", () => {
       });
     });
 
-    it("opens add dialog when header button clicked", async () => {
+    it("dialog form shows add mode when opened from empty state", async () => {
       const user = userEvent.setup();
-      useCardStore.setState({ cards: [mockCard] });
       renderWithRouter(<WalletPage />);
 
-      await user.click(screen.getByTestId("wallet-header-add-button"));
+      await user.click(screen.getByTestId("wallet-empty-add-button"));
 
       await waitFor(() => {
-        expect(screen.getByTestId("card-form-dialog")).toBeInTheDocument();
+        // Verify it's in add mode
+        expect(screen.getByTestId("card-form-title")).toHaveTextContent(
+          WALLET_STRINGS.ADD_CARD
+        );
       });
     });
   });
@@ -272,12 +273,12 @@ describe("WalletPage", () => {
       expect(screen.getByTestId("wallet-empty-state")).toBeInTheDocument();
     });
 
-    it("Add Card button has accessible label", () => {
-      useCardStore.setState({ cards: [mockCard] });
+    it("empty state Add Card button has accessible label", () => {
       renderWithRouter(<WalletPage />);
 
-      const addButton = screen.getByTestId("wallet-header-add-button");
-      expect(addButton).toHaveAccessibleName(WALLET_STRINGS.ADD_CARD);
+      // In new design, add is only via empty state when no cards
+      const addButton = screen.getByTestId("wallet-empty-add-button");
+      expect(addButton).toHaveAccessibleName(WALLET_STRINGS.ADD_FIRST_CARD);
     });
   });
 });

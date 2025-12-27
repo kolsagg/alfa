@@ -7,13 +7,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router";
 import { ImminentPaymentsBadge } from "./imminent-payments-badge";
 import { formatImminentBadgeLabel } from "@/lib/i18n/notifications";
 
 // Mock hooks
 const mockImminentPayments = vi.fn(() => ({
   count: 0,
-  payments: [] as unknown[],
+  payments: [] as Array<{ id: string; name: string; daysUntil: number }>,
   imminentDates: [] as string[],
   earliestDate: null as string | null,
   urgencyLevel: null as "critical" | "urgent" | "attention" | null,
@@ -50,6 +51,11 @@ vi.mock("@/lib/notification/utils", () => ({
 
 import { isPushNotificationActive } from "@/lib/notification/utils";
 
+// Helper to render with Router
+const renderWithRouter = (ui: React.ReactElement) => {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
+};
+
 describe("ImminentPaymentsBadge", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -75,8 +81,8 @@ describe("ImminentPaymentsBadge", () => {
         urgencyLevel: "attention",
       });
 
-      const { container } = render(<ImminentPaymentsBadge />);
-      expect(container.firstChild).toBeNull();
+      renderWithRouter(<ImminentPaymentsBadge />);
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
 
     it("should not render when count is 0", () => {
@@ -88,8 +94,8 @@ describe("ImminentPaymentsBadge", () => {
         urgencyLevel: null,
       });
 
-      const { container } = render(<ImminentPaymentsBadge />);
-      expect(container.firstChild).toBeNull();
+      renderWithRouter(<ImminentPaymentsBadge />);
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
 
     it("should render when notifications are off and payments are imminent", () => {
@@ -101,7 +107,7 @@ describe("ImminentPaymentsBadge", () => {
         urgencyLevel: "attention",
       });
 
-      render(<ImminentPaymentsBadge />);
+      renderWithRouter(<ImminentPaymentsBadge />);
       expect(screen.getByRole("status")).toBeInTheDocument();
       expect(screen.getByText("2")).toBeInTheDocument();
     });
@@ -117,7 +123,7 @@ describe("ImminentPaymentsBadge", () => {
         urgencyLevel: "urgent",
       });
 
-      render(<ImminentPaymentsBadge />);
+      renderWithRouter(<ImminentPaymentsBadge />);
       const badge = screen.getByRole("status");
       expect(badge).toBeInTheDocument();
     });
@@ -131,7 +137,7 @@ describe("ImminentPaymentsBadge", () => {
         urgencyLevel: "urgent",
       });
 
-      render(<ImminentPaymentsBadge />);
+      renderWithRouter(<ImminentPaymentsBadge />);
       const badge = screen.getByRole("status");
       expect(badge).toHaveAttribute("aria-label", formatImminentBadgeLabel(3));
     });
@@ -147,9 +153,10 @@ describe("ImminentPaymentsBadge", () => {
         urgencyLevel: "critical",
       });
 
-      render(<ImminentPaymentsBadge />);
+      renderWithRouter(<ImminentPaymentsBadge />);
       const badge = screen.getByRole("status");
-      expect(badge.className).toContain("color-critical");
+      // New component uses bg-[var(--color-critical)] pattern
+      expect(badge.className).toContain("--color-critical");
     });
 
     it("should apply urgent color for urgent urgency", () => {
@@ -161,9 +168,9 @@ describe("ImminentPaymentsBadge", () => {
         urgencyLevel: "urgent",
       });
 
-      render(<ImminentPaymentsBadge />);
+      renderWithRouter(<ImminentPaymentsBadge />);
       const badge = screen.getByRole("status");
-      expect(badge.className).toContain("color-urgent");
+      expect(badge.className).toContain("--color-urgent");
     });
 
     it("should apply attention color for attention urgency", () => {
@@ -175,29 +182,33 @@ describe("ImminentPaymentsBadge", () => {
         urgencyLevel: "attention",
       });
 
-      render(<ImminentPaymentsBadge />);
+      renderWithRouter(<ImminentPaymentsBadge />);
       const badge = screen.getByRole("status");
-      expect(badge.className).toContain("color-attention");
+      expect(badge.className).toContain("--color-attention");
     });
   });
 
   describe("Click Handler (AC5)", () => {
-    it("should set dateFilter to earliest imminent date when clicked", async () => {
+    it("should open popover when clicked", async () => {
       const user = userEvent.setup();
       const earliestDate = "2025-12-24T00:00:00Z";
       mockImminentPayments.mockReturnValue({
         count: 2,
-        payments: [],
+        payments: [
+          { id: "1", name: "Netflix", daysUntil: 1 },
+          { id: "2", name: "Spotify", daysUntil: 2 },
+        ],
         imminentDates: [earliestDate],
         earliestDate,
         urgencyLevel: "attention",
       });
 
-      render(<ImminentPaymentsBadge />);
+      renderWithRouter(<ImminentPaymentsBadge />);
       const badge = screen.getByRole("status");
       await user.click(badge);
 
-      expect(mockSetDateFilter).toHaveBeenCalledWith(earliestDate);
+      // Popover should open and show content
+      expect(screen.getByText("Yaklaşan Ödemeler")).toBeInTheDocument();
     });
 
     it("should be a clickable button", () => {
@@ -209,7 +220,7 @@ describe("ImminentPaymentsBadge", () => {
         urgencyLevel: "attention",
       });
 
-      render(<ImminentPaymentsBadge />);
+      renderWithRouter(<ImminentPaymentsBadge />);
       const badge = screen.getByRole("status");
       expect(badge.tagName).toBe("BUTTON");
       expect(badge).toHaveAttribute("type", "button");
@@ -226,7 +237,7 @@ describe("ImminentPaymentsBadge", () => {
         urgencyLevel: "attention",
       });
 
-      render(<ImminentPaymentsBadge className="custom-class" />);
+      renderWithRouter(<ImminentPaymentsBadge className="custom-class" />);
       const badge = screen.getByRole("status");
       expect(badge).toHaveClass("custom-class");
     });

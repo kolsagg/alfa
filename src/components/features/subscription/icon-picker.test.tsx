@@ -16,8 +16,9 @@ describe("IconPicker", () => {
   });
 
   it("shows the selected icon name", () => {
+    // Icon value is PascalCase (matching lucide-react icons), label is Turkish
     render(<IconPicker value="Tv" onChange={mockOnChange} />);
-    expect(screen.getByText(/Tv/i)).toBeInTheDocument();
+    expect(screen.getByText(/Televizyon/i)).toBeInTheDocument();
   });
 
   it("opens options when clicked", async () => {
@@ -26,28 +27,24 @@ describe("IconPicker", () => {
     const trigger = screen.getByRole("combobox");
     fireEvent.click(trigger);
 
-    // Check if some popular icons are visible in the list
-    // Radix UI Select uses portals, so we might need more complex querying if it's not simple
-    // But for basic check:
-    expect(screen.getByLabelText(/İkon/i)).toBeInTheDocument();
+    // Check if some popular icons are visible in the list (Radix Popover is used now)
+    expect(screen.getByTitle("Televizyon")).toBeInTheDocument();
   });
 
   it("enforces minimum touch target size on trigger", () => {
     render(<IconPicker value="" onChange={mockOnChange} />);
-    const trigger = screen.getByLabelText(/İkon/i);
-    expect(trigger).toHaveClass("min-h-[44px]");
+    const trigger = screen.getByRole("combobox");
+    // h-11 = 2.75rem = 44px - meets touch target requirements
+    expect(trigger).toHaveClass("h-11");
   });
 
   it("calls onChange when an icon is selected", async () => {
-    // Note: Radix Select is hard to test in JSDOM because of portals/pointer capture.
-    // In our project setup, we often mock complex components if they block logic testing.
-    // But since this is the component's OWN test, we use simplified fireEvent.
     render(<IconPicker value="" onChange={mockOnChange} />);
     const trigger = screen.getByRole("combobox");
     fireEvent.click(trigger);
 
-    // We look for items by role or text. Radix SelectItem renders as an option-like element.
-    const option = screen.getByText("Tv");
+    // Icons now use title attribute with Turkish label
+    const option = screen.getByTitle("Televizyon");
     fireEvent.click(option);
 
     expect(mockOnChange).toHaveBeenCalledWith("Tv");

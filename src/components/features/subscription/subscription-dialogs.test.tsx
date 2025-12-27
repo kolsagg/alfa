@@ -495,10 +495,14 @@ describe("AddSubscriptionDialog Integration", () => {
 
   it("should show QuickAddGrid by default", async () => {
     const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
+    const { useUIStore } = await import("@/stores/ui-store");
+
     render(<AddSubscriptionDialog />);
 
-    // Click the FAB to open dialog - use fireEvent to avoid pointer-events issue in JSDOM
-    fireEvent.click(screen.getByLabelText("Abonelik ekle"));
+    // Open dialog via UIStore (no FAB in this component - it's controlled by UIStore)
+    act(() => {
+      useUIStore.setState({ activeModal: "addSubscription" });
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Hızlı Abonelik Ekle")).toBeInTheDocument();
@@ -508,9 +512,14 @@ describe("AddSubscriptionDialog Integration", () => {
 
   it("should transition to form when a service is selected", async () => {
     const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
+    const { useUIStore } = await import("@/stores/ui-store");
+
     render(<AddSubscriptionDialog />);
 
-    fireEvent.click(screen.getByLabelText("Abonelik ekle"));
+    // Open dialog via UIStore
+    act(() => {
+      useUIStore.setState({ activeModal: "addSubscription" });
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Netflix")).toBeInTheDocument();
@@ -527,9 +536,14 @@ describe("AddSubscriptionDialog Integration", () => {
 
   it("should go back to grid when Geri is clicked", async () => {
     const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
+    const { useUIStore } = await import("@/stores/ui-store");
+
     render(<AddSubscriptionDialog />);
 
-    fireEvent.click(screen.getByLabelText("Abonelik ekle"));
+    // Open dialog via UIStore
+    act(() => {
+      useUIStore.setState({ activeModal: "addSubscription" });
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Netflix")).toBeInTheDocument();
@@ -550,9 +564,14 @@ describe("AddSubscriptionDialog Integration", () => {
 
   it("should pre-populate category and icon from selected service", async () => {
     const { AddSubscriptionDialog } = await import("./add-subscription-dialog");
+    const { useUIStore } = await import("@/stores/ui-store");
+
     render(<AddSubscriptionDialog />);
 
-    fireEvent.click(screen.getByLabelText("Abonelik ekle"));
+    // Open dialog via UIStore
+    act(() => {
+      useUIStore.setState({ activeModal: "addSubscription" });
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Spotify")).toBeInTheDocument();

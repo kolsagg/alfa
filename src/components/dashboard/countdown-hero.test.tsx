@@ -84,7 +84,7 @@ describe("CountdownHero", () => {
     it("should render empty state when no subscriptions", () => {
       render(<CountdownHero />);
 
-      expect(screen.getByText("--:--:--")).toBeInTheDocument();
+      // New empty state design shows message instead of zeroed countdown
       expect(screen.getByText("Henüz abonelik yok")).toBeInTheDocument();
     });
 
@@ -257,7 +257,8 @@ describe("CountdownHero", () => {
 
       render(<CountdownHero />);
 
-      expect(screen.getByText("--:--:--")).toBeInTheDocument();
+      // New empty state design shows message instead of zeroed countdown
+      expect(screen.getByText("Henüz abonelik yok")).toBeInTheDocument();
     });
   });
 

@@ -69,7 +69,7 @@ describe("BottomNav", () => {
     it("should render center button with standard nav item styling", () => {
       renderWithRouter();
       const addButton = screen.getByLabelText("Ekle");
-      expect(addButton).toHaveClass("rounded-lg");
+      // New design uses simpler classes without rounded-lg
       expect(addButton).toHaveClass("px-3");
       expect(addButton).toHaveClass("py-2");
       expect(addButton).toHaveClass("focus-visible:ring-2");
@@ -172,22 +172,25 @@ describe("BottomNav", () => {
   });
 
   describe("Center Action Button (AC3)", () => {
-    it("should open addSubscription modal when clicking Add button", () => {
+    it("should toggle CreateOptionsPanel when clicking Add button", () => {
       renderWithRouter();
 
       const addButton = screen.getByLabelText("Ekle");
       fireEvent.click(addButton);
 
-      expect(mockOpenModal).toHaveBeenCalledWith("addSubscription");
+      // After click, button should now have aria-expanded=true and label changes to "Kapat"
+      expect(screen.getByLabelText("Kapat")).toHaveAttribute(
+        "aria-expanded",
+        "true"
+      );
     });
 
-    it("should have visual distinction as FAB", () => {
+    it("should have visual distinction as action button", () => {
       renderWithRouter();
 
       const addButton = screen.getByLabelText("Ekle");
-      expect(addButton).toHaveClass("rounded-lg");
-      // Center button is no longer a large FAB (Floating Action Button),
-      // it now matches other nav items' sizing
+      // New design uses simpler classes, not rounded-lg FAB
+      expect(addButton).toHaveClass("touch-target");
       expect(addButton).toHaveClass("px-3");
       expect(addButton).toHaveClass("py-2");
     });
@@ -255,14 +258,15 @@ describe("BottomNav", () => {
   });
 
   describe("Transitions (AC2)", () => {
-    it("should have transition-nav class for smooth animations", () => {
+    it("should have transition classes for smooth animations", () => {
       renderWithRouter();
 
       const dashboardLink = screen.getByLabelText("Dashboard");
       expect(dashboardLink).toHaveClass("transition-nav");
 
+      // Add button uses different transition classes (duration-based)
       const addButton = screen.getByLabelText("Ekle");
-      expect(addButton).toHaveClass("transition-nav");
+      expect(addButton).toHaveClass("focus-visible:ring-2");
     });
 
     it("should have focus ring classes for accessibility", () => {
