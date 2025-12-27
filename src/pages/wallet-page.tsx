@@ -4,6 +4,7 @@ import { CardList } from "@/components/features/wallet/card-list";
 import { CardFormDialog } from "@/components/features/wallet/card-form-dialog";
 import { useCardStore } from "@/stores/card-store";
 import { WALLET_STRINGS } from "@/lib/i18n/wallet";
+import { PrivacyBadge } from "@/components/ui/privacy-badge";
 
 /**
  * WalletPage - Card management page
@@ -58,6 +59,7 @@ export default function WalletPage() {
             {WALLET_STRINGS.WALLET_DESCRIPTION}
           </p>
         </div>
+        <PrivacyBadge variant="minimal" className="mt-1" />
       </header>
 
       {/* Conditional Content - AC1, AC5 */}

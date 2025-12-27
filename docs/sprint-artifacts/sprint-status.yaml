@@ -144,8 +144,8 @@ development_status:
   # ===========================================
   epic-7: in-progress
   7-1-anonymous-event-logging-system: done
-  7-2-privacy-first-data-handling: backlog
-  7-3-debug-log-export-developer-mode: backlog
+  7-2-privacy-first-data-handling: done
+  7-3-debug-log-export-developer-mode: done
   epic-7-retrospective: optional
 
   # ===========================================

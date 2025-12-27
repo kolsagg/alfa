@@ -40,6 +40,8 @@ export const SettingsSchema = z.object({
   // Story 5.5: Storage limit warning settings
   storageWarningDismissedAt: z.string().datetime().optional(),
   recordCountWarningDisabled: z.boolean().default(false),
+  // Story 7.3: Developer mode
+  developerMode: z.boolean().default(false),
 });
 
 export type Settings = z.infer<typeof SettingsSchema>;

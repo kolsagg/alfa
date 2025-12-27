@@ -106,7 +106,8 @@ export interface BackupValidationResult {
     | "INVALID_FORMAT"
     | "EMPTY_BACKUP"
     | "VERSION_MISMATCH"
-    | "VALIDATION_ERROR";
+    | "VALIDATION_ERROR"
+    | "SECURITY_BLOCKED"; // Story 7.2 AC4: Import Guard blocking
 }
 
 /**
@@ -114,10 +115,15 @@ export interface BackupValidationResult {
  * Returns true if backup is from same or older version
  */
 export function isBackupVersionCompatible(
-  backupVersions: StoreVersions
+  backupVersions: StoreVersions & { cards?: number }
 ): boolean {
-  return (
-    backupVersions.subscriptions <= CURRENT_STORE_VERSIONS.subscriptions &&
-    backupVersions.settings <= CURRENT_STORE_VERSIONS.settings
-  );
+  const subscriptionsCompatible =
+    backupVersions.subscriptions <= CURRENT_STORE_VERSIONS.subscriptions;
+  const settingsCompatible =
+    backupVersions.settings <= CURRENT_STORE_VERSIONS.settings;
+  const cardsCompatible =
+    backupVersions.cards === undefined ||
+    backupVersions.cards <= CURRENT_STORE_VERSIONS.cards;
+
+  return subscriptionsCompatible && settingsCompatible && cardsCompatible;
 }

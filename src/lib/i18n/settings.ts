@@ -105,6 +105,34 @@ export const SETTINGS_STRINGS = {
   RECORD_COUNT_WARNING_DESCRIPTION:
     "{count} kayıt var. Performans için yedek alıp geçmiş verileri temizlemeyi düşünün.", // AC1: Accurate count with placeholder
   MANAGE_DATA_BUTTON: "Verileri Yönet", // "Manage Data"
+
+  // Story 7.2: Privacy-First Data Handling (AC5)
+  PRIVACY_BADGE_TEXT: "Veri cihazınızda kalır", // "Data stays on your device"
+  PRIVACY_BADGE_TOOLTIP:
+    "SubTracker tüm verilerinizi yalnızca bu cihazda saklar. Hiçbir veri dışarı gönderilmez.", // "SubTracker stores all data only on this device..."
+  PRIVACY_GUARANTEE_TITLE: "Gizlilik Öncelikli Garanti", // "Privacy-First Guarantee"
+  PRIVACY_GUARANTEE_DESC:
+    "Verileriniz asla sunucuya gönderilmez ve üçüncü taraf izleme araçları kullanılmaz.", // "Your data is never sent to servers..."
+
+  // Story 7.3: Developer Options
+  DEVELOPER_OPTIONS_TITLE: "Geliştirici Seçenekleri", // "Developer Options"
+  EXPORT_DEBUG_LOGS: "Debug Loglarını Dışa Aktar", // "Export Debug Logs"
+  CLEAR_LOGS: "Logları Temizle", // "Clear Logs"
+  CLEAR_LOGS_CONFIRM: "Tüm debug loglarını silmek istediğinize emin misiniz?", // "Are you sure you want to delete all debug logs?"
+  LOG_COUNT: "{count} log kaydı", // "{count} log entries"
+  ESTIMATED_SIZE: "Tahmini boyut: {size}", // "Estimated size: {size}"
+  SIZE_WARNING: "Dosya boyutu 1MB'dan büyük", // "File size exceeds 1MB"
+  DEBUG_PRIVACY_BANNER:
+    "Bu dosya kişisel veri içermez - sadece anonim debug bilgisi", // "This file contains no personal data - only anonymous debug info"
+  DEV_MODE_ENABLED: "Geliştirici modu aktif", // "Developer mode enabled"
+  DEV_MODE_DISABLED: "Geliştirici modu devre dışı", // "Developer mode disabled"
+  DEV_MODE_BADGE: "🛠️", // Developer mode badge icon
+  CHECKSUM_LABEL: "SHA-256:", // Checksum label
+  MINIFY_EXPORT: "Küçült (Minify)", // "Minify"
+  EXPORT_PREVIEW_TITLE: "Debug Export Önizleme", // "Debug Export Preview"
+  EXPORT_DOWNLOAD: "İndir", // "Download"
+  EXPORT_CLOSE: "Kapat", // "Close"
+  TOGGLE_DEV_MODE: "Geliştirici Modu", // "Developer Mode"
 } as const;
 
 export type SettingsStrings = typeof SETTINGS_STRINGS;

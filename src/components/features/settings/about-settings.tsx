@@ -6,9 +6,14 @@
  * AC2: Storage tracking with BACKUP_SIZE_THRESHOLD integration
  * AC3: Privacy & transparency statements (NFR07)
  * AC4: Accessibility & performance with memoization
+ *
+ * Story 7.3: Developer Mode Activation
+ * - Long-press (1.5s) on version text enables developer mode
+ * - Dev mode badge shown when active
+ * - Developer Options section shown when active
  */
 
-import { useMemo } from "react";
+import { useMemo, useRef, useCallback, useEffect } from "react";
 import { CalendarDays, Shield, HardDrive } from "lucide-react";
 import { SETTINGS_STRINGS } from "@/lib/i18n/settings";
 import {
@@ -16,6 +21,11 @@ import {
   formatBytes,
   isPWAMode,
 } from "@/lib/storage-utils";
+import { useSettingsStore } from "@/stores/settings-store";
+import { DeveloperOptionsSection } from "./developer-options";
+
+// Long-press duration for dev mode activation (ms)
+const LONG_PRESS_DURATION = 1500;
 
 export function AboutSettings() {
   // AC4: Memoize storage calculation to avoid blocking UI
@@ -23,6 +33,46 @@ export function AboutSettings() {
 
   // PWA detection
   const isPwa = useMemo(() => isPWAMode(), []);
+
+  // Story 7.3: Developer mode state
+  const developerMode = useSettingsStore((state) => state.developerMode);
+  const setDeveloperMode = useSettingsStore((state) => state.setDeveloperMode);
+
+  // Long-press detection refs
+  const longPressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+  // Story 7.3 AC1: Check URL param for dev mode on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("debug") === "true") {
+      setDeveloperMode(true);
+    }
+  }, [setDeveloperMode]);
+
+  // Long-press handlers for version text
+  const handlePressStart = useCallback(() => {
+    longPressTimeoutRef.current = setTimeout(() => {
+      setDeveloperMode(!developerMode);
+    }, LONG_PRESS_DURATION);
+  }, [developerMode, setDeveloperMode]);
+
+  const handlePressEnd = useCallback(() => {
+    if (longPressTimeoutRef.current) {
+      clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+    }
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimeoutRef.current) {
+        clearTimeout(longPressTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-4" data-testid="about-settings">
@@ -44,13 +94,31 @@ export function AboutSettings() {
 
       {/* Info Rows */}
       <div className="space-y-3 text-sm">
-        {/* Version Row */}
+        {/* Version Row with Long-Press Detection */}
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">
             {SETTINGS_STRINGS.VERSION}
           </span>
-          <span className="font-mono" data-testid="about-version">
+          <span
+            className="font-mono select-none flex items-center gap-1"
+            data-testid="about-version"
+            onMouseDown={handlePressStart}
+            onMouseUp={handlePressEnd}
+            onMouseLeave={handlePressEnd}
+            onTouchStart={handlePressStart}
+            onTouchEnd={handlePressEnd}
+            onTouchCancel={handlePressEnd}
+          >
             {__APP_VERSION__}
+            {developerMode && (
+              <span
+                className="ml-1"
+                data-testid="dev-mode-badge"
+                title={SETTINGS_STRINGS.DEV_MODE_ENABLED}
+              >
+                {SETTINGS_STRINGS.DEV_MODE_BADGE}
+              </span>
+            )}
           </span>
         </div>
 
@@ -89,6 +157,9 @@ export function AboutSettings() {
           </span>
         </div>
       </div>
+
+      {/* Story 7.3: Developer Options Section - Only visible in dev mode */}
+      {developerMode && <DeveloperOptionsSection />}
 
       {/* Privacy Section - AC3 */}
       <div className="pt-3 border-t space-y-2" data-testid="about-privacy">

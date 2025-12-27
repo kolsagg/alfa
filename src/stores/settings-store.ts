@@ -34,6 +34,9 @@ export interface SettingsState extends Settings {
   // Story 5.5: Storage limit warning actions
   setStorageWarningDismissed: () => void;
   setRecordCountWarningDisabled: (disabled: boolean) => void;
+  // Story 7.3: Developer mode
+  developerMode: boolean;
+  setDeveloperMode: (enabled: boolean) => void;
 }
 
 export const useSettingsStore = createStore<SettingsState>(
@@ -58,6 +61,8 @@ export const useSettingsStore = createStore<SettingsState>(
     // Story 5.5: Storage limit warning defaults
     storageWarningDismissedAt: undefined,
     recordCountWarningDisabled: false,
+    // Story 7.3: Developer mode
+    developerMode: false,
 
     // Actions
     setTheme: (theme) => {
@@ -209,10 +214,13 @@ export const useSettingsStore = createStore<SettingsState>(
 
     setRecordCountWarningDisabled: (disabled) =>
       set({ recordCountWarningDisabled: disabled }),
+
+    // Story 7.3: Developer mode actions
+    setDeveloperMode: (enabled) => set({ developerMode: enabled }),
   }),
   {
     name: "SettingsStore",
-    version: 6,
+    version: 7,
     migrate: (persistedState: unknown, version: number) => {
       const state = persistedState as Partial<SettingsState>;
 
@@ -261,6 +269,12 @@ export const useSettingsStore = createStore<SettingsState>(
           state.storageWarningDismissedAt ?? undefined;
         state.recordCountWarningDisabled =
           state.recordCountWarningDisabled ?? false;
+      }
+
+      if (version < 7) {
+        // Migration to v7: Add developer mode (Story 7.3)
+        console.log("[SettingsStore] Migrating to v7");
+        state.developerMode = state.developerMode ?? false;
       }
 
       return state as SettingsState;

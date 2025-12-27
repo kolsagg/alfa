@@ -20,6 +20,8 @@ describe("useSettingsStore", () => {
       // Story 5.5 v6 fields
       storageWarningDismissedAt: undefined,
       recordCountWarningDisabled: false,
+      // Story 7.3 v7 fields
+      developerMode: false,
       onboardingCompleted: false,
       lastIOSPromptDismissed: undefined,
       hasSeenNotificationPrompt: false,
@@ -236,6 +238,25 @@ describe("useSettingsStore", () => {
       expect(useSettingsStore.getState().recordCountWarningDisabled).toBe(
         false
       );
+    });
+  });
+
+  // ============ STORY 7.3 TESTS ============
+
+  describe("developerMode (v7)", () => {
+    it("should have default developerMode = false", () => {
+      expect(useSettingsStore.getState().developerMode).toBe(false);
+    });
+
+    it("should set developerMode to true", () => {
+      useSettingsStore.getState().setDeveloperMode(true);
+      expect(useSettingsStore.getState().developerMode).toBe(true);
+    });
+
+    it("should set developerMode back to false", () => {
+      useSettingsStore.getState().setDeveloperMode(true);
+      useSettingsStore.getState().setDeveloperMode(false);
+      expect(useSettingsStore.getState().developerMode).toBe(false);
     });
   });
 
@@ -647,6 +668,67 @@ describe("useSettingsStore", () => {
       expect(useSettingsStore.getState().recordCountWarningDisabled).toBe(
         false
       );
+
+      consoleSpy.mockRestore();
+    });
+
+    it("should migrate from v6 to v7 with developer mode field", async () => {
+      const consoleSpy = vi.spyOn(console, "log");
+
+      // Pre-populate with v6 data
+      localStorage.setItem(
+        "subtracker-settings-dev",
+        JSON.stringify({
+          state: {
+            theme: "dark",
+            notificationsEnabled: true,
+            storageWarningDismissedAt: undefined,
+            recordCountWarningDisabled: false,
+          },
+          version: 6,
+        })
+      );
+
+      await useSettingsStore.persist.rehydrate();
+
+      // Verify migration happened
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating to v7"
+      );
+
+      // Verify existing data preserved
+      expect(useSettingsStore.getState().theme).toBe("dark");
+
+      // Verify new field has default
+      expect(useSettingsStore.getState().developerMode).toBe(false);
+
+      consoleSpy.mockRestore();
+    });
+
+    it("should handle migration from v0 to v7", async () => {
+      const consoleSpy = vi.spyOn(console, "log");
+
+      // Pre-populate with v0 data (minimal)
+      localStorage.setItem(
+        "subtracker-settings-dev",
+        JSON.stringify({
+          state: { theme: "dark" },
+          version: 0,
+        })
+      );
+
+      await useSettingsStore.persist.rehydrate();
+
+      // Verify all migrations ran
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating from v0 to v1"
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[SettingsStore] Migrating to v7"
+      );
+
+      // Verify state has all v7 defaults
+      expect(useSettingsStore.getState().developerMode).toBe(false);
 
       consoleSpy.mockRestore();
     });

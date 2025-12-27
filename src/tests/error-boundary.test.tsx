@@ -1,6 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ErrorBoundary } from "../components/error-boundary";
+import { logger } from "@/lib/event-logger";
+import { resetErrorCooldown } from "@/lib/debug-export";
+
+// Mock the event logger
+vi.mock("@/lib/event-logger", () => ({
+  logger: {
+    log: vi.fn(),
+  },
+}));
 
 // Test component that throws an error
 function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
@@ -26,6 +35,8 @@ describe("ErrorBoundary", () => {
 
   beforeEach(() => {
     console.error = vi.fn();
+    vi.clearAllMocks();
+    resetErrorCooldown(); // Reset cooldown before each test
   });
 
   afterEach(() => {
@@ -71,6 +82,44 @@ describe("ErrorBoundary", () => {
 
     // In test environment (which mimics dev), console.error should be called
     expect(console.error).toHaveBeenCalled();
+  });
+
+  it("logs error_caught event via EventLogger", () => {
+    render(
+      <ErrorBoundary fallback={<TestFallback />}>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>
+    );
+
+    expect(logger.log).toHaveBeenCalledWith(
+      "error_caught",
+      expect.objectContaining({
+        error_message: expect.any(String),
+        error_name: "Error",
+      })
+    );
+  });
+
+  it("throttles error logging (only logs first error in cooldown period)", () => {
+    // First error
+    render(
+      <ErrorBoundary fallback={<TestFallback />}>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>
+    );
+
+    expect(logger.log).toHaveBeenCalledTimes(1);
+
+    // Second error (within cooldown)
+    vi.clearAllMocks();
+    render(
+      <ErrorBoundary fallback={<TestFallback />}>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>
+    );
+
+    // Should not call logger.log again within cooldown
+    expect(logger.log).not.toHaveBeenCalled();
   });
 
   it("allows recovery via retry mechanism", () => {

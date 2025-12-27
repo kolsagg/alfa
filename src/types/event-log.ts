@@ -30,6 +30,7 @@ export const EventTypeSchema = z.enum([
   "app_opened",
   "audit_shown",
   "audit_answered",
+  "error_caught", // Story 7.3: Error boundary caught errors
 ]);
 
 export type EventType = z.infer<typeof EventTypeSchema>;

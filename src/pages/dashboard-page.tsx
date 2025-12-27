@@ -6,6 +6,7 @@ import { SpendingSummary } from "@/components/features/spending";
 import { TimelineView } from "@/components/features/timeline";
 import { CategoryBreakdown } from "@/components/features/analytics/category-breakdown";
 import { DashboardAlerts } from "@/components/features/dashboard-alerts";
+import { PrivacyBadge } from "@/components/ui/privacy-badge";
 
 /**
  * Dashboard Page Component
@@ -38,6 +39,11 @@ export default function DashboardPage() {
         externalCategoryFilter={selectedCategory}
         onExternalCategoryChange={setSelectedCategory}
       />
+
+      {/* Story 7.2: Privacy Reassurance */}
+      <div className="flex justify-center pt-4 opacity-70">
+        <PrivacyBadge variant="standard" />
+      </div>
     </div>
   );
 }

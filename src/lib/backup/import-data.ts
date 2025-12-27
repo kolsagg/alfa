@@ -14,6 +14,7 @@ import {
   type Backup,
   type BackupValidationResult,
 } from "@/types/backup";
+import { guardImportData } from "@/lib/import-guard";
 
 export interface ImportParseResult extends BackupValidationResult {
   sizeBytes?: number;
@@ -108,14 +109,42 @@ export async function parseAndValidateBackup(
       };
     }
 
+    // Story 7.2 AC4: Privacy Guard - sanitize imported data
+    const guardResult = guardImportData(backup);
+
+    if (!guardResult.safe) {
+      console.warn(
+        "[ImportData] Privacy guard blocked fields:",
+        guardResult.blockedFields
+      );
+      return {
+        success: false,
+        error: `Güvenlik kontrolü başarısız: ${guardResult.blockedFields.length} tehlikeli alan engellendi`,
+        errorCode: "SECURITY_BLOCKED",
+        sizeBytes,
+        sizeWarning,
+      };
+    }
+
+    // Use sanitized data
+    const sanitizedBackup = guardResult.data;
+
+    // Log warnings if any (non-blocking)
+    if (guardResult.warnings.length > 0) {
+      console.info(
+        "[ImportData] Privacy guard warnings:",
+        guardResult.warnings
+      );
+    }
+
     // Validation passed - return with preview info
     return {
       success: true,
-      data: backup,
+      data: sanitizedBackup,
       sizeBytes,
       sizeWarning,
-      subscriptionCount: backup.subscriptions.length,
-      mostRecentSubscription: getMostRecentSubscriptionName(backup),
+      subscriptionCount: sanitizedBackup.subscriptions.length,
+      mostRecentSubscription: getMostRecentSubscriptionName(sanitizedBackup),
     };
   } catch (error) {
     console.error("[ImportData] Parse failed:", error);
