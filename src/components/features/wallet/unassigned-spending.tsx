@@ -1,11 +1,14 @@
 import { ChevronDown, CreditCard } from "lucide-react";
+import * as Icons from "lucide-react";
 import { useState } from "react";
 import {
   renderSpendingDisplay,
+  formatCurrencyAmount,
   type SpendingInfo,
 } from "@/lib/spending-calculator";
 import { WALLET_STRINGS } from "@/lib/i18n/wallet";
 import { cn } from "@/lib/utils";
+import type { Subscription } from "@/types/subscription";
 
 /**
  * UnassignedSpending - Displays spending for unassigned subscriptions
@@ -13,16 +16,18 @@ import { cn } from "@/lib/utils";
  * Story 6.4: AC3
  * - Shows "Kartsız Abonelikler" section
  * - Displays total monthly spending per currency
- * - Expandable list (navigation placeholder)
+ * - Expandable list showing subscription names and amounts
  */
 
 interface UnassignedSpendingProps {
   spending: SpendingInfo;
+  subscriptions: Subscription[];
   className?: string;
 }
 
 export function UnassignedSpending({
   spending,
+  subscriptions,
   className,
 }: UnassignedSpendingProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -31,6 +36,17 @@ export function UnassignedSpending({
   if (spending.subscriptionCount === 0) {
     return null;
   }
+
+  // Get icon component for subscription
+  const getIconComponent = (iconName?: string) => {
+    if (iconName && Icons[iconName as keyof typeof Icons]) {
+      return Icons[iconName as keyof typeof Icons] as React.ComponentType<{
+        size?: number;
+        className?: string;
+      }>;
+    }
+    return CreditCard;
+  };
 
   return (
     <div
@@ -84,15 +100,37 @@ export function UnassignedSpending({
         />
       </button>
 
-      {/* Expanded Content */}
+      {/* Expanded Content - Subscription List */}
       {isExpanded && (
         <div
-          className="mt-3 pt-3 border-t border-muted-foreground/20"
+          className="mt-3 pt-3 border-t border-muted-foreground/20 space-y-2"
           data-testid="unassigned-spending-details"
         >
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground mb-3">
             {WALLET_STRINGS.UNASSIGNED_DESCRIPTION}
           </p>
+          {subscriptions.map((sub) => {
+            const IconComponent = getIconComponent(sub.icon);
+            return (
+              <div
+                key={sub.id}
+                className="flex items-center justify-between gap-2 py-1"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div
+                    className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: sub.color || "var(--muted)" }}
+                  >
+                    <IconComponent size={14} className="text-white" />
+                  </div>
+                  <span className="text-sm truncate">{sub.name}</span>
+                </div>
+                <span className="text-sm font-medium tabular-nums flex-shrink-0">
+                  {formatCurrencyAmount(sub.amount, sub.currency)}
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

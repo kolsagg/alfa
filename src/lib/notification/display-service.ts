@@ -2,6 +2,7 @@ import { differenceInCalendarDays, startOfDay } from "date-fns";
 import { NOTIFICATION_CONFIG } from "@/config/notifications";
 import { useUIStore } from "@/stores/ui-store";
 import { formatCurrency } from "@/lib/formatters";
+import { logger } from "@/lib/event-logger";
 
 export const NotificationUrgency = {
   STANDARD: "standard",
@@ -92,6 +93,12 @@ export function displayNotification(
   }
 
   const notification = new Notification(title, options as NotificationOptions);
+
+  // Story 7.1: Log notification shown event
+  logger.log("notification_shown", {
+    urgency,
+    days_until_due: daysDiff,
+  });
 
   notification.onclick = (event) => {
     event.preventDefault();
@@ -191,6 +198,14 @@ export function displayGroupedNotification(
   }
 
   const notification = new Notification(title, options as NotificationOptions);
+
+  // Story 7.1: Log notification shown event (grouped)
+  logger.log("notification_shown", {
+    urgency,
+    days_until_due: daysDiff,
+    is_grouped: true,
+    subscription_count: subscriptions.length,
+  });
 
   // AC4: Close any open modals and set dateFilter on click
   const dateFilterValue = paymentDate.toISOString().split("T")[0];

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { UnassignedSpending } from "./unassigned-spending";
 import type { SpendingInfo } from "@/lib/spending-calculator";
+import type { Subscription } from "@/types/subscription";
 import { WALLET_STRINGS } from "@/lib/i18n/wallet";
 
 /**
@@ -34,21 +35,60 @@ const mockSpendingEmpty: SpendingInfo = {
   byCurrency: {},
 };
 
+const mockSubscriptions: Subscription[] = [
+  {
+    id: "sub-1",
+    name: "Netflix",
+    amount: 300,
+    currency: "TRY",
+    billingCycle: "monthly",
+    nextPaymentDate: new Date().toISOString(),
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    color: "#E50914",
+  },
+  {
+    id: "sub-2",
+    name: "Spotify",
+    amount: 200,
+    currency: "TRY",
+    billingCycle: "monthly",
+    nextPaymentDate: new Date().toISOString(),
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    color: "#1DB954",
+  },
+];
+
 describe("UnassignedSpending", () => {
   it("renders when there are unassigned subscriptions", () => {
-    render(<UnassignedSpending spending={mockSpendingSingle} />);
+    render(
+      <UnassignedSpending
+        spending={mockSpendingSingle}
+        subscriptions={mockSubscriptions}
+      />
+    );
 
     expect(screen.getByTestId("unassigned-spending")).toBeInTheDocument();
   });
 
   it("does not render when no unassigned subscriptions", () => {
-    render(<UnassignedSpending spending={mockSpendingEmpty} />);
+    render(
+      <UnassignedSpending spending={mockSpendingEmpty} subscriptions={[]} />
+    );
 
     expect(screen.queryByTestId("unassigned-spending")).not.toBeInTheDocument();
   });
 
   it("displays correct title", () => {
-    render(<UnassignedSpending spending={mockSpendingSingle} />);
+    render(
+      <UnassignedSpending
+        spending={mockSpendingSingle}
+        subscriptions={mockSubscriptions}
+      />
+    );
 
     expect(screen.getByTestId("unassigned-title")).toHaveTextContent(
       WALLET_STRINGS.UNASSIGNED_TITLE
@@ -56,13 +96,23 @@ describe("UnassignedSpending", () => {
   });
 
   it("displays subscription count", () => {
-    render(<UnassignedSpending spending={mockSpendingSingle} />);
+    render(
+      <UnassignedSpending
+        spending={mockSpendingSingle}
+        subscriptions={mockSubscriptions}
+      />
+    );
 
     expect(screen.getByText("2 abonelik")).toBeInTheDocument();
   });
 
   it("displays spending amount for single currency", () => {
-    render(<UnassignedSpending spending={mockSpendingSingle} />);
+    render(
+      <UnassignedSpending
+        spending={mockSpendingSingle}
+        subscriptions={mockSubscriptions}
+      />
+    );
 
     expect(screen.getByTestId("unassigned-spending-amount")).toHaveTextContent(
       "₺500"
@@ -70,7 +120,12 @@ describe("UnassignedSpending", () => {
   });
 
   it("displays spending amount for mixed currencies", () => {
-    render(<UnassignedSpending spending={mockSpendingMixed} />);
+    render(
+      <UnassignedSpending
+        spending={mockSpendingMixed}
+        subscriptions={mockSubscriptions}
+      />
+    );
 
     const amountEl = screen.getByTestId("unassigned-spending-amount");
     expect(amountEl).toHaveTextContent("₺300");
@@ -78,7 +133,12 @@ describe("UnassignedSpending", () => {
   });
 
   it("expands to show details when clicked", () => {
-    render(<UnassignedSpending spending={mockSpendingSingle} />);
+    render(
+      <UnassignedSpending
+        spending={mockSpendingSingle}
+        subscriptions={mockSubscriptions}
+      />
+    );
 
     // Details should not be visible initially
     expect(
@@ -98,7 +158,12 @@ describe("UnassignedSpending", () => {
   });
 
   it("collapses when clicked again", () => {
-    render(<UnassignedSpending spending={mockSpendingSingle} />);
+    render(
+      <UnassignedSpending
+        spending={mockSpendingSingle}
+        subscriptions={mockSubscriptions}
+      />
+    );
 
     const toggle = screen.getByTestId("unassigned-spending-toggle");
 
@@ -116,7 +181,12 @@ describe("UnassignedSpending", () => {
   });
 
   it("has accessible aria-label", () => {
-    render(<UnassignedSpending spending={mockSpendingSingle} />);
+    render(
+      <UnassignedSpending
+        spending={mockSpendingSingle}
+        subscriptions={mockSubscriptions}
+      />
+    );
 
     const toggle = screen.getByTestId("unassigned-spending-toggle");
     expect(toggle).toHaveAttribute(
@@ -129,6 +199,7 @@ describe("UnassignedSpending", () => {
     render(
       <UnassignedSpending
         spending={mockSpendingSingle}
+        subscriptions={mockSubscriptions}
         className="custom-class"
       />
     );

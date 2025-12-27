@@ -16,6 +16,7 @@ import {
   type SpendingInfo,
 } from "@/lib/spending-calculator";
 import type { Card } from "@/types/card";
+import type { Subscription } from "@/types/subscription";
 
 /**
  * CardSpendingData - Per-card spending with card reference
@@ -31,6 +32,7 @@ export interface CardSpendingData {
 export interface AllSpendingData {
   cardSpending: CardSpendingData[];
   unassignedSpending: SpendingInfo;
+  unassignedSubscriptions: Subscription[];
   hasUnassigned: boolean;
 }
 
@@ -78,9 +80,15 @@ export function useAllCardSpending(): AllSpendingData {
 
     const unassignedSpending = calculateUnassignedSpending(subscriptions);
 
+    // Filter unassigned active subscriptions
+    const unassignedSubscriptions = subscriptions.filter(
+      (sub) => sub.isActive && !sub.cardId
+    );
+
     return {
       cardSpending,
       unassignedSpending,
+      unassignedSubscriptions,
       hasUnassigned: unassignedSpending.subscriptionCount > 0,
     };
   }, [subscriptions, cards]);

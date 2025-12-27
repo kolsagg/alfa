@@ -12,6 +12,7 @@
 import { toast } from "sonner";
 import { useSettingsStore } from "@/stores/settings-store";
 import { detectIOSSafariNonStandalone } from "@/hooks/use-ios-pwa-detection";
+import { logger } from "@/lib/event-logger";
 
 /**
  * Request notification permission from the browser.
@@ -81,6 +82,8 @@ export function showNotificationPermissionPrompt(
             description: "Ödeme hatırlatıcıları artık size gönderilecek.",
           });
         } else if (result === "denied") {
+          // Story 7.1: Log notification denied event
+          logger.log("notification_denied", { source: "toast_prompt" });
           toast.info("Bildirimleri daha sonra Ayarlar'dan açabilirsiniz.", {
             duration: 4000,
           });
@@ -133,6 +136,11 @@ export async function requestAndUpdatePermission(): Promise<boolean> {
   // Already denied - can't request again, show guidance
   if (currentPermission === "denied") {
     setNotificationPermissionDenied();
+    // Story 7.1: Log notification denied event
+    logger.log("notification_denied", {
+      source: "settings_toggle",
+      reason: "already_denied",
+    });
     toast.info("Bildirimleri daha sonra tarayıcı ayarlarından açabilirsiniz.", {
       duration: 5000,
     });
@@ -151,6 +159,11 @@ export async function requestAndUpdatePermission(): Promise<boolean> {
       return true;
     } else if (result === "denied") {
       setNotificationPermissionDenied();
+      // Story 7.1: Log notification denied event
+      logger.log("notification_denied", {
+        source: "settings_toggle",
+        reason: "user_denied",
+      });
       toast.info(
         "Bildirimleri daha sonra tarayıcı ayarlarından açabilirsiniz.",
         {

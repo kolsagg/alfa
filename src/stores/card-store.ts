@@ -2,6 +2,7 @@ import { createStore } from "./create-store";
 import { CardSchema, CardUpdateSchema } from "@/types/card";
 import type { Card, CardUpdate, CardInput } from "@/types/card";
 import { generateUUID } from "@/lib/uuid";
+import { logger } from "@/lib/event-logger";
 
 export type { CardInput };
 
@@ -43,6 +44,11 @@ export const useCardStore = createStore<CardsState>(
       set((state) => ({
         cards: [...state.cards, result.data],
       }));
+
+      // Story 7.1: Log card added event
+      logger.log("card_added", {
+        type: result.data.type,
+      });
 
       return result.data;
     },
@@ -101,6 +107,9 @@ export const useCardStore = createStore<CardsState>(
       set((state) => ({
         cards: state.cards.filter((card) => card.id !== id),
       }));
+
+      // Story 7.1: Log card deleted event
+      logger.log("card_deleted");
 
       return true;
     },

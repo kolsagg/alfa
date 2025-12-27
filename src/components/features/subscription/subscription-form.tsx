@@ -571,7 +571,7 @@ export function SubscriptionForm({
       {/* Card Select (Story 6.3) */}
       <CardSelect
         value={cardId || undefined}
-        onValueChange={(v) => setCardId(v || "")}
+        onValueChange={setCardId}
         disabled={isSubmitting}
         onNavigateToWallet={() => {
           // Check if form has been modified

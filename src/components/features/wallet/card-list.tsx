@@ -31,8 +31,12 @@ export function CardList({ onAddCard }: CardListProps) {
   const cards = useCardStore((s) => s.cards);
 
   // Get all card spending with memoization (Story 6.4)
-  const { cardSpending, unassignedSpending, hasUnassigned } =
-    useAllCardSpending();
+  const {
+    cardSpending,
+    unassignedSpending,
+    unassignedSubscriptions,
+    hasUnassigned,
+  } = useAllCardSpending();
 
   // Dialog state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -106,6 +110,7 @@ export function CardList({ onAddCard }: CardListProps) {
       {hasUnassigned && (
         <UnassignedSpending
           spending={unassignedSpending}
+          subscriptions={unassignedSubscriptions}
           className="mt-4"
           data-testid="card-list-unassigned"
         />

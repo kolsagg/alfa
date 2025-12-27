@@ -25,6 +25,7 @@ import {
 import type { Backup } from "@/types/backup";
 import { ImportConfirmDialog } from "./import-confirm-dialog";
 import { toast } from "sonner";
+import { logger } from "@/lib/event-logger";
 
 type OperationState = "idle" | "processing" | "success" | "error";
 
@@ -103,6 +104,12 @@ export function DataSettings() {
         } else {
           toast.success(SETTINGS_STRINGS.EXPORT_SUCCESS);
         }
+
+        // Story 7.1: Log export event
+        logger.log("export_triggered", {
+          subscription_count: subscriptions.length,
+          card_count: cards.length,
+        });
 
         // Reset state after feedback
         setTimeout(() => setExportState("idle"), 2000);
@@ -234,6 +241,12 @@ export function DataSettings() {
       setShowConfirmDialog(false);
       setPendingImport(null);
       toast.success(SETTINGS_STRINGS.IMPORT_SUCCESS);
+
+      // Story 7.1: Log import event
+      logger.log("import_triggered", {
+        subscription_count: pendingImport.subscriptionCount,
+        had_auto_backup: autoBackup,
+      });
 
       setTimeout(() => setImportState("idle"), 2000);
     } catch (error) {

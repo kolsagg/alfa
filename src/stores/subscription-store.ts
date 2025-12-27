@@ -5,6 +5,7 @@ import {
 } from "@/types/subscription";
 import type { Subscription, SubscriptionUpdate } from "@/types/subscription";
 import { generateUUID } from "@/lib/uuid";
+import { logger } from "@/lib/event-logger";
 
 // Input type for adding subscriptions (without auto-generated fields)
 export type SubscriptionInput = Omit<
@@ -60,6 +61,13 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
         subscriptions: [...state.subscriptions, result.data],
       }));
 
+      // Story 7.1: Log subscription added event
+      logger.log("subscription_added", {
+        category: result.data.categoryId,
+        billing_cycle: result.data.billingCycle,
+        has_card: !!result.data.cardId,
+      });
+
       return result.data;
     },
 
@@ -104,6 +112,11 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
         ),
       }));
 
+      // Story 7.1: Log subscription updated event
+      logger.log("subscription_updated", {
+        updated_fields: Object.keys(updateResult.data),
+      });
+
       return true;
     },
 
@@ -119,6 +132,9 @@ export const useSubscriptionStore = createStore<SubscriptionState>(
       set((state) => ({
         subscriptions: state.subscriptions.filter((sub) => sub.id !== id),
       }));
+
+      // Story 7.1: Log subscription deleted event
+      logger.log("subscription_deleted");
 
       return true;
     },

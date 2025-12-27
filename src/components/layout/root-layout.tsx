@@ -8,6 +8,7 @@ import { useNotificationScheduleSync } from "@/hooks/use-notification-schedule-s
 import { useNotificationLifecycle } from "@/hooks/use-notification-lifecycle";
 import { PAGE_TITLES, ROUTES } from "@/router/routes";
 import { IOSInstallGuidance } from "@/components/ui/ios-install-guidance";
+import { logger } from "@/lib/event-logger";
 
 /**
  * Root Layout Component
@@ -27,6 +28,12 @@ export function RootLayout() {
 
   // Story 4.4: Handle notification display, clicks, and permission syncing
   useNotificationLifecycle();
+
+  // Story 7.1: Log app_opened event once per session
+  // (Deduplication handled by EventLogger singleton)
+  useEffect(() => {
+    logger.log("app_opened");
+  }, []);
 
   // AC7: Update document title based on current route
   useEffect(() => {

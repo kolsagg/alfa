@@ -2,6 +2,7 @@ import { createStore } from "./create-store";
 import { SettingsSchema, NotificationSettingsSchema } from "@/types/settings";
 import { z } from "zod";
 import type { Settings, Theme, NotificationSettings } from "@/types/settings";
+import { logger } from "@/lib/event-logger";
 
 export interface SettingsState extends Settings {
   // Theme actions
@@ -59,7 +60,11 @@ export const useSettingsStore = createStore<SettingsState>(
     recordCountWarningDisabled: false,
 
     // Actions
-    setTheme: (theme) => set({ theme }),
+    setTheme: (theme) => {
+      set({ theme });
+      // Story 7.1: Log theme changed event
+      logger.log("theme_changed", { theme });
+    },
 
     setNotificationPermission: (permission) =>
       set({ notificationPermission: permission }),
