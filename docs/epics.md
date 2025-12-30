@@ -10,8 +10,8 @@ user_name: "kolsag"
 date: "2025-12-17"
 completedAt: "2025-12-17T16:12:00+03:00"
 partyModeUsed: true
-epicCount: 7
-storyCount: 41
+epicCount: 9
+storyCount: 51
 estimatedHours: "128-146"
 frCoverage: 26/26
 nfrCoverage: 17/17
@@ -1335,6 +1335,39 @@ Epic 8 (Navigation & Settings) ← unblocks full Epic 5/6 integration
 
 ---
 
+## Epic 9: User Onboarding Experience
+
+**Goal:** İlk kez uygulamayı açan kullanıcıya kısa, görsel ve aksiyona yönlendiren bir onboarding deneyimi sun.
+
+**User Outcome:** Kullanıcı uygulamayı açtığında ne işe yaradığını anlar, ilk aboneliğini kolayca ekler ve uygulamaya bağlılık hisseder.
+
+**FRs covered:** FR21 (enhanced)
+**NFRs covered:** Cross-cutting UX
+
+**Background:** Party Mode tartışmasında (2025-12-29) tespit edildi: Mevcut onboarding sadece PWA kurulum rehberi sunuyor. Kullanıcı uygulamanın değer önerisini anlamadan boş dashboard ile karşılaşıyor. Sally ve Mary'nin önerisiyle "Value-First Onboarding" + "Template-Assisted First Subscription" yaklaşımı benimsendi.
+
+**Implementation Notes:**
+
+- 3-4 slide'lık görsel tanıtım (skip edilebilir)
+- Her slide tek bir değer önerisi: "Aboneliklerini Kontrol Altına Al", "Yaklaşan Ödemeleri Gör", "Harcamalarını Takip Et"
+- Son ekran: "Haydi Başlayalım!" + Template grid (Netflix, Spotify, YouTube, iCloud, Game Pass, Diğer)
+- Template seçince pre-filled form (sadece fiyat + tarih girilir)
+- İlk abonelik eklendikten sonra "Tebrikler!" celebration screen (confetti animation, prefers-reduced-motion respected)
+- localStorage'da `onboarding_completed: true` flag'i
+- Settings'den "Onboarding'i Tekrar İzle" seçeneği
+
+**Stories:**
+
+- 9.1: Onboarding Component Architecture (OnboardingCarousel, OnboardingStep, useOnboardingState)
+- 9.2: Value Proposition Slides (3 görsel slide + copy)
+- 9.3: Template Grid for Quick Start (popüler servisler + pre-filled form)
+- 9.4: Celebration Screen (confetti animation + redirect to dashboard)
+- 9.5: Settings Integration ("Onboarding'i Tekrar İzle" option)
+
+**Estimated Effort:** 6-8 hours (1 dev-day)
+
+---
+
 # 📊 Complete Epic Summary
 
 ## Story Count by Epic
@@ -1348,7 +1381,9 @@ Epic 8 (Navigation & Settings) ← unblocks full Epic 5/6 integration
 | 5         | Export/Import & Backup      | 5              | 15-18h            |
 | 6         | Wallet & Cards              | 5              | 15-18h            |
 | 7         | System Analytics            | 3              | 8-10h             |
-| **TOTAL** |                             | **41 Stories** | **128-146 hours** |
+| 8         | Navigation & Settings       | 8              | 8-12h             |
+| 9         | User Onboarding Experience  | 5              | 6-8h              |
+| **TOTAL** |                             | **51 Stories** | **142-174 hours** |
 
 ## Estimated Timeline
 

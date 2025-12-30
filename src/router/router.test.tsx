@@ -78,6 +78,17 @@ vi.mock("@/stores/fx-store", () => ({
   })),
 }));
 
+// Mock onboarding state - simulate completed onboarding so routes are accessible
+vi.mock("@/hooks/use-onboarding-state", () => ({
+  useOnboardingState: vi.fn(() => ({
+    hasCompletedOnboarding: true, // Always show pages, not onboarding
+    currentStep: 0,
+    markComplete: vi.fn(),
+    setStep: vi.fn(),
+    reset: vi.fn(),
+  })),
+}));
+
 /**
  * Helper to render with router at specific path
  */
@@ -186,5 +197,90 @@ describe("Route Constants", () => {
     expect(ROUTES.DASHBOARD).toBe("/");
     expect(ROUTES.SETTINGS).toBe("/settings");
     expect(ROUTES.WALLET).toBe("/wallet");
+  });
+});
+
+/**
+ * Story 9.1: First-Run Integration Tests
+ * Tests onboarding flow for first-time users (AC4)
+ */
+describe("First-Run Onboarding Integration", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should render OnboardingCarousel for first-time users (hasCompletedOnboarding: false)", async () => {
+    // Override mock for this test - first-time user
+    const { useOnboardingState } = await import("@/hooks/use-onboarding-state");
+    vi.mocked(useOnboardingState).mockReturnValue({
+      hasCompletedOnboarding: false,
+      currentStep: 0,
+      markComplete: vi.fn(),
+      setStep: vi.fn(),
+      reset: vi.fn(),
+    });
+
+    renderWithRouter(ROUTES.DASHBOARD);
+
+    // Should show onboarding carousel, not dashboard
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("onboarding-carousel")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    // Dashboard should NOT be visible
+    expect(screen.queryByTestId("dashboard-page")).not.toBeInTheDocument();
+  });
+
+  it("should render full-screen onboarding without Header/BottomNav for first-time users", async () => {
+    // Override mock for this test - first-time user
+    const { useOnboardingState } = await import("@/hooks/use-onboarding-state");
+    vi.mocked(useOnboardingState).mockReturnValue({
+      hasCompletedOnboarding: false,
+      currentStep: 0,
+      markComplete: vi.fn(),
+      setStep: vi.fn(),
+      reset: vi.fn(),
+    });
+
+    renderWithRouter(ROUTES.DASHBOARD);
+
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("onboarding-carousel")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    // Header and BottomNav should NOT be present during onboarding
+    expect(screen.queryByText("SubTracker")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Dashboard")).not.toBeInTheDocument();
+  });
+
+  it("should block navigation to /settings during onboarding (shows onboarding instead)", async () => {
+    // Override mock for this test - first-time user
+    const { useOnboardingState } = await import("@/hooks/use-onboarding-state");
+    vi.mocked(useOnboardingState).mockReturnValue({
+      hasCompletedOnboarding: false,
+      currentStep: 0,
+      markComplete: vi.fn(),
+      setStep: vi.fn(),
+      reset: vi.fn(),
+    });
+
+    // Try to navigate directly to settings
+    renderWithRouter(ROUTES.SETTINGS);
+
+    // Should still show onboarding, not settings
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("onboarding-carousel")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    expect(screen.queryByTestId("settings-page")).not.toBeInTheDocument();
   });
 });

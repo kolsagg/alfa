@@ -31,6 +31,9 @@ export const EventTypeSchema = z.enum([
   "audit_shown",
   "audit_answered",
   "error_caught", // Story 7.3: Error boundary caught errors
+  "onboarding_completed", // Story 9.1: User completed onboarding
+  "onboarding_skipped", // Story 9.1: User skipped onboarding
+  "onboarding_step_viewed", // Story 9.2: Track slide views for funnel analysis
 ]);
 
 export type EventType = z.infer<typeof EventTypeSchema>;

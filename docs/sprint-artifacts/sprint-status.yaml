@@ -142,11 +142,11 @@ development_status:
   # FRs: FR22, FR26 | NFRs: NFR07
   # Estimated: 8-10 hours
   # ===========================================
-  epic-7: in-progress
+  epic-7: done
   7-1-anonymous-event-logging-system: done
   7-2-privacy-first-data-handling: done
   7-3-debug-log-export-developer-mode: done
-  epic-7-retrospective: optional
+  epic-7-retrospective: completed
 
   # ===========================================
   # EPIC 8: Navigation & Settings Infrastructure
@@ -164,3 +164,18 @@ development_status:
   8-7-settings-about-section: done
   8-8-wallet-route: done
   epic-8-retrospective: completed
+
+  # ===========================================
+  # EPIC 9: User Onboarding Experience
+  # Goal: İlk kez uygulamayı açan kullanıcıya kısa, görsel ve aksiyona yönlendiren bir onboarding deneyimi sun.
+  # FRs: FR21 (enhanced) | NFRs: Cross-cutting UX
+  # Party Mode Addition: 2025-12-29
+  # Estimated: 6-8 hours
+  # ===========================================
+  epic-9: in-progress
+  9-1-onboarding-component-architecture: done
+  9-2-value-proposition-slides: done
+  9-3-template-grid-for-quick-start: backlog
+  9-4-celebration-screen: backlog
+  9-5-settings-integration: backlog
+  epic-9-retrospective: optional

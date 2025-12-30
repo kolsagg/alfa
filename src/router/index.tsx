@@ -1,6 +1,6 @@
 import { createHashRouter, Navigate } from "react-router";
 import { lazy, Suspense } from "react";
-import { RootLayout } from "@/components/layout/root-layout";
+import { OnboardingGate } from "@/components/layout/onboarding-gate";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { RootErrorBoundary } from "./error-boundary";
 import { ROUTES } from "./routes";
@@ -12,11 +12,12 @@ const WalletPage = lazy(() => import("@/pages/wallet-page"));
 
 /**
  * Route configuration exported for testing
+ * Story 9.1: Uses OnboardingGate for first-run onboarding flow
  */
 export const routeConfig = [
   {
     path: ROUTES.DASHBOARD,
-    element: <RootLayout />,
+    element: <OnboardingGate />,
     errorElement: <RootErrorBoundary />,
     children: [
       {
